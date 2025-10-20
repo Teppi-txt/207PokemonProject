@@ -1,5 +1,6 @@
 package pokeapi;
 
+import entities.Pokemon;
 import okhttp3.Call;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -23,21 +24,24 @@ public class PokeAPIFetcher {
 
     private final OkHttpClient client = new OkHttpClient();
 
-    public JSONObject getPokemon(String pokemonName) throws PokemonNotFoundException {
-        Request request = new Request.Builder().url(API_HEADER + "pokemon/" + pokemonName).build();
+    public Pokemon getPokemon(String pokemon) throws PokemonNotFoundException {
+        Request request = new Request.Builder().url(API_HEADER + "pokemon/" + pokemon).build();
         final Call call = client.newCall(request);
         try {
             Response response = call.execute();
             final JSONObject responseBody = new JSONObject(response.body().string());
-            System.out.println(responseBody);
-            return responseBody;
+            final String pokemonName = responseBody.getString("name");
+            final int pokemonID = responseBody.getInt("id");
+            return new Pokemon(pokemonName, pokemonID);
+
         } catch (IOException | JSONException exception) {
-            throw new PokemonNotFoundException(pokemonName);
+            throw new PokemonNotFoundException(pokemon);
         }
     }
 
     public static void main(String[] args) throws PokemonNotFoundException {
         PokeAPIFetcher fetcher = new PokeAPIFetcher();
-        fetcher.getPokemon("raichu");
+        System.out.println(fetcher.getPokemon("raichu"));
+
     }
 }
