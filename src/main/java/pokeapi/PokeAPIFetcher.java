@@ -18,13 +18,13 @@ import java.util.*;
 public class PokeAPIFetcher {
     private final String API_HEADER = "https://pokeapi.co/api/v2/";
 
-    class PokemonNotFoundException extends Exception {
+    static class PokemonNotFoundException extends Exception {
         public PokemonNotFoundException(String pokemon) {
             super("Pokemon not found: " + pokemon);
         }
     }
 
-    class MoveNotFoundException extends Exception {
+    static class MoveNotFoundException extends Exception {
         public MoveNotFoundException(String move) {
             super("Move not found: " + move);
         }
@@ -43,9 +43,10 @@ public class PokeAPIFetcher {
             int pokemonID = responseBody.getInt("id");
             ArrayList<String> types = extractTypesFromJSON(responseBody);
             Stats stats = extractStatsFromJSON(responseBody);
+            ArrayList<String> moves = extractMovesFromJSON(responseBody);
 
 
-            return new Pokemon(pokemonName, pokemonID, types, stats);
+            return new Pokemon(pokemonName, pokemonID, types, stats, moves);
 
         } catch (IOException | JSONException exception) {
             throw new PokemonNotFoundException(pokemon);
@@ -68,13 +69,20 @@ public class PokeAPIFetcher {
                     .setEffect(responseBody.getJSONObject("meta").getJSONObject("ailment").getString("name"))
                     .setDamageClass(responseBody.getJSONObject("damage_class").getString("name"));
 
-
-
             return returnMove;
 
         } catch (IOException | JSONException exception) {
             throw new MoveNotFoundException(move);
         }
+    }
+
+    private ArrayList<String> extractMovesFromJSON(JSONObject responseBody) {
+        final JSONArray moveJA = responseBody.getJSONArray("moves");
+        ArrayList<String> moves = new ArrayList<>();
+        for (int i = 0; i < moveJA.length(); i++) {
+            moves.add(moveJA.getJSONObject(i).getJSONObject("move").getString("name"));
+        }
+        return moves;
     }
 
     private ArrayList<String> extractTypesFromJSON(JSONObject responseBody) {
@@ -101,7 +109,7 @@ public class PokeAPIFetcher {
     public static void main(String[] args) throws PokemonNotFoundException, MoveNotFoundException {
         PokeAPIFetcher fetcher = new PokeAPIFetcher();
         System.out.println(fetcher.getPokemon("farigiraf"));
-        System.out.println(fetcher.getPokemon("farigiraf").getStats());
+        System.out.println(fetcher.getPokemon("farigiraf").getMoves());
         System.out.println(fetcher.getMove("scald"));
     }
 }
