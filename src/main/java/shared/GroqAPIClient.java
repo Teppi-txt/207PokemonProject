@@ -12,7 +12,7 @@ import java.util.List;
 
 public class GroqAPIClient {
     private static final String API_ENDPOINT = "https://api.groq.com/openai/v1/chat/completions";
-    private static final String DEFAULT_MODEL = "llama-3.3-70b-versatile";
+    private static final String DEFAULT_MODEL = "openai/gpt-oss-120b";
     private static final MediaType JSON = MediaType.get("application/json; charset=utf-8");
 
     private final OkHttpClient client;
