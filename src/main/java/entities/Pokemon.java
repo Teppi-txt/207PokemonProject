@@ -28,4 +28,30 @@ public class Pokemon {
 
     public ArrayList<String> getMoves() { return this.moves; }
     public void setMoves(ArrayList<String> moves) { this.moves = moves; }
+
+    public String toJSONString() {
+        StringBuilder json = new StringBuilder();
+        json.append("{");
+        json.append("\"name\":\"").append(name).append("\",");
+        json.append("\"id\":").append(id).append(",");
+
+        // typing
+        json.append("\"types\":[");
+        for (int i = 0; i < types.size(); i++) {
+            json.append("\"").append(types.get(i)).append("\"");
+            if (i < types.size() - 1) json.append(",");
+        }
+        json.append("],");
+
+
+        json.append("\"stats\":").append(stats.toJSONString()).append(",");
+
+        json.append("\"moves\":[");
+        for (int i = 0; i < moves.size(); i++) {
+            json.append("\"").append(moves.get(i)).append("\"");
+            if (i < moves.size() - 1) json.append(",");
+        }
+        json.append("]}");
+        return json.toString();
+    }
 }

@@ -11,7 +11,7 @@ public class Stats {
     private int speed;
 
     // some moves have stat level increases, so STAT_LEVEL maps the level to the multiplier for the stat
-    // ie. ATK raised by +2 -> ATK *= STAT_LEVEL.get(+2)
+    // i.e. ATK raised by +2 -> ATK *= STAT_LEVEL.get(+2)
     public static final Map<Integer, Double> STAT_LEVEL = Map.ofEntries(
             Map.entry(-6, 2.0 / 8.0),
             Map.entry(-5, 2.0 / 7.0),
@@ -139,6 +139,11 @@ public class Stats {
     @Override
     public String toString() {
         return String.format("hp: %d, attack: %d, defense: %d, sp.attack: %d, sp.defense: %d, speed: %d",
+                hp, attack, defense, spAttack, spDefense, speed);
+    }
+
+    public String toJSONString() {
+        return String.format("{\"hp\": %d, \"attack\": %d, \"defense\": %d, \"sp_attack\": %d, \"sp_defense\": %d, \"speed\": %d}",
                 hp, attack, defense, spAttack, spDefense, speed);
     }
 }
