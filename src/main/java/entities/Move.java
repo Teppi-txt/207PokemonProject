@@ -42,4 +42,16 @@ public class Move {
                 ", effect='" + effect + '\'' +
                 '}';
     }
+
+    public String toJSONString() {
+        return "Move{" +
+                "name: '" + name + '\'' +
+                ", type: '" + type + '\'' +
+                ", damageClass: '" + damageClass + '\'' +
+                ", power: " + power +
+                ", accuracy: " + accuracy +
+                ", priority: " + priority +
+                ", effect: '" + effect + '\'' +
+                '}';
+    }
 }
