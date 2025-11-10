@@ -10,8 +10,8 @@ public class Deck {
     ArrayList<Pokemon> pokemons;
 
     public Deck() {
-        this.id = 0;
-        this.name = "Deck " + (this.id + 1);
+        this.id = 0; //this isnt final, need 2 find a way for ids to not overlap
+        this.name = "Deck " + (this.id + 1); //??
         this.pokemons = new ArrayList<>();
     }
 
