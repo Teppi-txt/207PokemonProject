@@ -1,39 +1,24 @@
 package org.example;
 
-public class Turn {
-    private int id;
-    private Player player;
-    private Move move;
-    private String result;
-    private int damage;
-    private String effectiveness;
-    private String statusEffect;
-    private int turnNumber;
+public abstract class Turn {
+    protected int id;
+    protected Player player;
+    protected int turnNumber;
+    protected String result;
 
     public Turn() {
     }
 
-    public Turn(int id, Player player, Move move) {
+    public Turn(int id, Player player, int turnNumber) {
         this.id = id;
         this.player = player;
-        this.move = move;
+        this.turnNumber = turnNumber;
         this.result = "";
-        this.damage = 0;
-        this.effectiveness = "normal";
-        this.statusEffect = "";
-        this.turnNumber = 0;
     }
 
-    public void executeTurn() {
-        // Logic to execute the turn would go here
-        // This would process the move and update the result
-        this.result = "Turn executed";
-    }
+    public abstract void executeTurn();
 
-    public String getTurnDetails() {
-        return "Turn " + id + ": Player " + player.getName() +
-               " used " + move.getName() + ". Result: " + result;
-    }
+    public abstract String getTurnDetails();
 
     public int getId() {
         return id;
@@ -51,12 +36,12 @@ public class Turn {
         this.player = player;
     }
 
-    public Move getMove() {
-        return move;
+    public int getTurnNumber() {
+        return turnNumber;
     }
 
-    public void setMove(Move move) {
-        this.move = move;
+    public void setTurnNumber(int turnNumber) {
+        this.turnNumber = turnNumber;
     }
 
     public String getResult() {
@@ -65,37 +50,5 @@ public class Turn {
 
     public void setResult(String result) {
         this.result = result;
-    }
-
-    public int getDamage() {
-        return damage;
-    }
-
-    public void setDamage(int damage) {
-        this.damage = damage;
-    }
-
-    public String getEffectiveness() {
-        return effectiveness;
-    }
-
-    public void setEffectiveness(String effectiveness) {
-        this.effectiveness = effectiveness;
-    }
-
-    public String getStatusEffect() {
-        return statusEffect;
-    }
-
-    public void setStatusEffect(String statusEffect) {
-        this.statusEffect = statusEffect;
-    }
-
-    public int getTurnNumber() {
-        return turnNumber;
-    }
-
-    public void setTurnNumber(int turnNumber) {
-        this.turnNumber = turnNumber;
     }
 }
