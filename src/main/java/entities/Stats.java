@@ -79,30 +79,23 @@ public class Stats {
 
     // im not sure if this is good or terrible code
     public void setStat(String name, int value) {
-        switch (name.toLowerCase()) {
+        switch (normalizeStatName(name)) {
             case "hp":
                 setHp(value);
                 break;
             case "attack":
-            case "atk":
                 setAttack(value);
                 break;
             case "defense":
-            case "def":
                 setDefense(value);
                 break;
             case "spattack":
-            case "spatk":
-            case "special-attack":
                 setSpAttack(value);
                 break;
             case "spdefense":
-            case "spdef":
-            case "special-defense":
                 setSpDefense(value);
                 break;
             case "speed":
-            case "spe":
                 setSpeed(value);
                 break;
             default:
@@ -111,30 +104,40 @@ public class Stats {
     }
 
     public int getStat(String name) {
-        switch (name.toLowerCase()) {
+        switch (normalizeStatName(name)) {
             case "hp":
                 return getHp();
             case "attack":
-            case "atk":
                 return getAttack();
             case "defense":
-            case "def":
                 return getDefense();
             case "spattack":
-            case "spatk":
-            case "special-attack":
                 return getSpAttack();
             case "spdefense":
-            case "spdef":
-            case "special-defense":
                 return getSpDefense();
             case "speed":
-            case "spe":
                 return getSpeed();
             default:
                 throw new IllegalArgumentException("Unknown stat: " + name);
         }
     }
+
+    private String normalizeStatName(String name) {
+        switch (name.toLowerCase()) {
+            case "hp", "health":
+                return "hp";
+            case "attack", "atk":
+                return "attack";
+            case "defense", "def":
+                return "defense";
+            case "special-attack", "spatk":
+            case "sp-attack":
+                return "spattack";
+            case "special-defense", "spdef", "sp-defense":
+                return "spdefense";
+            case "speed", "spe":
+                return "speed";
+            default: throw new IllegalArgumentException("Unknown stat: " + name); } }
 
     @Override
     public String toString() {

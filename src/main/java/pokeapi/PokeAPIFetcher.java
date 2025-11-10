@@ -128,6 +128,6 @@ public class PokeAPIFetcher {
 
     public static void main(String[] args) throws PokemonNotFoundException, MoveNotFoundException {
         PokeAPIFetcher fetcher = new PokeAPIFetcher();
-        System.out.println(fetcher.getAllPokemonNames());
+        System.out.println(fetcher.getPokemon("farigiraf"));
     }
 }
