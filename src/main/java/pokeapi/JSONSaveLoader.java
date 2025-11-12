@@ -1,5 +1,6 @@
 package pokeapi;
 
+import entities.Move;
 import entities.Pokemon;
 
 import java.io.*;
@@ -21,7 +22,7 @@ public class JSONSaveLoader {
         try {
             ArrayList<String> pokemons = PokeAPIFetcher.getAllPokemonNames();
             Writer writer = new BufferedWriter(new OutputStreamWriter(
-                    new FileOutputStream("src/assets/data/pokemon.json"), StandardCharsets.UTF_8));
+                            new FileOutputStream("src/assets/data/pokemon.json"), StandardCharsets.UTF_8));
             writer.write("[");
 
             for(String pokemonName : pokemons) {
@@ -42,7 +43,33 @@ public class JSONSaveLoader {
         }
     }
 
+    public static void saveMoveData() {
+        try {
+            ArrayList<String> moves = PokeAPIFetcher.getAllMoveNames();
+            Writer writer = new BufferedWriter(new OutputStreamWriter(
+                    new FileOutputStream("src/assets/data/moves.json"), StandardCharsets.UTF_8));
+            writer.write("[");
+
+            for(String moveName : moves) {
+                Move pokemon =  PokeAPIFetcher.getMove(moveName);
+                writer.write(pokemon.toJSONString());
+
+                // don't want trailing comma
+                if (!moveName.equals(moves.get(moves.size() - 1))) {
+                    writer.write(",");
+                }
+
+                writer.write("\n");
+            }
+            writer.write("]");
+            writer.close();
+        } catch (PokeAPIFetcher.MoveNotFoundException | IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public static void main(String[] args) {
-        savePokemonData();
+        saveMoveData();
+        //savePokemonData();
     }
 }

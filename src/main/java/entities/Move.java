@@ -4,9 +4,9 @@ public class Move {
     private String name;
     private String type;
     private String damageClass;  // physical, special, or status
-    private int power;       // int or null (for status)
-    private int accuracy;    // percentage of a successful hit
-    private int priority;    // higher priority moves first
+    private Integer power;       // int or null (for status)
+    private Integer accuracy;    // percentage of a successful hit
+    private Integer priority;    // higher priority moves first
     private String effect;
 
     public String getName() { return name; }
@@ -24,7 +24,7 @@ public class Move {
     public Integer getAccuracy() { return accuracy; }
     public Move setAccuracy(Integer accuracy) { this.accuracy = accuracy; return this; }
 
-    public int getPriority() { return priority; }
+    public Integer getPriority() { return priority; }
     public Move setPriority(int priority) { this.priority = priority; return this; }
 
     public String getEffect() { return effect; }
@@ -44,14 +44,14 @@ public class Move {
     }
 
     public String toJSONString() {
-        return "Move{" +
-                "name: '" + name + '\'' +
-                ", type: '" + type + '\'' +
-                ", damageClass: '" + damageClass + '\'' +
-                ", power: " + power +
-                ", accuracy: " + accuracy +
-                ", priority: " + priority +
-                ", effect: '" + effect + '\'' +
+        return "{" +
+                "\"name\": \"" + name + '\"' +
+                ", \"type\": \"" + type + '\"' +
+                ", \"damageClass\": \"" + damageClass + '\"' +
+                ", \"power\": \"" + power + "\"" +
+                ", \"accuracy\": \"" + accuracy + "\"" +
+                ", \"priority\": \"" + priority + "\"" +
+                ", \"effect\": \"" + effect + '\"' +
                 '}';
     }
 }
