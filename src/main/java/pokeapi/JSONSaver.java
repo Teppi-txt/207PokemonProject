@@ -11,13 +11,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 
-public class JSONSaveLoader {
-    public static void downloadFile(String url, String localPath) throws IOException {
-        try (InputStream in = new URL(url).openStream()) {
-            Files.copy(in, Paths.get(localPath), StandardCopyOption.REPLACE_EXISTING);
-        }
-    }
-
+public class JSONSaver {
     public static void savePokemonData() {
         try {
             ArrayList<String> pokemons = PokeAPIFetcher.getAllPokemonNames();
@@ -68,8 +62,14 @@ public class JSONSaveLoader {
         }
     }
 
+    public static void downloadFile(String url, String localPath) throws IOException {
+        try (InputStream in = new URL(url).openStream()) {
+            Files.copy(in, Paths.get(localPath), StandardCopyOption.REPLACE_EXISTING);
+        }
+    }
+
     public static void main(String[] args) {
         saveMoveData();
-        //savePokemonData();
+        savePokemonData();
     }
 }

@@ -1,5 +1,7 @@
 package entities;
 
+import org.json.JSONObject;
+
 public class Move {
     private String name;
     private String type;
@@ -8,6 +10,18 @@ public class Move {
     private Integer accuracy;    // percentage of a successful hit
     private Integer priority;    // higher priority moves first
     private String effect;
+
+    public static Move fromJSON(JSONObject jsonObject) {
+        Move returnMove = new Move()
+            .setName(jsonObject.getString("name"))
+            .setType(jsonObject.getString("type"))
+            .setDamageClass(jsonObject.getString("damageClass"))
+            .setPower(jsonObject.getInt("power"))
+            .setAccuracy(jsonObject.getInt("accuracy"))
+            .setPriority(jsonObject.getInt("priority"))
+            .setEffect(jsonObject.getString("effect"));
+        return returnMove;
+    }
 
     public String getName() { return name; }
     public Move setName(String name) { this.name = name; return this; }
