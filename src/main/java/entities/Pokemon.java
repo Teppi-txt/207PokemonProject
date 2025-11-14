@@ -1,5 +1,8 @@
 package entities;
 
+import org.json.JSONObject;
+import pokeapi.JSONUtility;
+
 import java.util.ArrayList;
 
 public class Pokemon {
@@ -18,9 +21,18 @@ public class Pokemon {
         this.moves = moves;
     }
 
+    public static Pokemon fromJSON(JSONObject jsonObject) {
+        String name = jsonObject.getString("name");
+        Integer id = jsonObject.getInt("id");
+        ArrayList<String> types = JSONUtility.jsonArrayToString(jsonObject.getJSONArray("types"));
+        ArrayList<String> moves = JSONUtility.jsonArrayToString(jsonObject.getJSONArray("moves"));
+        Stats stats = Stats.fromJSON(jsonObject.getJSONObject("stats"));
+        return new Pokemon(name, id, types, stats, moves);
+    }
+
     @Override
     public String toString() {
-        return name + "(#" + id + ", " + String.join(", ", types) + ")";
+        return name + "(#" + id + ", " + String.join(", ", types) + ", " + stats.toString() + ")";
     }
 
     public Stats getStats() { return this.stats; }
