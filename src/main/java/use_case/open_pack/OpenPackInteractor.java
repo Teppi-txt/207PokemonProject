@@ -43,7 +43,7 @@ public class OpenPackInteractor implements OpenPackInputBoundary{
             boolean isDuplicate = user.hasDuplicatePokemon(pokemon);
             user.addPokemon(pokemon);
             if(isDuplicate){
-                user.addCurrency(50);
+                user.addCurrency(50); // if the pokemon pulled from the packs is a duplicate the user gains 50 currency
             }
         }
 

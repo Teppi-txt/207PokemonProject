@@ -59,7 +59,7 @@ public class User {
         currency += amount;
     }
 
-    public boolean hasDuplicatePokemon(Pokemon pokemon){
+    public boolean hasDuplicatePokemon(Pokemon pokemon){ // checks if the pokemon id is the same and then checks if its shiny or not to see if the user pulled a duplicated card
         for (Pokemon owned : ownedPokemon){
             if(owned.getID() == pokemon.getID() && owned.isShiny() == pokemon.isShiny()){
                 return true;
