@@ -59,5 +59,14 @@ public class User {
         currency += amount;
     }
 
+    public boolean hasDuplicatePokemon(Pokemon pokemon){
+        for (Pokemon owned : ownedPokemon){
+            if(owned.getID() == pokemon.getID() && owned.isShiny() == pokemon.isShiny()){
+                return true;
+            }
+        }
+        return false;
+    }
+
 
 }

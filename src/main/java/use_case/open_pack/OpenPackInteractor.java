@@ -40,7 +40,11 @@ public class OpenPackInteractor implements OpenPackInputBoundary{
         List<Pokemon> openedCards = pack.openPack();
 
         for (Pokemon pokemon : openedCards){
+            boolean isDuplicate = user.hasDuplicatePokemon(pokemon);
             user.addPokemon(pokemon);
+            if(isDuplicate){
+                user.addCurrency(50);
+            }
         }
 
         userDataAccess.save(user);
