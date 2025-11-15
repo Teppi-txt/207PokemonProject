@@ -1,5 +1,6 @@
 package entities;
 
+import cards.Deck;
 import java.util.ArrayList;
 import java.util.List;
 

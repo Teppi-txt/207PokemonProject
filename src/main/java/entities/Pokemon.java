@@ -46,11 +46,21 @@ public class Pokemon {
         return name + "(#" + id + ", " + String.join(", ", types) + ")";
     }
 
+    public String getName() { return this.name; }
+
+    public int getId() { return this.id; }
+
+    public ArrayList<String> getTypes() { return this.types; }
+
     public Stats getStats() { return this.stats; }
     public void setStats(Stats stats) { this.stats = stats; }
 
     public ArrayList<String> getMoves() { return this.moves; }
     public void setMoves(ArrayList<String> moves) { this.moves = moves; }
+
+    public boolean isFainted() {
+        return this.stats.getHp() <= 0;
+    }
 
     public String toJSONString() {
         StringBuilder json = new StringBuilder();

@@ -38,7 +38,9 @@ public class User {
     public void addPokemon(Pokemon pokemon) {
         this.ownedPokemon.add(pokemon);
     }
+
     public List<Pokemon> openPack(int packID) {
         //this has not been implemented yet as pack class is not created
+        return new ArrayList<>();
     }
 }
