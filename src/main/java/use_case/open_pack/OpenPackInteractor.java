@@ -6,7 +6,7 @@ import entities.User;
 
 import java.util.List;
 
-public class OpenPackInteractor {
+public class OpenPackInteractor implements OpenPackInputBoundary{
 
     private static final int PACK_COST = 1000;
     private final OpenPackUserDataAccessInterface userDataAccess;
@@ -21,15 +21,14 @@ public class OpenPackInteractor {
         this.pack = pack;
     }
 
+    @Override
     public void execute(OpenPackInputData inputData) {
-        final String username = inputData.getUsername();
 
-        if (userDataAccess.existsByName(username)){
-            openPackPresenter.prepareFailView(username + " User does not exist.");
+        final User user = userDataAccess.get();
+        if (user == null) {
+            openPackPresenter.prepareFailView("User not found");
             return;
         }
-
-        final User user = userDataAccess.get(username);
 
         if (!user.canAffordPack(PACK_COST)){
             openPackPresenter.prepareFailView("Not enough currency to open pack.");
@@ -47,7 +46,7 @@ public class OpenPackInteractor {
         userDataAccess.save(user);
 
         OpenPackOutputData outputData =
-                new OpenPackOutputData(user.getName(), openedCards, user.getCurrency());
+                new OpenPackOutputData(openedCards, user.getCurrency());
         openPackPresenter.prepareSuccessView(outputData);
 
     }
