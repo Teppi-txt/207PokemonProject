@@ -34,6 +34,10 @@ public class Pokemon {
         return shiny;
     }
 
+    public int getID() {
+        return id;
+    }
+
     public void setShiny(boolean shiny) {
         this.shiny = shiny;
     }
