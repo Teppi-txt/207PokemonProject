@@ -12,7 +12,7 @@ public class OpenPackState {
 
     private List<Pokemon> openedCards = new ArrayList<>();
     private int remainingCurrency;
-    private String errorMessage;
+    private String errorMessage; // if it is null there is no error
 
     public List<Pokemon> getOpenedCards() {
         return openedCards;
