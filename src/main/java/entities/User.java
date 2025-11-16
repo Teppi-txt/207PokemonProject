@@ -7,9 +7,10 @@ import java.util.List;
 public class User implements Serializable {
     private static final long serialVersionUID = 1L;
 
-    private int id;
+    private final int id;
     private String name;
     private int currency;
+    private String email; //do we need a password?
 
     private final List<Pokemon> ownedPokemon;
 
@@ -17,6 +18,7 @@ public class User implements Serializable {
         this.id = id;
         this.name = name;
         this.currency = currency;
+        this.email = email;
         this.ownedPokemon = new ArrayList<>();
     }
 
@@ -27,6 +29,10 @@ public class User implements Serializable {
 
     public String getName() {
         return name;
+    }
+
+    public String getEmail() {
+        return email;
     }
 
     public int getCurrency() {
@@ -41,8 +47,28 @@ public class User implements Serializable {
         this.ownedPokemon.add(pokemon);
     }
 
-    public List<Pokemon> openPack(int packID) {
-        //this has not been implemented yet as pack class is not created
-        return new ArrayList<>();
+    //got rid of openPack method because that will be used with the open pack interactor
+
+    public boolean canAffordPack(int amount){
+        return currency >= amount;
     }
+
+    public void buyPack(int amount){
+        currency -= amount;
+    }
+
+    public void addCurrency(int amount){
+        currency += amount;
+    }
+
+    public boolean hasDuplicatePokemon(Pokemon pokemon){ // checks if the pokemon id is the same and then checks if its shiny or not to see if the user pulled a duplicated card
+        for (Pokemon owned : ownedPokemon){
+            if(owned.getID() == pokemon.getID() && owned.isShiny() == pokemon.isShiny()){
+                return true;
+            }
+        }
+        return false;
+    }
+
+
 }

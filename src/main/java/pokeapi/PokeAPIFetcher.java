@@ -17,6 +17,8 @@ import java.util.*;
 
 public class PokeAPIFetcher {
     private static final String API_HEADER = "https://pokeapi.co/api/v2/";
+    private static final int MOVE_COUNT = 937;
+    private static final int POKEMON_COUNT = 1328;
 
     static class PokemonNotFoundException extends Exception {
         public PokemonNotFoundException(String pokemon) {
@@ -54,7 +56,7 @@ public class PokeAPIFetcher {
     }
     
     public static ArrayList<String> getAllPokemonNames() throws PokemonNotFoundException {
-        Request request = new Request.Builder().url(API_HEADER + "pokemon/" + "?offset=0&limit=200").build();
+        Request request = new Request.Builder().url(API_HEADER + "pokemon/" + "?offset=0&limit=" + POKEMON_COUNT).build();
         final Call call = client.newCall(request);
         try {
             Response response = call.execute();
@@ -73,7 +75,27 @@ public class PokeAPIFetcher {
         }
     }
 
-    public Move getMove(String move) throws MoveNotFoundException {
+    public static ArrayList<String> getAllMoveNames() throws MoveNotFoundException {
+        Request request = new Request.Builder().url(API_HEADER + "move/" + "?offset=0&limit=" + MOVE_COUNT).build();
+        final Call call = client.newCall(request);
+        try {
+            Response response = call.execute();
+            final JSONObject responseBody = new JSONObject(response.body().string());
+            final JSONArray results = responseBody.getJSONArray("results");
+
+            ArrayList<String> moveNames = new ArrayList<>();
+            for (int i = 0; i < results.length(); i++) {
+                moveNames.add(results.getJSONObject(i).getString("name"));
+            }
+
+            return moveNames;
+
+        } catch (IOException | JSONException exception) {
+            throw new MoveNotFoundException("all moves");
+        }
+    }
+
+    public static Move getMove(String move) throws MoveNotFoundException {
         Request request = new Request.Builder().url(API_HEADER + "move/" + move).build();
         final Call call = client.newCall(request);
 
@@ -81,19 +103,30 @@ public class PokeAPIFetcher {
             Response response = call.execute();
             final JSONObject responseBody = new JSONObject(response.body().string());
             Move returnMove = new Move()
-                    .setName(responseBody.getString("name"))
-                    .setAccuracy(responseBody.getInt("accuracy"))
-                    .setPriority(responseBody.getInt("priority"))
-                    .setPower(responseBody.getInt("power"))
-                    .setType(responseBody.getJSONObject("type").getString("name"))
-                    .setEffect(responseBody.getJSONObject("meta").getJSONObject("ailment").getString("name"))
-                    .setDamageClass(responseBody.getJSONObject("damage_class").getString("name"));
+                    .setName(responseBody.optString("name"))
+                    .setAccuracy(responseBody.optInt("accuracy"))
+                    .setPriority(responseBody.optInt("priority"))
+                    .setPower(responseBody.optInt("power"))
+                    .setType(getNestedString(responseBody, "type", "name"))
+                    .setEffect(getNestedString(responseBody, "meta", "ailment", "name"))
+                    .setDamageClass(getNestedString(responseBody, "damage_class", "name"));
 
             return returnMove;
 
         } catch (IOException | JSONException exception) {
+            System.out.println(exception.getMessage());
             throw new MoveNotFoundException(move);
         }
+    }
+
+    // given a json string nested in many json objects, extracts it while typechecking for null
+    public static String getNestedString(JSONObject obj, String... keys) {
+        JSONObject current = obj;
+        for (int i = 0; i < keys.length - 1; i++) {
+            if (current == null) return null;
+            current = current.optJSONObject(keys[i]);
+        }
+        return (current == null) ? null : current.optString(keys[keys.length - 1], null);
     }
 
     private static ArrayList<String> extractMovesFromJSON(JSONObject responseBody) {

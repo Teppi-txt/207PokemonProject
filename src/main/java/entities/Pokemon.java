@@ -1,6 +1,9 @@
 package entities;
 
 import java.io.Serializable;
+import org.json.JSONObject;
+import pokeapi.JSONUtility;
+
 import java.util.ArrayList;
 
 public class Pokemon implements Serializable {
@@ -21,9 +24,20 @@ public class Pokemon implements Serializable {
         this.moves = moves;
     }
 
+    public static Pokemon fromJSON(JSONObject jsonObject) {
+        String name = jsonObject.getString("name");
+        Integer id = jsonObject.getInt("id");
+        ArrayList<String> types = JSONUtility.jsonArrayToString(jsonObject.getJSONArray("types"));
+        ArrayList<String> moves = JSONUtility.jsonArrayToString(jsonObject.getJSONArray("moves"));
+        Stats stats = Stats.fromJSON(jsonObject.getJSONObject("stats"));
+        return new Pokemon(name, id, types, stats, moves);
     // new for shiny pokemon
     public boolean isShiny() {
         return shiny;
+    }
+
+    public int getID() {
+        return id;
     }
 
     public void setShiny(boolean shiny) {
@@ -45,7 +59,7 @@ public class Pokemon implements Serializable {
 
     @Override
     public String toString() {
-        return name + "(#" + id + ", " + String.join(", ", types) + ")";
+        return name + "(#" + id + ", " + String.join(", ", types) + ", " + stats.toString() + ")";
     }
 
     public String getName() { return this.name; }
