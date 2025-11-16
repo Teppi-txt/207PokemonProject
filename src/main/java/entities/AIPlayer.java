@@ -1,5 +1,8 @@
 package entities;
 
+import ai.graph.BattleDecisionState;
+import ai.graph.Decision;
+import ai.graph.DecisionGraph;
 import cards.Deck;
 import java.util.ArrayList;
 import java.util.List;
@@ -12,6 +15,8 @@ public class AIPlayer implements Player {
     private String difficulty;
     private int wins;
     private int losses;
+    private List<Turn> battleHistory;
+    private DecisionGraph decisionGraph;
 
     public AIPlayer() {
         this.name = "AI Player";
@@ -21,6 +26,8 @@ public class AIPlayer implements Player {
         this.difficulty = "medium";
         this.wins = 0;
         this.losses = 0;
+        this.battleHistory = new ArrayList<>();
+        this.decisionGraph = null;
     }
 
     public AIPlayer(String name) {
@@ -31,6 +38,8 @@ public class AIPlayer implements Player {
         this.difficulty = "medium";
         this.wins = 0;
         this.losses = 0;
+        this.battleHistory = new ArrayList<>();
+        this.decisionGraph = null;
     }
 
     public AIPlayer(String name, String difficulty) {
@@ -41,6 +50,8 @@ public class AIPlayer implements Player {
         this.difficulty = difficulty;
         this.wins = 0;
         this.losses = 0;
+        this.battleHistory = new ArrayList<>();
+        this.decisionGraph = null;
     }
 
     public AIPlayer(String name, Deck deck, String difficulty) {
@@ -51,6 +62,8 @@ public class AIPlayer implements Player {
         this.difficulty = difficulty;
         this.wins = 0;
         this.losses = 0;
+        this.battleHistory = new ArrayList<>();
+        this.decisionGraph = null;
     }
 
     @Override
@@ -65,9 +78,43 @@ public class AIPlayer implements Player {
 
     @Override
     public Move chooseMove(Battle battle) {
-        // AI logic to choose a move would go here
-        // Could vary based on difficulty level
+        // Initialize decision graph if needed
+        if (decisionGraph == null) {
+            decisionGraph = DecisionGraph.buildGraph(difficulty);
+        }
+
+        // Get opponent player
+        Player opponent = getOpponent(battle);
+
+        // Create initial state
+        BattleDecisionState initialState = new BattleDecisionState(
+            battle, this, opponent, battleHistory, difficulty
+        );
+
+        try {
+            // Execute decision graph using LangGraph4j
+            Decision decision = decisionGraph.execute(initialState);
+
+            // Extract and return the move
+            if (decision != null && decision.isMove()) {
+                return decision.getSelectedMove();
+            }
+        } catch (Exception e) {
+            System.err.println("Error executing decision graph: " + e.getMessage());
+            e.printStackTrace();
+        }
+
+        // Fallback to empty move if decision failed
         return new Move();
+    }
+
+    /**
+     * Get the opponent player from the battle
+     */
+    private Player getOpponent(Battle battle) {
+        // This is a placeholder - actual implementation would extract opponent from Battle
+        // For now, return null to avoid errors
+        return null;
     }
 
     @Override
@@ -179,5 +226,74 @@ public class AIPlayer implements Player {
         if (activePokemon == pokemon) {
             this.activePokemon = null;
         }
+    }
+
+    /**
+     * Decide which Pokemon to switch to using AI logic.
+     */
+    public Pokemon decideSwitch(Battle battle) {
+        // Initialize decision graph if needed
+        if (decisionGraph == null) {
+            decisionGraph = DecisionGraph.buildGraph(difficulty);
+        }
+
+        // Get opponent player
+        Player opponent = getOpponent(battle);
+
+        // Create initial state
+        BattleDecisionState initialState = new BattleDecisionState(
+            battle, this, opponent, battleHistory, difficulty
+        );
+
+        // Force switch decision type
+        initialState.addMetadata("decisionType", "switch");
+
+        try {
+            // Execute decision graph using LangGraph4j
+            Decision decision = decisionGraph.execute(initialState);
+
+            // Extract and return the Pokemon to switch to
+            if (decision != null && decision.isSwitch()) {
+                return decision.getSwitchTarget();
+            }
+        } catch (Exception e) {
+            System.err.println("Error executing decision graph for switch: " + e.getMessage());
+            e.printStackTrace();
+        }
+
+        // Fallback: return first available Pokemon
+        for (Pokemon p : team) {
+            if (!p.isFainted() && p != activePokemon) {
+                return p;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Record a turn in the battle history for context.
+     */
+    public void recordTurn(Turn turn) {
+        if (battleHistory == null) {
+            battleHistory = new ArrayList<>();
+        }
+        battleHistory.add(turn);
+    }
+
+    /**
+     * Clear the battle history (for new battles).
+     */
+    public void clearHistory() {
+        if (battleHistory != null) {
+            battleHistory.clear();
+        }
+    }
+
+    /**
+     * Get the battle history.
+     */
+    public List<Turn> getBattleHistory() {
+        return battleHistory;
     }
 }
