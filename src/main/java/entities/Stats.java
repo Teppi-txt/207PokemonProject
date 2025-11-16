@@ -1,8 +1,10 @@
 package entities;
 
+import java.io.Serializable;
 import java.util.Map;
 
-public class Stats {
+public class Stats implements Serializable {
+    private static final long serialVersionUID = 1L;
     private int hp;
     private int attack;
     private int defense;

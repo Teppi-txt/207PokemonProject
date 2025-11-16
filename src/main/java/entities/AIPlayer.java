@@ -4,10 +4,12 @@ import ai.graph.BattleDecisionState;
 import ai.graph.Decision;
 import ai.graph.DecisionGraph;
 import cards.Deck;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class AIPlayer implements Player {
+public class AIPlayer implements Player, Serializable {
+    private static final long serialVersionUID = 1L;
     private String name;
     private Deck deck;
     private List<Pokemon> team;
@@ -16,7 +18,7 @@ public class AIPlayer implements Player {
     private int wins;
     private int losses;
     private List<Turn> battleHistory;
-    private DecisionGraph decisionGraph;
+    private transient DecisionGraph decisionGraph;
 
     public AIPlayer() {
         this.name = "AI Player";

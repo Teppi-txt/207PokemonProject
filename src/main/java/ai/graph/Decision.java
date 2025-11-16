@@ -2,12 +2,14 @@ package ai.graph;
 
 import entities.Move;
 import entities.Pokemon;
+import java.io.Serializable;
 
 /**
  * Represents an AI's chosen action in battle.
  * Can be either a move decision or a switch decision.
  */
-public class Decision {
+public class Decision implements Serializable {
+    private static final long serialVersionUID = 1L;
     private final DecisionType type;
     private final Move selectedMove;
     private final Pokemon switchTarget;

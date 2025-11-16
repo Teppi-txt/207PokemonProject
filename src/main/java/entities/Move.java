@@ -1,6 +1,9 @@
 package entities;
 
-public class Move {
+import java.io.Serializable;
+
+public class Move implements Serializable {
+    private static final long serialVersionUID = 1L;
     private String name;
     private String type;
     private String damageClass;  // physical, special, or status

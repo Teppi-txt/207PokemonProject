@@ -38,11 +38,43 @@ public class BattleDecisionState extends AgentState {
         this.useFallback = false;
     }
 
+    @SuppressWarnings("unchecked")
     public BattleDecisionState(Map<String, Object> initData) {
         super(initData);
-        this.metadata = new HashMap<>();
-        this.turnHistory = new ArrayList<>();
-        this.useFallback = false;
+        // Extract data from initData map
+        if (initData.containsKey("battle")) {
+            this.battle = (Battle) initData.get("battle");
+        }
+        if (initData.containsKey("aiPlayer")) {
+            this.aiPlayer = (Player) initData.get("aiPlayer");
+        }
+        if (initData.containsKey("opponent")) {
+            this.opponent = (Player) initData.get("opponent");
+        }
+        if (initData.containsKey("turnHistory")) {
+            this.turnHistory = (List<Turn>) initData.get("turnHistory");
+        } else {
+            this.turnHistory = new ArrayList<>();
+        }
+        if (initData.containsKey("difficulty")) {
+            this.difficulty = (String) initData.get("difficulty");
+        }
+        if (initData.containsKey("metadata")) {
+            this.metadata = (Map<String, Object>) initData.get("metadata");
+        } else {
+            this.metadata = new HashMap<>();
+        }
+        if (initData.containsKey("currentDecision")) {
+            this.currentDecision = (Decision) initData.get("currentDecision");
+        }
+        if (initData.containsKey("useFallback")) {
+            this.useFallback = (Boolean) initData.get("useFallback");
+        } else {
+            this.useFallback = false;
+        }
+        if (initData.containsKey("errorMessage")) {
+            this.errorMessage = (String) initData.get("errorMessage");
+        }
     }
 
     public BattleDecisionState(Battle battle, Player aiPlayer, Player opponent,

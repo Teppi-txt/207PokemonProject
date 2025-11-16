@@ -1,6 +1,9 @@
 package entities;
 
-public class Battle {
+import java.io.Serializable;
+
+public class Battle implements Serializable {
+    private static final long serialVersionUID = 1L;
     private int id;
     private User player1;
     private User player2;
