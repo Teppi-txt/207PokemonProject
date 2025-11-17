@@ -29,6 +29,8 @@ public class Pokemon {
         ArrayList<String> moves = JSONUtility.jsonArrayToString(jsonObject.getJSONArray("moves"));
         Stats stats = Stats.fromJSON(jsonObject.getJSONObject("stats"));
         return new Pokemon(name, id, types, stats, moves);
+    }
+
     // new for shiny pokemon
     public boolean isShiny() {
         return shiny;
@@ -92,3 +94,5 @@ public class Pokemon {
         return json.toString();
     }
 }
+
+

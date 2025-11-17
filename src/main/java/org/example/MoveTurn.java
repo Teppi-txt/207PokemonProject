@@ -1,5 +1,7 @@
 package org.example;
 
+import entities.Move;
+
 public class MoveTurn extends Turn {
     private Move move;
     private int damage;

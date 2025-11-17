@@ -1,5 +1,8 @@
 package org.example;
 
+import cards.Deck;
+import entities.Pokemon;
+
 import java.util.ArrayList;
 import java.util.List;
 
