@@ -1,0 +1,16 @@
+/Users/dimural/207PokemonProject/src/main/java/cards/Deck.java
+/Users/dimural/207PokemonProject/src/main/java/entities/Battle.java
+/Users/dimural/207PokemonProject/src/main/java/entities/Move.java
+/Users/dimural/207PokemonProject/src/main/java/entities/Pack.java
+/Users/dimural/207PokemonProject/src/main/java/entities/Pokemon.java
+/Users/dimural/207PokemonProject/src/main/java/entities/Stats.java
+/Users/dimural/207PokemonProject/src/main/java/entities/User.java
+/Users/dimural/207PokemonProject/src/main/java/org/example/AIPlayer.java
+/Users/dimural/207PokemonProject/src/main/java/org/example/MoveTurn.java
+/Users/dimural/207PokemonProject/src/main/java/org/example/Player.java
+/Users/dimural/207PokemonProject/src/main/java/org/example/SwitchTurn.java
+/Users/dimural/207PokemonProject/src/main/java/org/example/Turn.java
+/Users/dimural/207PokemonProject/src/main/java/pokeapi/JSONSaveLoader.java
+/Users/dimural/207PokemonProject/src/main/java/pokeapi/PokeAPIFetcher.java
+/Users/dimural/207PokemonProject/src/main/java/shared/GroqAPIClient.java
+/Users/dimural/207PokemonProject/src/main/java/shared/GroqAPITest.java
