@@ -1,11 +1,13 @@
 package entities;
 
+import java.io.Serializable;
 import org.json.JSONObject;
 import pokeapi.JSONUtility;
 
 import java.util.ArrayList;
 
-public class Pokemon {
+public class Pokemon implements Serializable {
+    private static final long serialVersionUID = 1L;
     private String name;    // private so no other classes can modify/access
     private int id;
     private ArrayList<String> types;
@@ -60,11 +62,21 @@ public class Pokemon {
         return name + "(#" + id + ", " + String.join(", ", types) + ", " + stats.toString() + ")";
     }
 
+    public String getName() { return this.name; }
+
+    public int getId() { return this.id; }
+
+    public ArrayList<String> getTypes() { return this.types; }
+
     public Stats getStats() { return this.stats; }
     public void setStats(Stats stats) { this.stats = stats; }
 
     public ArrayList<String> getMoves() { return this.moves; }
     public void setMoves(ArrayList<String> moves) { this.moves = moves; }
+
+    public boolean isFainted() {
+        return this.stats.getHp() <= 0;
+    }
 
     public String toJSONString() {
         StringBuilder json = new StringBuilder();

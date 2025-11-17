@@ -1,5 +1,9 @@
 package entities;
 
+import java.io.Serializable;
+
+public class Move implements Serializable {
+    private static final long serialVersionUID = 1L;
 import org.json.JSONObject;
 
 public class Move {
