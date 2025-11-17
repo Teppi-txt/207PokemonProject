@@ -3,10 +3,10 @@ package use_case.battle_player;
 import entities.Battle;
 import entities.Pokemon;
 import entities.User;
-import org.example.MoveTurn;
-import org.example.Player;
-import org.example.SwitchTurn;
-import org.example.Turn;
+import entities.MoveTurn;
+import entities.Player;
+import entities.SwitchTurn;
+import entities.Turn;
 
 public class BattlePlayerInteractor implements BattlePlayerInputBoundary {
 

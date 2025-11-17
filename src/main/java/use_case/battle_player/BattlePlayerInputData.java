@@ -1,6 +1,6 @@
 package use_case.battle_player;
 
-import org.example.Turn;
+import entities.Turn;
 
 public class BattlePlayerInputData {
     private final Turn turn;
