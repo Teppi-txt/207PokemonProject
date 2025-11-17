@@ -1,5 +1,7 @@
 package entities;
 
+import org.json.JSONObject;
+
 import java.util.Map;
 
 public class Stats {
@@ -39,6 +41,17 @@ public class Stats {
         this.spAttack = spAttack;
         this.spDefense = spDefense;
         this.speed = speed;
+    }
+
+    public static Stats fromJSON(JSONObject stats) {
+        Stats statsObj = new Stats();
+        statsObj.hp = stats.getInt("hp");
+        statsObj.attack = stats.getInt("attack");
+        statsObj.defense = stats.getInt("defense");
+        statsObj.spAttack = stats.getInt("sp_attack");
+        statsObj.spDefense = stats.getInt("sp_defense");
+        statsObj.speed = stats.getInt("speed");
+        return statsObj;
     }
 
     public int getHp() { return hp; }
