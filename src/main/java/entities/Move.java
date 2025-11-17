@@ -1,12 +1,10 @@
 package entities;
 
 import java.io.Serializable;
+import org.json.JSONObject;
 
 public class Move implements Serializable {
     private static final long serialVersionUID = 1L;
-import org.json.JSONObject;
-
-public class Move {
     private String name;
     private String type;
     private String damageClass;  // physical, special, or status
