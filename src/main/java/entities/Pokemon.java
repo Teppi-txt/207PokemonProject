@@ -92,3 +92,8 @@ public class Pokemon {
         return json.toString();
     }
 }
+
+    public String getName() {
+        return name;
+    }
+}
