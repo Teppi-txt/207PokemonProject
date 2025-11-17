@@ -1,6 +1,9 @@
-package org.example;
+package entities;
 
-public abstract class Turn {
+import java.io.Serializable;
+
+public abstract class Turn implements Serializable {
+    private static final long serialVersionUID = 1L;
     protected int id;
     protected Player player;
     protected int turnNumber;

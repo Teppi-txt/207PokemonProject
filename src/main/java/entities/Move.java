@@ -1,5 +1,9 @@
 package entities;
 
+import java.io.Serializable;
+
+public class Move implements Serializable {
+    private static final long serialVersionUID = 1L;
 import org.json.JSONObject;
 
 public class Move {
@@ -10,6 +14,11 @@ public class Move {
     private Integer accuracy;    // percentage of a successful hit
     private Integer priority;    // higher priority moves first
     private String effect;
+    // I'm not sure if we are using this but I see them in the api
+    private int effect_chance; // Percentage chance that the move's additional effect occurs
+    private String short_effect; //the move's additional effect, usually excluding damage info
+    private int pp; // Power Points: the number of times this move can be used in battle.
+
 
     public static Move fromJSON(JSONObject jsonObject) {
         Move returnMove = new Move()
@@ -43,6 +52,16 @@ public class Move {
 
     public String getEffect() { return effect; }
     public Move setEffect(String effect) { this.effect = effect; return this; }
+
+    public int getEffect_chance() { return effect_chance; }
+    public Move setEffect_chance(int effect_chance) { this.effect_chance =  effect_chance; return this; }
+
+    public int getPp() { return pp; }
+    public Move setPp(int pp) { this.pp = pp; return this; }
+
+    public String getShortEffect() { return short_effect; }
+    public Move setShortEffect(String short_effect) { this.short_effect = short_effect; return this; }
+
 
     @Override
     public String toString() {

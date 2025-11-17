@@ -1,4 +1,4 @@
-package org.example;
+package entities;
 
 public class MoveTurn extends Turn {
     private Move move;

@@ -2,9 +2,11 @@ package cards;
 
 import entities.Pokemon;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
-public class Deck {
+public class Deck implements Serializable {
+    private static final long serialVersionUID = 1L;
     int id;
     String name;
     ArrayList<Pokemon> pokemons;
