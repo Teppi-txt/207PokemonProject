@@ -1,5 +1,7 @@
 package org.example;
 
+import entities.Pokemon;
+
 public class SwitchTurn extends Turn {
     private Pokemon previousPokemon;
     private Pokemon newPokemon;

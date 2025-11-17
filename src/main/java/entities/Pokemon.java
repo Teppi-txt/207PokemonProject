@@ -36,6 +36,10 @@ public class Pokemon {
         return shiny;
     }
 
+    public String getName() {
+        return this.name;
+    }
+
     public int getID() {
         return id;
     }
@@ -92,6 +96,22 @@ public class Pokemon {
         }
         json.append("]}");
         return json.toString();
+    }
+
+
+    //Sprite images
+    private static final String SPRITE_BASE_URL = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/";
+
+    public String getRegularSpriteURL() {
+        return SPRITE_BASE_URL + id + ".png";
+    }
+
+    public String getShinySpriteURL() {
+        return SPRITE_BASE_URL + "shiny/" + id + ".png";
+    }
+
+    public String getSpriteUrl() {
+        return shiny ? getShinySpriteURL() : getRegularSpriteURL();
     }
 }
 

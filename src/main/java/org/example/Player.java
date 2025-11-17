@@ -1,5 +1,10 @@
 package org.example;
 
+import cards.Deck;
+import entities.Battle;
+import entities.Move;
+import entities.Pokemon;
+
 import java.util.List;
 
 public interface Player {
@@ -15,7 +20,7 @@ public interface Player {
 
     List<Pokemon> getTeam();
 
-    void useItem(Item item, Pokemon target);
+    //void useItem(Item item, Pokemon target);
 
     boolean hasAvailablePokemon();
 
