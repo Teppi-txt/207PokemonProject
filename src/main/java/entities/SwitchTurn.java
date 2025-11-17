@@ -1,4 +1,4 @@
-package org.example;
+package entities;
 
 public class SwitchTurn extends Turn {
     private Pokemon previousPokemon;
