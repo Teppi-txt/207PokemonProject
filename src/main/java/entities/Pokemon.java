@@ -135,3 +135,8 @@ public class Pokemon implements Serializable {
         return shiny ? getShinySpriteURL() : getRegularSpriteURL();
     }
 }
+
+    public String getName() {
+        return name;
+    }
+}
