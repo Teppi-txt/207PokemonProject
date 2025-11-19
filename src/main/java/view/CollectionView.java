@@ -13,58 +13,40 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.Map;
 
 public class CollectionView extends JPanel implements PropertyChangeListener, ActionListener {
     static final JFrame application  = new JFrame("User Login Example");
 
-    private final JTextField passwordInputField = new JTextField(15);
+    final PokemonInfoPanel pokemonInfoPanel;
+    final PokemonCollectionPanel pokemonCollectionPanel;
 
     public CollectionView() {
-        final JTextField passwordInputField = new JTextField(15);
         final JLabel title = new JLabel("My Collection");
-        title.setFont(new Font(title.getFont().getFontName(), Font.BOLD, 20));
+        title.setFont(new Font(title.getFont().getFontName(), Font.BOLD, 46));
         title.setAlignmentX(Component.CENTER_ALIGNMENT);
         title.setBorder(new EmptyBorder(10, 10, 10, 10));
 
         final JPanel body = new JPanel();
         body.setLayout(new BoxLayout(body, BoxLayout.X_AXIS));
 
-        final PokemonInfoPanel pokemonInfoPanel = new PokemonInfoPanel(JSONLoader.allPokemon.get(1));
-
-        final JPanel pokemonPanel = new JPanel();
-        pokemonPanel.setLayout(new GridLayout(5, 5));
-        pokemonPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
-        pokemonPanel.setMinimumSize(new Dimension(600, 600));
-        // Add 25 buttons to the frame
-        for (int i = 0; i < 25; i++) {
-            ImageIcon pokeIcon = new ImageIcon();
-            try {
-                pokeIcon = new ImageIcon(new URL(JSONLoader.allPokemon.get(i).getSpriteUrl()));
-            } catch (MalformedURLException e) {
-                throw new RuntimeException(e);
-            }
-            JButton button = new JButton(pokeIcon);
-            button.setContentAreaFilled(false);
-            button.putClientProperty("id", i);  // store index as command
-
-            button.addActionListener(e -> {
-                JButton clicked = (JButton)e.getSource();
-                int index = (int) clicked.getClientProperty("id");
-                System.out.println(index);
-                pokemonInfoPanel.updatePokemon(JSONLoader.allPokemon.get(index));
-                application.pack();
-            });
-            pokemonPanel.add(button);
-        }
-
+        pokemonInfoPanel = new PokemonInfoPanel(JSONLoader.allPokemon.get(1));
+        pokemonCollectionPanel = new PokemonCollectionPanel(JSONLoader.allPokemon);
 
         this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         this.add(title);
         body.add(pokemonInfoPanel);
-        body.add(pokemonPanel);
+        body.add(pokemonCollectionPanel);
         this.add(body);
+    }
+
+    public void onPokemonSelection(ActionEvent e) {
+        JButton clicked = (JButton)e.getSource();
+        int index = (int) clicked.getClientProperty("id");
+        System.out.println(index);
+        pokemonInfoPanel.updatePokemon(JSONLoader.allPokemon.get(index));
+        application.pack();
     }
 
     @Override
@@ -83,7 +65,7 @@ public class CollectionView extends JPanel implements PropertyChangeListener, Ac
         JSONLoader.loadPokemon();
 
         application.add(new CollectionView());
-        application.setMinimumSize(new Dimension(600, 600));
+        application.setMinimumSize(new Dimension(700, 600));
         application.pack();
         application.setVisible(true);
     }
@@ -96,18 +78,10 @@ public class CollectionView extends JPanel implements PropertyChangeListener, Ac
 
         public PokemonInfoPanel(Pokemon pokemon) {
             setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-            setPreferredSize(new Dimension(200, 350));
+            setPreferredSize(new Dimension(300, 350));
             setBorder(BorderFactory.createLineBorder(Color.GRAY, 2));
 
-            spriteLabel = getSpriteLabel(pokemon);
-            nameLabel = getNameLabel(pokemon.getName());
-            statsPanel = getStatsPanel(pokemon.getStats());
-
-            add(Box.createVerticalStrut(10));
-            add(spriteLabel);
-            add(nameLabel);
-            add(statsPanel);
-            add(Box.createVerticalGlue());
+            updatePokemon(pokemon);
         }
 
         public void updatePokemon(Pokemon pokemon) {
@@ -127,7 +101,7 @@ public class CollectionView extends JPanel implements PropertyChangeListener, Ac
 
         public JLabel getNameLabel(String name) {
             JLabel nameLabel = new JLabel(name);
-            nameLabel.setFont(new Font("Arial", Font.BOLD, 18));
+            nameLabel.setFont(new Font("Arial", Font.BOLD, 32));
             nameLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
             nameLabel.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
             return nameLabel;
@@ -135,10 +109,13 @@ public class CollectionView extends JPanel implements PropertyChangeListener, Ac
 
         public JLabel getSpriteLabel(Pokemon pokemon) {
             try {
-                JLabel spriteLabel = new JLabel(new ImageIcon(new URL(pokemon.getSpriteUrl())));
-                spriteLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-                return spriteLabel;
+                ImageIcon sprite = new ImageIcon(new URL(pokemon.getSpriteUrl()));
+                sprite.setImage(sprite.getImage().getScaledInstance(300, 300, Image.SCALE_SMOOTH));
 
+                JLabel spriteLabel = new JLabel(sprite);
+                spriteLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+                spriteLabel.setMaximumSize(new Dimension(300, 100));
+                return spriteLabel;
             } catch (Exception e) {
                 System.out.println(e);
                 return new  JLabel();
@@ -150,13 +127,63 @@ public class CollectionView extends JPanel implements PropertyChangeListener, Ac
             Map<String, Integer> map = stats.getStatMap();
             statsPanel.setLayout(new BoxLayout(statsPanel, BoxLayout.Y_AXIS));
             statsPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
-            statsPanel.setBackground(Color.WHITE);
 
             for (String stat : Stats.STAT_NAMES) {
                 JLabel statLabel = new JLabel(stat + ": " + String.valueOf(map.get(stat)));
+                statLabel.setFont(new Font("Arial", Font.BOLD, 24));
                 statsPanel.add(statLabel);
             }
             return statsPanel;
+        }
+    }
+
+    public class PokemonCollectionPanel extends JPanel {
+        private final JPanel pokemonPanel;
+        private int currentPage = 0;
+
+        public PokemonCollectionPanel(ArrayList<Pokemon> pokemons) {
+            pokemonPanel = new JPanel();
+            pokemonPanel.setLayout(new GridLayout(5, 5));
+            pokemonPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
+            pokemonPanel.setMinimumSize(new Dimension(600, 600));
+
+            loadPage(currentPage);
+
+            this.add(pokemonPanel);
+            JButton backButton = new JButton("Prev");
+            backButton.addActionListener(e -> {
+                currentPage--;
+                loadPage(currentPage);
+                application.pack();
+            });
+            this.add(backButton);
+
+            JButton nextButton = new JButton("Next");
+            nextButton.addActionListener(e -> {
+                currentPage++;
+                loadPage(currentPage);
+                application.pack();
+            });
+            this.add(nextButton);
+        }
+
+        private void loadPage(int page) {
+            pokemonPanel.removeAll();
+
+            // Add 25 buttons to the frame
+            for (int i = 25 * page; i < 25 * (page + 1); i++) {
+                ImageIcon pokeIcon = new ImageIcon();
+                try {
+                    pokeIcon = new ImageIcon(new URL(JSONLoader.allPokemon.get(i).getSpriteUrl()));
+                } catch (MalformedURLException e) {
+                    throw new RuntimeException(e);
+                }
+                JButton button = new JButton(pokeIcon);
+                button.setContentAreaFilled(false);
+                button.putClientProperty("id", i);  // store index as command
+                button.addActionListener(CollectionView.this::onPokemonSelection);
+                pokemonPanel.add(button);
+            }
         }
     }
 }
