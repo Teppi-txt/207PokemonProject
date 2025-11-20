@@ -17,7 +17,7 @@ import java.util.ArrayList;
 import java.util.Map;
 
 public class CollectionView extends JPanel implements PropertyChangeListener, ActionListener {
-    static final JFrame application  = new JFrame("User Login Example");
+    static final JFrame application  = new JFrame("Pokemon Collection Example");
 
     final PokemonInfoPanel pokemonInfoPanel;
     final PokemonCollectionPanel pokemonCollectionPanel;
@@ -137,11 +137,55 @@ public class CollectionView extends JPanel implements PropertyChangeListener, Ac
         }
     }
 
+    public class PokemonFilterPanel extends JPanel {
+
+        private final JToggleButton allButton;
+        private final JToggleButton ownedButton;
+        private final JToggleButton shinyButton;
+
+        public PokemonFilterPanel(ActionListener filterListener) {
+            setLayout(new FlowLayout(FlowLayout.LEFT, 8, 4));
+
+            allButton   = new JToggleButton("All");
+            ownedButton = new JToggleButton("Owned");
+            shinyButton = new JToggleButton("Shiny");
+
+            ButtonGroup group = new ButtonGroup();
+            group.add(allButton);
+            group.add(ownedButton);
+            group.add(shinyButton);
+            allButton.setSelected(true);
+
+            if (filterListener != null) {
+                allButton.setActionCommand("ALL");
+                ownedButton.setActionCommand("OWNED");
+                shinyButton.setActionCommand("SHINY");
+
+                allButton.addActionListener(filterListener);
+                ownedButton.addActionListener(filterListener);
+                shinyButton.addActionListener(filterListener);
+            }
+
+            add(allButton);
+            add(ownedButton);
+            add(shinyButton);
+        }
+
+        public String getSelectedFilter() {
+            if (ownedButton.isSelected()) return "OWNED";
+            if (shinyButton.isSelected()) return "SHINY";
+            return "ALL";
+        }
+    }
+
     public class PokemonCollectionPanel extends JPanel {
         private final JPanel pokemonPanel;
+        private final JPanel filterPanel;
         private int currentPage = 0;
 
         public PokemonCollectionPanel(ArrayList<Pokemon> pokemons) {
+            this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+
             pokemonPanel = new JPanel();
             pokemonPanel.setLayout(new GridLayout(5, 5));
             pokemonPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
@@ -149,6 +193,9 @@ public class CollectionView extends JPanel implements PropertyChangeListener, Ac
 
             loadPage(currentPage);
 
+
+            filterPanel = new PokemonFilterPanel(null);
+            this.add(filterPanel);
             this.add(pokemonPanel);
             JButton backButton = new JButton("Prev");
             backButton.addActionListener(e -> {
