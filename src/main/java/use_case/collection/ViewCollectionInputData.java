@@ -14,4 +14,29 @@ public class ViewCollectionInputData {
         this.currentPage = currentPage;
         this.filter = filter;
     }
+
+    public ArrayList<Pokemon> getOwnedPokemon() {
+        return ownedPokemon;
+    }
+
+    public void setOwnedPokemon(ArrayList<Pokemon> ownedPokemon) {
+        this.ownedPokemon = ownedPokemon;
+    }
+
+    public int getCurrentPage() {
+        return currentPage;
+    }
+
+    public void setCurrentPage(int currentPage) {
+        this.currentPage = currentPage;
+    }
+
+    public String getFilter() {
+        return filter;
+    }
+
+    public void setFilter(String filter) {
+        this.filter = filter;
+    }
+
 }
