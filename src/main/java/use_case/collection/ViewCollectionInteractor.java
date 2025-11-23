@@ -30,12 +30,6 @@ public class ViewCollectionInteractor implements ViewCollectionInputBoundary{
         } else if (Objects.equals(filter, "shiny")) {
             outputData.setDisplayedPokemon(getShinies(ownedPokemon));
         }
-
-        if (user == null) {
-            //viewCollectionPresenter.prepareFailView(...)
-        }
-        //viewCollectionPresenter.prepareSuccessView(...)
-
     }
 
     private ArrayList<Pokemon> getShinies(ArrayList<Pokemon> ownedPokemon) {

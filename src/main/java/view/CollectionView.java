@@ -2,10 +2,13 @@ package view;
 
 import entities.Pokemon;
 import entities.Stats;
+import interface_adapter.collection.ViewCollectionState;
+import interface_adapter.collection.ViewCollectionViewModel;
 import pokeapi.JSONLoader;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+import javax.swing.text.View;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -21,8 +24,12 @@ public class CollectionView extends JPanel implements PropertyChangeListener, Ac
 
     final PokemonInfoPanel pokemonInfoPanel;
     final PokemonCollectionPanel pokemonCollectionPanel;
+    private final ViewCollectionViewModel collectionViewModel;
 
-    public CollectionView() {
+    public CollectionView(ViewCollectionViewModel collectionViewModel) {
+        this.collectionViewModel = collectionViewModel;
+        this.collectionViewModel.addPropertyChangeListener(this);
+
         final JLabel title = new JLabel("My Collection");
         title.setFont(new Font(title.getFont().getFontName(), Font.BOLD, 46));
         title.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -56,15 +63,22 @@ public class CollectionView extends JPanel implements PropertyChangeListener, Ac
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
+        final ViewCollectionState state = (ViewCollectionState) evt.getNewValue();
+        updatePanel(state);
+    }
 
+    private void updatePanel(ViewCollectionState state) {
+        this.pokemonInfoPanel.updatePokemon(state.getSelectedPokemon());
+        this.pokemonCollectionPanel.loadPage(state.getPokemonOnPage());
     }
 
     public static void main(String[] args) {
         application.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
         JSONLoader.loadPokemon();
+        ViewCollectionViewModel vcvm = new ViewCollectionViewModel();
 
-        application.add(new CollectionView());
+        application.add(new CollectionView(vcvm), BorderLayout.CENTER);
         application.setMinimumSize(new Dimension(700, 600));
         application.pack();
         application.setVisible(true);
@@ -191,37 +205,37 @@ public class CollectionView extends JPanel implements PropertyChangeListener, Ac
             pokemonPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
             pokemonPanel.setMinimumSize(new Dimension(600, 600));
 
-            loadPage(currentPage);
+            loadPage(new ArrayList(JSONLoader.allPokemon.subList(0, 25)));
 
 
             filterPanel = new PokemonFilterPanel(null);
             this.add(filterPanel);
             this.add(pokemonPanel);
             JButton backButton = new JButton("Prev");
-            backButton.addActionListener(e -> {
-                currentPage--;
-                loadPage(currentPage);
-                application.pack();
-            });
+//            backButton.addActionListener(e -> {
+//                currentPage--;
+//                loadPage(currentPage);
+//                application.pack();
+//            });
             this.add(backButton);
 
             JButton nextButton = new JButton("Next");
-            nextButton.addActionListener(e -> {
-                currentPage++;
-                loadPage(currentPage);
-                application.pack();
-            });
+//            nextButton.addActionListener(e -> {
+//                currentPage++;
+//                loadPage(currentPage);
+//                application.pack();
+//            });
             this.add(nextButton);
         }
 
-        private void loadPage(int page) {
+        private void loadPage(ArrayList<Pokemon> pokemons) {
             pokemonPanel.removeAll();
 
             // Add 25 buttons to the frame
-            for (int i = 25 * page; i < 25 * (page + 1); i++) {
+            for (int i = 0; i < pokemons.size(); i++) {
                 ImageIcon pokeIcon = new ImageIcon();
                 try {
-                    pokeIcon = new ImageIcon(new URL(JSONLoader.allPokemon.get(i).getSpriteUrl()));
+                    pokeIcon = new ImageIcon(new URL(pokemons.get(i).getSpriteUrl()));
                 } catch (MalformedURLException e) {
                     throw new RuntimeException(e);
                 }
