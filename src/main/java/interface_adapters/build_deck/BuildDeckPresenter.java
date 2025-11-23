@@ -20,6 +20,8 @@ public class BuildDeckPresenter implements BuildDeckOutputBoundary{
         BuildDeckState buildDeckState = new BuildDeckState();
         buildDeckState.setDeck(outputData.getDeck());
         buildDeckState.setErrorMessage(null);
+
+        viewModel.setState(buildDeckState);
     }
 
     @Override
