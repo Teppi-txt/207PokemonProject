@@ -2,6 +2,7 @@ package interface_adapters.build_deck;
 
 import use_case.build_deck.BuildDeckInputBoundary;
 import use_case.build_deck.BuildDeckInputData;
+import entities.Pokemon;
 
 import java.util.List;
 /*
