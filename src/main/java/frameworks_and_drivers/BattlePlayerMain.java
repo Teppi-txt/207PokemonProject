@@ -4,7 +4,7 @@ import interface_adapters.battle_player.*;
 import use_case.battle_player.*;
 import entities.*;
 import cards.Deck;
-import pokeapi.PokeAPIFetcher;
+import pokeapi.JSONLoader;
 
 import javax.swing.*;
 import java.util.ArrayList;
@@ -31,6 +31,10 @@ public class BattlePlayerMain {
     
     // wire clean-architecture layers together
     private static void initializeApplication() {
+        // preload local JSON data so we stay offline
+        JSONLoader.loadMoves();
+        JSONLoader.loadPokemon();
+
         User user1 = createTestUser("Ash", 1);
         User user2 = createTestUser("Gary", 2);
         
@@ -62,13 +66,13 @@ public class BattlePlayerMain {
     // build a demo user roster
     private static User createTestUser(String name, int id) {
         User user = new User(id, name, name.toLowerCase() + "@pokemon.com", 1000);
-        String[] picks = {"charmander", "squirtle", "bulbasaur", "pikachu", "eevee", "onix"};
+        String[] picks = {"chansey", "terapagos-stellar", "bulbasaur", "pikachu", "eevee", "onix"};
         for (String pick : picks) {
             try {
-                Pokemon p = fetchPokemonWithLimitedMoves(pick, 0);
+                Pokemon p = fetchPokemonFromJson(pick);
                 user.addPokemon(p);
             } catch (Exception e) {
-                // If API fetch fails for a specific pokemon, add a minimal placeholder so team size stays 6
+                // If local lookup fails for a specific pokemon, add a minimal placeholder so team size stays 6
                 ArrayList<String> types = new ArrayList<>();
                 types.add("normal");
                 ArrayList<String> moves = new ArrayList<>();
@@ -82,17 +86,22 @@ public class BattlePlayerMain {
         return user;
     }
 
-    /**
-     * Fetches a Pokemon from PokeAPI and limits its moveset to the first few entries.
-     */
-    private static Pokemon fetchPokemonWithLimitedMoves(String name, int id) throws Exception {
-        Pokemon fetched = PokeAPIFetcher.getPokemon(name);
-        // Trim move list to first 4 moves (actual moveset from API)
-        ArrayList<String> moves = fetched.getMoves();
-        int limit = Math.min(4, moves.size());
-        ArrayList<String> trimmed = new ArrayList<>(moves.subList(0, limit));
-        fetched.setMoves(trimmed);
-        return fetched;
+    private static Pokemon fetchPokemonFromJson(String name) {
+        for (Pokemon candidate : JSONLoader.allPokemon) {
+            if (candidate.getName().equalsIgnoreCase(name)) {
+                ArrayList<String> moves = candidate.getMoves();
+                int limit = Math.min(4, moves.size());
+                ArrayList<String> trimmed = new ArrayList<>(moves.subList(0, limit));
+                return new Pokemon(
+                    candidate.getName(),
+                    candidate.getId(),
+                    new ArrayList<>(candidate.getTypes()),
+                    candidate.getStats().copy(),
+                    trimmed
+                );
+            }
+        }
+        throw new IllegalArgumentException("Pokemon not found in local JSON: " + name);
     }
     
 }
