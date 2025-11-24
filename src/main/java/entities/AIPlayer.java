@@ -111,12 +111,107 @@ public class AIPlayer implements Player, Serializable {
     }
 
     /**
-     * Get the opponent player from the battle
+     * Get the opponent player from the battle.
+     * Since Battle stores Users (not Players), we create a temporary Player wrapper.
      */
     private Player getOpponent(Battle battle) {
-        // This is a placeholder - actual implementation would extract opponent from Battle
-        // For now, return null to avoid errors
+        if (battle == null) {
+            return null;
+        }
+
+        // AIPlayer is typically player2, so opponent is player1
+        // But we need to check which one this AIPlayer is
+        if (battle.getPlayer2() != null && battle.getPlayer2().getName().equals(this.name)) {
+            // We are player2, so player1 is opponent
+            return new HumanPlayerWrapper(battle.getPlayer1());
+        } else if (battle.getPlayer1() != null) {
+            // We are player1, so player2 is opponent
+            return new HumanPlayerWrapper(battle.getPlayer2());
+        }
+
         return null;
+    }
+
+    /**
+     * Temporary wrapper to make User act like a Player for AI decision making.
+     * Must be serializable for LangGraph state cloning.
+     */
+    private static class HumanPlayerWrapper implements Player, java.io.Serializable {
+        private static final long serialVersionUID = 1L;
+        private final entities.User user;
+        private Pokemon activePokemon;
+        private List<Pokemon> team;
+
+        public HumanPlayerWrapper(entities.User user) {
+            this.user = user;
+            this.team = user.getOwnedPokemon();
+
+            // Find the active Pokemon - it's the first one in the team (battle uses first as active)
+            // or the first non-fainted one
+            if (team != null && !team.isEmpty()) {
+                // First try to use the first Pokemon (most likely active in battle)
+                if (!team.get(0).isFainted()) {
+                    this.activePokemon = team.get(0);
+                } else {
+                    // Find first non-fainted
+                    for (Pokemon p : team) {
+                        if (!p.isFainted()) {
+                            this.activePokemon = p;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        @Override
+        public String getName() {
+            return user.getName();
+        }
+
+        @Override
+        public cards.Deck getDeck() {
+            return new cards.Deck();
+        }
+
+        @Override
+        public Move chooseMove(Battle battle) {
+            return new Move(); // Human doesn't auto-choose
+        }
+
+        @Override
+        public Pokemon getActivePokemon() {
+            return activePokemon;
+        }
+
+        @Override
+        public void switchPokemon(Pokemon pokemon) {
+            this.activePokemon = pokemon;
+        }
+
+        @Override
+        public List<Pokemon> getTeam() {
+            return team;
+        }
+
+        @Override
+        public void useItem(Item item, Pokemon target) {
+            // No-op
+        }
+
+        @Override
+        public boolean hasAvailablePokemon() {
+            if (team == null) return false;
+            for (Pokemon p : team) {
+                if (!p.isFainted()) return true;
+            }
+            return false;
+        }
+
+        @Override
+        public boolean isDefeated() {
+            return !hasAvailablePokemon();
+        }
     }
 
     @Override

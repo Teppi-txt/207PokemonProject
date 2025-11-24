@@ -31,6 +31,10 @@ public class BattleBoardView extends JFrame implements BattleAIViewModel.ViewMod
 
     private JTextArea battleLog;
 
+    // Store max HP values
+    private int playerMaxHP = 100;
+    private int aiMaxHP = 100;
+
     public BattleBoardView(BattleAIController controller) {
         this.controller = controller;
 
@@ -167,33 +171,51 @@ public class BattleBoardView extends JFrame implements BattleAIViewModel.ViewMod
 
         // Update player Pokemon
         if (playerPokemon != null) {
-            playerPokemonName.setText(capitalize(playerPokemon.getName()));
-            playerHPBar.updateHP(playerPokemon.getStats().getHp(), playerPokemon.getStats().getHp());
+            String pokemonName = capitalize(playerPokemon.getName());
 
-            // Load sprite
-            SpriteLoader.loadSpriteAsync(playerPokemon.getSpriteUrl(), sprite -> {
-                if (sprite != null) {
-                    playerPokemonSprite.setIcon(new ImageIcon(sprite));
-                    playerPokemonSprite.setText(null);
-                }
-            });
+            // Check if Pokemon changed (new max HP needed)
+            if (!playerPokemonName.getText().equals(pokemonName)) {
+                playerMaxHP = playerPokemon.getStats().getHp();
+                playerPokemonName.setText(pokemonName);
 
-            // Update moves
-            updateMoves(playerPokemon);
+                // Load sprite for new Pokemon
+                SpriteLoader.loadSpriteAsync(playerPokemon.getSpriteUrl(), sprite -> {
+                    if (sprite != null) {
+                        playerPokemonSprite.setIcon(new ImageIcon(sprite));
+                        playerPokemonSprite.setText(null);
+                    }
+                });
+
+                // Update moves for new Pokemon
+                updateMoves(playerPokemon);
+            }
+
+            // Always update HP (this changes during battle)
+            int currentHP = playerPokemon.getStats().getHp();
+            playerHPBar.updateHP(currentHP, playerMaxHP);
         }
 
         // Update AI Pokemon
         if (aiPokemon != null) {
-            aiPokemonName.setText(capitalize(aiPokemon.getName()));
-            aiHPBar.updateHP(aiPokemon.getStats().getHp(), aiPokemon.getStats().getHp());
+            String pokemonName = capitalize(aiPokemon.getName());
 
-            // Load sprite
-            SpriteLoader.loadSpriteAsync(aiPokemon.getSpriteUrl(), sprite -> {
-                if (sprite != null) {
-                    aiPokemonSprite.setIcon(new ImageIcon(sprite));
-                    aiPokemonSprite.setText(null);
-                }
-            });
+            // Check if Pokemon changed (new max HP needed)
+            if (!aiPokemonName.getText().equals(pokemonName)) {
+                aiMaxHP = aiPokemon.getStats().getHp();
+                aiPokemonName.setText(pokemonName);
+
+                // Load sprite for new Pokemon
+                SpriteLoader.loadSpriteAsync(aiPokemon.getSpriteUrl(), sprite -> {
+                    if (sprite != null) {
+                        aiPokemonSprite.setIcon(new ImageIcon(sprite));
+                        aiPokemonSprite.setText(null);
+                    }
+                });
+            }
+
+            // Always update HP (this changes during battle)
+            int currentHP = aiPokemon.getStats().getHp();
+            aiHPBar.updateHP(currentHP, aiMaxHP);
         }
 
         // Check if battle ended
@@ -245,19 +267,40 @@ public class BattleBoardView extends JFrame implements BattleAIViewModel.ViewMod
     }
 
     private void executeMove(Move move) {
-        appendLog("You chose " + move.getName() + "!\n");
-
         // Disable moves during execution
         setMovesEnabled(false);
 
         // Execute player move
         controller.executePlayerMove(move);
 
+        // Get and display the turn result
+        String turnResult = controller.getLastTurnDescription();
+        if (turnResult != null) {
+            appendLog(turnResult + "\n");
+        }
+
         // Update display
         updateDisplay();
 
-        // Re-enable moves
-        SwingUtilities.invokeLater(() -> setMovesEnabled(true));
+        // Schedule AI turn display update (after AI executes)
+        javax.swing.Timer updateTimer = new javax.swing.Timer(600, e -> {
+            // Get AI turn result
+            String aiTurnResult = controller.getLastTurnDescription();
+            if (aiTurnResult != null && !aiTurnResult.equals(turnResult)) {
+                appendLog(aiTurnResult + "\n");
+            }
+
+            // Update display again after AI turn
+            updateDisplay();
+
+            // Re-enable moves if battle still in progress
+            if (controller.getCurrentBattle() != null &&
+                    "IN_PROGRESS".equals(controller.getCurrentBattle().getBattleStatus())) {
+                setMovesEnabled(true);
+            }
+        });
+        updateTimer.setRepeats(false);
+        updateTimer.start();
     }
 
     private void setMovesEnabled(boolean enabled) {

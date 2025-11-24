@@ -2,6 +2,7 @@ package use_case.battle_ai;
 
 import entities.*;
 import ai.graph.Decision;
+import frameworks_and_drivers.UserPlayerAdapter;
 
 /**
  * Interactor for the battle AI use case.
@@ -87,7 +88,8 @@ public class BattleAIInteractor implements BattleAIInputBoundary {
         }
 
         // Phase 3: Turn execution
-        Turn turn = createTurnFromDecision(decision, aiPlayer, getNextTurnNumber(battle));
+        User opponentUser = getOpponentUser(battle, aiUser);
+        Turn turn = createTurnFromDecision(decision, aiPlayer, opponentUser, getNextTurnNumber(battle));
         if (turn == null) {
             presenter.prepareFailView("Failed to create turn from AI decision");
             return;
@@ -100,7 +102,6 @@ public class BattleAIInteractor implements BattleAIInputBoundary {
         aiPlayer.recordTurn(turn);
 
         // Phase 4: Battle state management
-        User opponentUser = getOpponentUser(battle, aiUser);
         boolean battleEnded = false;
         User winner = null;
 
@@ -197,12 +198,15 @@ public class BattleAIInteractor implements BattleAIInputBoundary {
      * Helper method to create a Turn object from an AI Decision.
      * @param decision the AI's decision
      * @param player the AI player
+     * @param targetUser the opponent user (target of the move)
      * @param turnNumber the turn number
      * @return the created Turn object
      */
-    private Turn createTurnFromDecision(Decision decision, Player player, int turnNumber) {
+    private Turn createTurnFromDecision(Decision decision, Player player, User targetUser, int turnNumber) {
         if (decision.isMove()) {
-            return new MoveTurn(turnNumber, player, turnNumber, decision.getSelectedMove());
+            // Wrap the target User in a Player adapter for the turn
+            Player targetPlayer = new UserPlayerAdapter(targetUser);
+            return new MoveTurn(turnNumber, player, turnNumber, decision.getSelectedMove(), targetPlayer);
         } else if (decision.isSwitch()) {
             Pokemon currentPokemon = player.getActivePokemon();
             Pokemon newPokemon = decision.getSwitchTarget();

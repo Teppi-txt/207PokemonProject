@@ -23,21 +23,25 @@ public class BattleAIController {
     private final BattleAIInputBoundary aiInteractor;
     private final BattleAIDataAccessObject dataAccess;
     private final BattleAIPresenter presenter;
+    private final BattleAIViewModel viewModel;
 
     private Battle currentBattle;
     private AIPlayer aiPlayer;
     private List<Pokemon> playerTeam;
     private Pokemon playerActivePokemon;
     private int turnNumber;
+    private String lastTurnDescription;
 
     public BattleAIController(BattlePlayerInputBoundary playerInteractor,
                               BattleAIInputBoundary aiInteractor,
                               BattleAIDataAccessObject dataAccess,
-                              BattleAIPresenter presenter) {
+                              BattleAIPresenter presenter,
+                              BattleAIViewModel viewModel) {
         this.playerInteractor = playerInteractor;
         this.aiInteractor = aiInteractor;
         this.dataAccess = dataAccess;
         this.presenter = presenter;
+        this.viewModel = viewModel;
         this.turnNumber = 0;
     }
 
@@ -70,6 +74,15 @@ public class BattleAIController {
 
         // Create AI user (temporary user for battle system)
         User aiUser = new User(999, aiPlayer.getName(), "ai@pokemon.com", 0);
+        // Give AI user the AI Pokemon team so getOpponent() can see them
+        for (Pokemon p : aiPlayer.getTeam()) {
+            aiUser.addPokemon(p);
+        }
+
+        // Update human player's owned Pokemon to reflect battle team
+        // (so AI can see opponent's team via Battle object)
+        user.getOwnedPokemon().clear();
+        user.getOwnedPokemon().addAll(playerTeam);
 
         // Create battle
         this.currentBattle = new Battle(new Random().nextInt(10000), user, aiUser);
@@ -111,13 +124,17 @@ public class BattleAIController {
         // Execute player's move
         String turnResult = executeMoveSimple(playerActivePokemon, selectedMove, aiActivePokemon);
         System.out.println("Player turn: " + turnResult);
+        this.lastTurnDescription = turnResult;
 
         // Update view model
         presenter.updateTeams(playerTeam, aiPlayer);
 
         // Check if AI Pokemon fainted
         if (aiActivePokemon.isFainted()) {
-            System.out.println("AI's " + aiActivePokemon.getName() + " fainted!");
+            String faintMessage = "AI's " + aiActivePokemon.getName() + " fainted!";
+            System.out.println(faintMessage);
+            this.lastTurnDescription += " " + faintMessage;
+
             // Check if AI has any Pokemon left
             if (!aiPlayer.hasAvailablePokemon()) {
                 // Player wins!
@@ -126,6 +143,9 @@ public class BattleAIController {
             }
             // AI must switch to next available Pokemon
             switchAIToNextPokemon();
+            String switchMessage = "AI sent out " + aiPlayer.getActivePokemon().getName() + "!";
+            System.out.println(switchMessage);
+            this.lastTurnDescription += " " + switchMessage;
         }
 
         // Check if battle ended
@@ -196,23 +216,60 @@ public class BattleAIController {
             return;
         }
 
-        // AI chooses a random move (simplified - could use AI decision graph here)
-        Move aiMove = chooseRandomMove(aiActivePokemon);
+        System.out.println("\n=== AI TURN START ===");
+        System.out.println("AI's Pokemon: " + aiActivePokemon.getName() + " (HP: " + aiActivePokemon.getStats().getHp() + ")");
+        System.out.println("Player's Pokemon: " + playerActivePokemon.getName() + " (HP: " + playerActivePokemon.getStats().getHp() + ")");
+        System.out.println("AI Difficulty: " + aiPlayer.getDifficulty());
+
+        // Update player's owned Pokemon to reflect battle team (for AI to see)
+        updatePlayerTeamInBattle();
+
+        // Try to use LangGraph AI decision
+        Move aiMove = null;
+        try {
+            System.out.println("Attempting to use LangGraph AI decision engine...");
+            aiMove = aiPlayer.chooseMove(currentBattle);
+            if (aiMove != null && aiMove.getName() != null && !aiMove.getName().isEmpty()) {
+                System.out.println("✓ LangGraph AI chose move: " + aiMove.getName() + " (Power: " + aiMove.getPower() + ")");
+            } else {
+                System.out.println("✗ LangGraph returned null/empty move, falling back to random selection");
+                aiMove = null;
+            }
+        } catch (Exception e) {
+            System.out.println("✗ LangGraph AI failed: " + e.getMessage());
+            System.out.println("Falling back to random move selection");
+            aiMove = null;
+        }
+
+        // Fallback to random if LangGraph failed
+        if (aiMove == null) {
+            aiMove = chooseRandomMove(aiActivePokemon);
+            if (aiMove != null) {
+                System.out.println("Random fallback chose: " + aiMove.getName() + " (Power: " + aiMove.getPower() + ")");
+            }
+        }
+
         if (aiMove == null) {
             System.out.println("AI has no valid moves!");
+            System.out.println("=== AI TURN END ===\n");
             return;
         }
 
         // Execute AI's move
         String turnResult = executeMoveSimple(aiActivePokemon, aiMove, playerActivePokemon);
-        System.out.println("AI turn: " + turnResult);
+        System.out.println("Turn result: " + turnResult);
+        System.out.println("=== AI TURN END ===\n");
+        this.lastTurnDescription = turnResult;
 
         // Update view model
         presenter.updateTeams(playerTeam, aiPlayer);
 
         // Check if player's Pokemon fainted
         if (playerActivePokemon.isFainted()) {
-            System.out.println("Your " + playerActivePokemon.getName() + " fainted!");
+            String faintMessage = "Your " + playerActivePokemon.getName() + " fainted!";
+            System.out.println(faintMessage);
+            this.lastTurnDescription += " " + faintMessage;
+
             // Check if player has any Pokemon left
             if (!hasAvailablePlayerPokemon()) {
                 // AI wins!
@@ -221,6 +278,9 @@ public class BattleAIController {
             }
             // Player must switch to next available Pokemon
             switchPlayerToNextPokemon();
+            String switchMessage = "Go, " + playerActivePokemon.getName() + "!";
+            System.out.println(switchMessage);
+            this.lastTurnDescription += " " + switchMessage;
         }
 
         // Check if battle ended
@@ -442,5 +502,32 @@ public class BattleAIController {
             }
         }
         return false;
+    }
+
+    /**
+     * Gets the description of the last turn (for battle log).
+     */
+    public String getLastTurnDescription() {
+        return lastTurnDescription;
+    }
+
+    /**
+     * Gets the view model.
+     */
+    public BattleAIViewModel getViewModel() {
+        return viewModel;
+    }
+
+    /**
+     * Updates the player's team in the battle's User object so AI can see it.
+     */
+    private void updatePlayerTeamInBattle() {
+        if (currentBattle != null && currentBattle.getPlayer1() != null) {
+            User player = currentBattle.getPlayer1();
+            // Clear and update with battle team
+            List<Pokemon> ownedPokemon = player.getOwnedPokemon();
+            ownedPokemon.clear();
+            ownedPokemon.addAll(playerTeam);
+        }
     }
 }

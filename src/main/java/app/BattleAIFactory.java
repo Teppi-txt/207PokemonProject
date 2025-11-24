@@ -32,7 +32,7 @@ public class BattleAIFactory {
 
         // Controller
         BattleAIController controller = new BattleAIController(
-                playerInteractor, aiInteractor, dataAccess, presenter);
+                playerInteractor, aiInteractor, dataAccess, presenter, viewModel);
 
         // View
         DeckSelectionView view = new DeckSelectionView(controller, user);

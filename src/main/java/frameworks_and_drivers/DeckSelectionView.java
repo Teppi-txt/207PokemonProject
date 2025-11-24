@@ -215,7 +215,8 @@ public class DeckSelectionView extends JFrame {
         controller.startBattle(user, selectedDeck, difficulty);
 
         // Open battle view
-        BattleBoardView battleView = new BattleBoardView(controller);
+        BattleAIView battleView = new BattleAIView(controller);
+        battleView.setViewModel(controller.getViewModel());
         battleView.setVisible(true);
         dispose();
     }
