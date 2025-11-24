@@ -8,6 +8,8 @@ import entities.Player;
 import entities.SwitchTurn;
 import entities.Turn;
 
+// interactor implementing the battle player use case
+
 public class BattlePlayerInteractor implements BattlePlayerInputBoundary {
 
     private final BattlePlayerUserDataAccessInterface battleDataAccess;
@@ -27,7 +29,6 @@ public class BattlePlayerInteractor implements BattlePlayerInputBoundary {
             return;
         }
 
-        // someone already won
         if ("COMPLETED".equals(battle.getBattleStatus())) {
             battlePlayerPresenter.prepareFailView("battle is already completed");
             return;
