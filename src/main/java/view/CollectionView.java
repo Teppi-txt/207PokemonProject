@@ -64,6 +64,7 @@ public class CollectionView extends JPanel implements PropertyChangeListener, Ac
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
         final ViewCollectionState state = (ViewCollectionState) evt.getNewValue();
+        System.out.println(evt.getPropertyName());
         updatePanel(state);
     }
 

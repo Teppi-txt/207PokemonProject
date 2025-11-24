@@ -7,19 +7,29 @@ import java.util.List;
 
 public class ViewCollectionOutputData {
 
-    private ArrayList<Pokemon> displayedPokemon;
+    private ArrayList<Pokemon> pokemonOnPage;
+    private Pokemon selectedPokemon;
 
     public ViewCollectionOutputData() {}
 
-    public ViewCollectionOutputData(ArrayList<Pokemon> displayedPokemon) {
-        this.displayedPokemon = displayedPokemon;
+    public ViewCollectionOutputData(ArrayList<Pokemon> pokemonOnPage, Pokemon selectedPokemon) {
+        this.pokemonOnPage = pokemonOnPage;
+        this.selectedPokemon = selectedPokemon;
     }
 
-    public List<Pokemon> getDisplayedPokemon() {
-        return displayedPokemon;
+    public ArrayList<Pokemon> getPokemonOnPage() {
+        return pokemonOnPage;
     }
 
-    public void setDisplayedPokemon(ArrayList<Pokemon> displayedPokemon) {
-        this.displayedPokemon = displayedPokemon;
+    public void setPokemonOnPage(ArrayList<Pokemon> pokemonOnPage) {
+        this.pokemonOnPage = pokemonOnPage;
+    }
+
+    public Pokemon getSelectedPokemon() {
+        return selectedPokemon;
+    }
+
+    public void setSelectedPokemon(Pokemon selectedPokemon) {
+        this.selectedPokemon = selectedPokemon;
     }
 }
