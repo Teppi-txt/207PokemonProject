@@ -4,24 +4,18 @@ import interface_adapters.battle_player.*;
 import use_case.battle_player.*;
 import entities.*;
 import cards.Deck;
+import pokeapi.PokeAPIFetcher;
 
 import javax.swing.*;
 import java.util.ArrayList;
 
-/**
- * Main application class for Battle Player use case.
- * This class wires together all the components following Clean Architecture principles:
- * - Frameworks & Drivers: BattlePlayerView, BattlePlayerDataAccessObject
- * - Interface Adapters: BattlePlayerController, BattlePlayerPresenter, BattlePlayerViewModel
- * - Use Cases: BattlePlayerInteractor
- * - Entities: Battle, User, Pokemon, Turn, etc.
- */
+// entry point wiring the battle player flow end-to-end
 public class BattlePlayerMain {
     
     private static BattlePlayerView view;
     
     public static void main(String[] args) {
-        // Run on Event Dispatch Thread for Swing
+        // boot swing on the edt
         SwingUtilities.invokeLater(() -> {
             try {
                 initializeApplication();
@@ -35,39 +29,28 @@ public class BattlePlayerMain {
         });
     }
     
-    /**
-     * Initializes the application by creating and wiring all components
-     */
+    // wire clean-architecture layers together
     private static void initializeApplication() {
-        // 1. Create test data (Entities layer)
         User user1 = createTestUser("Ash", 1);
         User user2 = createTestUser("Gary", 2);
         
-        // 2. Create Battle (Entities layer)
         Battle battle = new Battle(1, user1, user2);
-        battle.startBattle(); // Set status to IN_PROGRESS
+        battle.startBattle();
         
-        // 3. Create Data Access Object (Frameworks & Drivers layer)
         BattlePlayerDataAccessObject dataAccess = new BattlePlayerDataAccessObject();
         dataAccess.setBattle(battle);
         dataAccess.setUser(user1);
         
-        // 4. Create ViewModel (Interface Adapters layer)
         BattlePlayerViewModel viewModel = new BattlePlayerViewModel();
         
-        // 5. Create Presenter (Interface Adapters layer)
         BattlePlayerPresenter presenter = new BattlePlayerPresenter(viewModel);
         
-        // 6. Create Interactor (Use Cases layer)
         BattlePlayerInteractor interactor = new BattlePlayerInteractor(dataAccess, presenter);
         
-        // 7. Create Controller (Interface Adapters layer)
         BattlePlayerController controller = new BattlePlayerController(interactor);
         
-        // 8. Create View (Frameworks & Drivers layer)
         view = new BattlePlayerView(controller, viewModel);
         
-        // 9. Set initial state in ViewModel to trigger view update
         BattlePlayerState initialState = new BattlePlayerState();
         initialState.setBattle(battle);
         initialState.setBattleStatus(battle.getBattleStatus());
@@ -76,33 +59,40 @@ public class BattlePlayerMain {
         viewModel.setState(initialState);
     }
     
-    /**
-     * Creates a test user with Pokemon
-     */
+    // build a demo user roster
     private static User createTestUser(String name, int id) {
         User user = new User(id, name, name.toLowerCase() + "@pokemon.com", 1000);
-        
-        // Create Pokemon for the user
-        ArrayList<String> types1 = new ArrayList<>();
-        types1.add("Fire");
-        ArrayList<String> moves1 = new ArrayList<>();
-        moves1.add("Ember");
-        moves1.add("Tackle");
-        Stats stats1 = new Stats(100, 50, 50, 50, 50, 50);
-        Pokemon pokemon1 = new Pokemon("Charmander", 4, types1, stats1, moves1);
-        user.addPokemon(pokemon1);
-        
-        ArrayList<String> types2 = new ArrayList<>();
-        types2.add("Water");
-        ArrayList<String> moves2 = new ArrayList<>();
-        moves2.add("Water Gun");
-        moves2.add("Bubble");
-        Stats stats2 = new Stats(90, 55, 45, 60, 50, 65);
-        Pokemon pokemon2 = new Pokemon("Squirtle", 7, types2, stats2, moves2);
-        user.addPokemon(pokemon2);
-        
+        String[] picks = {"charmander", "squirtle", "bulbasaur", "pikachu", "eevee", "onix"};
+        for (String pick : picks) {
+            try {
+                Pokemon p = fetchPokemonWithLimitedMoves(pick, 0);
+                user.addPokemon(p);
+            } catch (Exception e) {
+                // If API fetch fails for a specific pokemon, add a minimal placeholder so team size stays 6
+                ArrayList<String> types = new ArrayList<>();
+                types.add("normal");
+                ArrayList<String> moves = new ArrayList<>();
+                moves.add("tackle");
+                moves.add("scratch");
+                Stats stats = new Stats(80, 40, 40, 40, 40, 40);
+                Pokemon fallback = new Pokemon(pick, 0, types, stats, moves);
+                user.addPokemon(fallback);
+            }
+        }
         return user;
+    }
+
+    /**
+     * Fetches a Pokemon from PokeAPI and limits its moveset to the first few entries.
+     */
+    private static Pokemon fetchPokemonWithLimitedMoves(String name, int id) throws Exception {
+        Pokemon fetched = PokeAPIFetcher.getPokemon(name);
+        // Trim move list to first 4 moves (actual moveset from API)
+        ArrayList<String> moves = fetched.getMoves();
+        int limit = Math.min(4, moves.size());
+        ArrayList<String> trimmed = new ArrayList<>(moves.subList(0, limit));
+        fetched.setMoves(trimmed);
+        return fetched;
     }
     
 }
-

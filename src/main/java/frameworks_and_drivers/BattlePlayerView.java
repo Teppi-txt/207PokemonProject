@@ -21,6 +21,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.imageio.ImageIO;
+import javax.swing.SwingWorker;
+import java.awt.image.BufferedImage;
 
 public class BattlePlayerView extends JFrame implements PropertyChangeListener {
     private final BattlePlayerController battlePlayerController;
@@ -46,6 +48,8 @@ public class BattlePlayerView extends JFrame implements PropertyChangeListener {
     private JLabel player2PokemonNameLabel;
     private JLabel player2HPLabel;
     private JProgressBar player2HPBar;
+    private JPanel player2MovesPanel;
+    private JPanel player2TeamPanel;
     
     // UI Components - Battle Info
     private JTextArea turnResultArea;
@@ -62,6 +66,8 @@ public class BattlePlayerView extends JFrame implements PropertyChangeListener {
     private User currentUser; // The user playing (not AI)
     private UserPlayerAdapter currentUserAdapter;
     private Player opponentPlayer;
+    private boolean processingTurn = false;
+    private boolean player1Turn = true;
     
     // Turn counter
     private int turnCounter = 1;
@@ -80,9 +86,7 @@ public class BattlePlayerView extends JFrame implements PropertyChangeListener {
         initializeGUI();
     }
 
-    /**
-     * Initializes the GUI components
-     */
+    // build the gui
     private void initializeGUI() {
         setTitle("Pokemon Battle");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -135,9 +139,7 @@ public class BattlePlayerView extends JFrame implements PropertyChangeListener {
         setVisible(true);
     }
 
-    /**
-     * Creates the battle status panel
-     */
+    // battle status panel
     private JPanel createStatusPanel() {
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         panel.setBorder(new TitledBorder("Battle Status"));
@@ -150,9 +152,7 @@ public class BattlePlayerView extends JFrame implements PropertyChangeListener {
         return panel;
     }
 
-    /**
-     * Creates the arena panel showing both players and their Pokemon
-     */
+    // arena panel with both players
     private JPanel createArenaPanel() {
         JPanel panel = new JPanel(new GridLayout(1, 2, 10, 0));
         panel.setBorder(new TitledBorder("Battle Arena"));
@@ -169,9 +169,7 @@ public class BattlePlayerView extends JFrame implements PropertyChangeListener {
         return panel;
     }
 
-    /**
-     * Creates a player panel with Pokemon image, info, and controls
-     */
+    // player panel with image/info/controls
     private JPanel createPlayerPanel(boolean isUser) {
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
@@ -259,14 +257,22 @@ public class BattlePlayerView extends JFrame implements PropertyChangeListener {
             JPanel teamPanel = createTeamPanel();
             panel.add(teamPanel);
             player1TeamPanel = teamPanel;
+        } else {
+            panel.add(Box.createVerticalStrut(10));
+            JPanel movesPanel = createMovesPanel();
+            panel.add(movesPanel);
+            player2MovesPanel = movesPanel;
+            
+            panel.add(Box.createVerticalStrut(10));
+            JPanel teamPanel = createTeamPanel();
+            panel.add(teamPanel);
+            player2TeamPanel = teamPanel;
         }
         
         return panel;
     }
 
-    /**
-     * Creates the moves selection panel for the user
-     */
+    // moves list container
     private JPanel createMovesPanel() {
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
@@ -282,9 +288,7 @@ public class BattlePlayerView extends JFrame implements PropertyChangeListener {
         return panel;
     }
 
-    /**
-     * Creates the team panel for switching Pokemon
-     */
+    // team list container
     private JPanel createTeamPanel() {
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
@@ -300,46 +304,64 @@ public class BattlePlayerView extends JFrame implements PropertyChangeListener {
         return panel;
     }
 
-    /**
-     * Creates a placeholder icon for Pokemon images
-     */
+    // simple placeholder sprite
     private ImageIcon createPlaceholderIcon() {
-        ImageIcon icon = new ImageIcon();
-        Image img = new ImageIcon().getImage();
-        Image scaledImg = img.getScaledInstance(200, 200, Image.SCALE_SMOOTH);
-        return new ImageIcon(scaledImg);
+        BufferedImage img = new BufferedImage(200, 200, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g2 = img.createGraphics();
+        g2.setColor(Color.LIGHT_GRAY);
+        g2.fillRect(0, 0, 200, 200);
+        g2.setColor(Color.DARK_GRAY);
+        g2.drawRect(0, 0, 199, 199);
+        g2.dispose();
+        return new ImageIcon(img);
     }
 
-    /**
-     * Loads and displays a Pokemon image from URL
-     */
+    // load a pokemon sprite from url
     private void loadPokemonImage(JLabel imageLabel, Pokemon pokemon) {
         if (pokemon == null) {
             imageLabel.setIcon(createPlaceholderIcon());
             return;
         }
-        
-        SwingUtilities.invokeLater(() -> {
-            try {
-                String imageUrl = pokemon.getSpriteUrl();
-                URL url = new URL(imageUrl);
-                Image image = ImageIO.read(url);
-                if (image != null) {
-                    Image scaledImage = image.getScaledInstance(200, 200, Image.SCALE_SMOOTH);
-                    imageLabel.setIcon(new ImageIcon(scaledImage));
-                } else {
-                    imageLabel.setIcon(createPlaceholderIcon());
+
+        if (Boolean.getBoolean("offline")) {
+            imageLabel.setIcon(createPlaceholderIcon());
+            return;
+        }
+
+        ImageIcon placeholder = createPlaceholderIcon();
+        imageLabel.setIcon(placeholder);
+
+        SwingWorker<ImageIcon, Void> worker = new SwingWorker<>() {
+            @Override
+            protected ImageIcon doInBackground() {
+                try {
+                    String imageUrl = pokemon.getSpriteUrl();
+                    URL url = new URL(imageUrl);
+                    Image image = ImageIO.read(url);
+                    if (image != null) {
+                        Image scaledImage = image.getScaledInstance(200, 200, Image.SCALE_SMOOTH);
+                        return new ImageIcon(scaledImage);
+                    }
+                } catch (IOException e) {
+                    System.err.println("Error loading Pokemon image: " + e.getMessage());
                 }
-            } catch (IOException e) {
-                System.err.println("Error loading Pokemon image: " + e.getMessage());
-                imageLabel.setIcon(createPlaceholderIcon());
+                return placeholder;
             }
-        });
+
+            @Override
+            protected void done() {
+                try {
+                    ImageIcon icon = get();
+                    imageLabel.setIcon(icon);
+                } catch (Exception e) {
+                    imageLabel.setIcon(placeholder);
+                }
+            }
+        };
+        worker.execute();
     }
 
-    /**
-     * Creates the turn result panel
-     */
+    // turn result panel
     private JPanel createResultPanel() {
         JPanel panel = new JPanel(new BorderLayout());
         panel.setBorder(new TitledBorder("Turn Results"));
@@ -358,9 +380,7 @@ public class BattlePlayerView extends JFrame implements PropertyChangeListener {
         return panel;
     }
 
-    /**
-     * Creates the error panel
-     */
+    // error banner
     private JPanel createErrorPanel() {
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         panel.setBackground(Color.WHITE);
@@ -374,9 +394,7 @@ public class BattlePlayerView extends JFrame implements PropertyChangeListener {
         return panel;
     }
 
-    /**
-     * Creates the battle ended panel
-     */
+    // winner banner
     private JPanel createBattleEndedPanel() {
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
@@ -392,43 +410,45 @@ public class BattlePlayerView extends JFrame implements PropertyChangeListener {
         return panel;
     }
 
-    /**
-     * Updates the moves panel with available moves for the active Pokemon
-     */
-    private void updateMovesPanel(Pokemon activePokemon) {
-        player1MovesPanel.removeAll();
+    // refresh move buttons for a pokemon
+    private void updateMovesPanel(JPanel targetPanel, Pokemon activePokemon, boolean enableButtons, boolean isPlayer1Panel) {
+        targetPanel.removeAll();
         
         if (activePokemon == null || activePokemon.getMoves() == null || activePokemon.getMoves().isEmpty()) {
             JLabel noMoves = new JLabel("No moves available");
             noMoves.setAlignmentX(Component.LEFT_ALIGNMENT);
-            player1MovesPanel.add(noMoves);
+            targetPanel.add(noMoves);
         } else {
-            // Try to get Move objects from PokeAPIFetcher
             PokeAPIFetcher fetcher = new PokeAPIFetcher();
             for (String moveName : activePokemon.getMoves()) {
                 JButton moveButton = new JButton(moveName);
                 moveButton.setAlignmentX(Component.LEFT_ALIGNMENT);
                 moveButton.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30));
-                moveButton.addActionListener(e -> executeMove(moveName));
-                player1MovesPanel.add(moveButton);
-                player1MovesPanel.add(Box.createVerticalStrut(5));
+                moveButton.setEnabled(enableButtons);
+                moveButton.addActionListener(e -> {
+                    if (isPlayer1Panel) {
+                        executeMoveForPlayer(currentUserAdapter, opponentPlayer, true, moveName);
+                    } else {
+                        executeMoveForPlayer(opponentPlayer, currentUserAdapter, false, moveName);
+                    }
+                });
+                targetPanel.add(moveButton);
+                targetPanel.add(Box.createVerticalStrut(5));
             }
         }
         
-        player1MovesPanel.revalidate();
-        player1MovesPanel.repaint();
+        targetPanel.revalidate();
+        targetPanel.repaint();
     }
 
-    /**
-     * Updates the team panel with available Pokemon for switching
-     */
-    private void updateTeamPanel(User user, Pokemon activePokemon) {
-        player1TeamPanel.removeAll();
+    // refresh team list for switches
+    private void updateTeamPanel(JPanel targetPanel, User user, Pokemon activePokemon, boolean enableButtons, boolean isPlayer1Panel) {
+        targetPanel.removeAll();
         
         if (user == null || user.getOwnedPokemon() == null || user.getOwnedPokemon().isEmpty()) {
             JLabel noTeam = new JLabel("No Pokemon in team");
             noTeam.setAlignmentX(Component.LEFT_ALIGNMENT);
-            player1TeamPanel.add(noTeam);
+            targetPanel.add(noTeam);
         } else {
             for (Pokemon pokemon : user.getOwnedPokemon()) {
                 JPanel pokemonCard = new JPanel(new BorderLayout());
@@ -443,7 +463,14 @@ public class BattlePlayerView extends JFrame implements PropertyChangeListener {
                 
                 if (pokemon != activePokemon && !pokemon.isFainted()) {
                     JButton switchButton = new JButton("Switch");
-                    switchButton.addActionListener(e -> executeSwitch(pokemon));
+                    switchButton.setEnabled(enableButtons);
+                    switchButton.addActionListener(e -> {
+                        if (isPlayer1Panel) {
+                            executeSwitchForPlayer(currentUserAdapter, opponentPlayer, true, pokemon);
+                        } else {
+                            executeSwitchForPlayer(opponentPlayer, currentUserAdapter, false, pokemon);
+                        }
+                    });
                     pokemonCard.add(pokemonInfo, BorderLayout.CENTER);
                     pokemonCard.add(switchButton, BorderLayout.EAST);
                 } else {
@@ -452,20 +479,18 @@ public class BattlePlayerView extends JFrame implements PropertyChangeListener {
                 
                 pokemonCard.setAlignmentX(Component.LEFT_ALIGNMENT);
                 pokemonCard.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
-                player1TeamPanel.add(pokemonCard);
-                player1TeamPanel.add(Box.createVerticalStrut(5));
+                targetPanel.add(pokemonCard);
+                targetPanel.add(Box.createVerticalStrut(5));
             }
         }
         
-        player1TeamPanel.revalidate();
-        player1TeamPanel.repaint();
+        targetPanel.revalidate();
+        targetPanel.repaint();
     }
 
-    /**
-     * Executes a move turn
-     */
-    private void executeMove(String moveName) {
-        if (currentUserAdapter == null || currentUserAdapter.getActivePokemon() == null) {
+    // run a move for the acting player
+    private void executeMoveForPlayer(Player actingPlayer, Player targetPlayer, boolean isPlayer1, String moveName) {
+        if (actingPlayer == null || actingPlayer.getActivePokemon() == null) {
             displayError("No active Pokemon!");
             return;
         }
@@ -475,23 +500,32 @@ public class BattlePlayerView extends JFrame implements PropertyChangeListener {
             return;
         }
         
-        // Create a Move object
-        Move move = new Move()
-            .setName(moveName)
-            .setType("normal") // Default type, could be improved
-            .setPower(40)
-            .setAccuracy(100)
-            .setPriority(0);
-        
-        MoveTurn turn = new MoveTurn(turnCounter++, currentUserAdapter, turnCounter, move);
-        battlePlayerController.battle(turn);
+        if (processingTurn || isPlayer1 != player1Turn) {
+            return;
+        }
+        processingTurn = true;
+
+        try {
+            Move move = loadMove(moveName);
+            
+            int turnNumber = nextTurnNumber();
+            MoveTurn turn = new MoveTurn(turnNumber, actingPlayer, turnNumber, move, targetPlayer);
+            battlePlayerController.battle(turn);
+
+            BattlePlayerState latestState = battlePlayerViewModel.getState();
+            if (latestState.isBattleEnded() || !"IN_PROGRESS".equals(latestState.getBattleStatus())) {
+                return;
+            }
+
+            setPlayerTurn(!player1Turn);
+        } finally {
+            processingTurn = false;
+        }
     }
 
-    /**
-     * Executes a switch turn
-     */
-    private void executeSwitch(Pokemon newPokemon) {
-        if (currentUserAdapter == null) {
+    // switch active pokemon for the acting player
+    private void executeSwitchForPlayer(Player actingPlayer, Player targetPlayer, boolean isPlayer1, Pokemon newPokemon) {
+        if (actingPlayer == null) {
             displayError("No active player!");
             return;
         }
@@ -501,15 +535,48 @@ public class BattlePlayerView extends JFrame implements PropertyChangeListener {
             return;
         }
         
-        Pokemon previousPokemon = currentUserAdapter.getActivePokemon();
-        SwitchTurn turn = new SwitchTurn(turnCounter++, currentUserAdapter, turnCounter, previousPokemon, newPokemon);
-        currentUserAdapter.switchPokemon(newPokemon);
+        if (processingTurn || isPlayer1 != player1Turn) {
+            return;
+        }
+
+        Pokemon previousPokemon = actingPlayer.getActivePokemon();
+        int turnNumber = nextTurnNumber();
+        SwitchTurn turn = new SwitchTurn(turnNumber, actingPlayer, turnNumber, previousPokemon, newPokemon);
+        actingPlayer.switchPokemon(newPokemon);
         battlePlayerController.battle(turn);
+
+        BattlePlayerState latestState = battlePlayerViewModel.getState();
+        if (latestState.isBattleEnded() || !"IN_PROGRESS".equals(latestState.getBattleStatus())) {
+            return;
+        }
+
+        setPlayerTurn(!player1Turn);
     }
 
-    /**
-     * PropertyChangeListener implementation - called when ViewModel state changes
-     */
+    private Move loadMove(String moveName) {
+        try {
+            return PokeAPIFetcher.getMove(moveName);
+        } catch (Exception e) {
+            // Fallback so the battle can continue even if network/API fails
+            return new Move()
+                    .setName(moveName)
+                    .setType("normal")
+                    .setPower(40)
+                    .setAccuracy(100)
+                    .setPriority(0);
+        }
+    }
+
+    private int nextTurnNumber() {
+        return turnCounter++;
+    }
+
+    private void setPlayerTurn(boolean player1TurnNow) {
+        this.player1Turn = player1TurnNow;
+        updateControlsEnabled();
+    }
+
+    // listen for view model changes
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
         if (evt.getPropertyName().equals(BattlePlayerViewModel.STATE_PROPERTY)) {
@@ -517,9 +584,7 @@ public class BattlePlayerView extends JFrame implements PropertyChangeListener {
         }
     }
 
-    /**
-     * Updates the view based on the current state in the ViewModel
-     */
+    // push state to the ui
     public void updateView() {
         BattlePlayerState state = battlePlayerViewModel.getState();
         
@@ -539,9 +604,7 @@ public class BattlePlayerView extends JFrame implements PropertyChangeListener {
         }
     }
 
-    /**
-     * Displays the current battle status
-     */
+    // show current battle state
     private void displayBattleStatus(BattlePlayerState state) {
         battleEndedPanel.setVisible(false);
         
@@ -554,10 +617,11 @@ public class BattlePlayerView extends JFrame implements PropertyChangeListener {
             User user1 = currentBattle.getPlayer1();
             User user2 = currentBattle.getPlayer2();
             
-            // For now, assume player1 is the user (could be made configurable)
-            if (currentUser == null) {
+            if (currentUserAdapter == null) {
                 currentUser = user1;
                 currentUserAdapter = new UserPlayerAdapter(currentUser);
+            }
+            if (opponentPlayer == null) {
                 opponentPlayer = new UserPlayerAdapter(user2);
             }
             
@@ -576,15 +640,13 @@ public class BattlePlayerView extends JFrame implements PropertyChangeListener {
         } else if (state.getTurn() != null) {
             turnResultArea.setText(state.getTurn().getTurnDetails());
         }
-        
+        updateControlsEnabled();
         // Refresh the UI
         revalidate();
         repaint();
     }
 
-    /**
-     * Updates a player panel with Pokemon information
-     */
+    // update labels, hp, moves, and team for one player
     private void updatePlayerPanel(User user, Player playerAdapter, boolean isUser) {
         if (user == null) {
             return;
@@ -660,8 +722,8 @@ public class BattlePlayerView extends JFrame implements PropertyChangeListener {
                 }
                 
                 // Update moves and team panels
-                updateMovesPanel(activePokemon);
-                updateTeamPanel(user, activePokemon);
+                updateMovesPanel(player1MovesPanel, activePokemon, player1Turn, true);
+                updateTeamPanel(player1TeamPanel, user, activePokemon, player1Turn, true);
             } else {
                 player2HPLabel.setText(String.format("HP: %d / %d", currentHP, maxHP));
                 int hpPercentage = maxHP > 0 ? (int) ((currentHP * 100.0) / maxHP) : 0;
@@ -676,6 +738,9 @@ public class BattlePlayerView extends JFrame implements PropertyChangeListener {
                 } else {
                     player2HPBar.setForeground(Color.RED);
                 }
+
+                updateMovesPanel(player2MovesPanel, activePokemon, !player1Turn, false);
+                updateTeamPanel(player2TeamPanel, user, activePokemon, !player1Turn, false);
             }
         } else {
             // No active Pokemon
@@ -695,9 +760,7 @@ public class BattlePlayerView extends JFrame implements PropertyChangeListener {
         }
     }
 
-    /**
-     * Displays the battle ended state
-     */
+    // show final winner banner
     private void displayBattleEnded(BattlePlayerState state) {
         displayBattleStatus(state); // Show final state first
         
@@ -715,20 +778,14 @@ public class BattlePlayerView extends JFrame implements PropertyChangeListener {
         }
         
         // Disable move buttons when battle ends
-        for (Component comp : player1MovesPanel.getComponents()) {
-            if (comp instanceof JButton) {
-                comp.setEnabled(false);
-            }
-        }
+        disableUserControls();
         
         // Refresh the UI
         revalidate();
         repaint();
     }
 
-    /**
-     * Displays an error message
-     */
+    // show an error in the banner and result area
     private void displayError(String errorMessage) {
         errorLabel.setText("Error: " + errorMessage);
         errorLabel.setVisible(true);
@@ -739,5 +796,36 @@ public class BattlePlayerView extends JFrame implements PropertyChangeListener {
         // Refresh the UI
         revalidate();
         repaint();
+    }
+
+    private void updateControlsEnabled() {
+        boolean player1Enable = player1Turn && currentBattle != null && "IN_PROGRESS".equals(currentBattle.getBattleStatus());
+        boolean player2Enable = !player1Turn && currentBattle != null && "IN_PROGRESS".equals(currentBattle.getBattleStatus());
+        toggleButtons(player1MovesPanel, player1Enable);
+        toggleButtons(player1TeamPanel, player1Enable);
+        toggleButtons(player2MovesPanel, player2Enable);
+        toggleButtons(player2TeamPanel, player2Enable);
+    }
+
+    private void disableUserControls() {
+        this.player1Turn = false;
+        updateControlsEnabled();
+    }
+
+    private void toggleButtons(JPanel panel, boolean enable) {
+        if (panel == null) {
+            return;
+        }
+        for (Component comp : panel.getComponents()) {
+            if (comp instanceof JButton) {
+                comp.setEnabled(enable);
+            } else if (comp instanceof JPanel) {
+                for (Component child : ((JPanel) comp).getComponents()) {
+                    if (child instanceof JButton) {
+                        child.setEnabled(enable);
+                    }
+                }
+            }
+        }
     }
 }
