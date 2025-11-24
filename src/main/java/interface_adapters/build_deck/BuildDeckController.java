@@ -6,7 +6,7 @@ import entities.Pokemon;
 
 import java.util.List;
 /*
-The controller for the build deck use case
+The Controller for the Build Deck Use Case
  */
 
 public class BuildDeckController {
@@ -19,8 +19,8 @@ public class BuildDeckController {
     /**
      * Executes the Login Use Case.
      * @param deckName the name of the deck being made
-     * @param pokemon the list of Pokemon in the deck
-     * @param isRandom whether or not the deck is randomly generated
+     * @param pokemon the list of Pokémon in the deck
+     * @param isRandom whether the deck is randomly generated
      */
     public void buildDeck(String deckName, List<Pokemon> pokemon, boolean isRandom) {
         BuildDeckInputData buildDeckInputData = new BuildDeckInputData(deckName, pokemon, isRandom);

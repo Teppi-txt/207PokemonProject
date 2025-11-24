@@ -2,7 +2,7 @@ package interface_adapters.build_deck;
 
 import entities.Deck;
 /**
- * The state for the Build Deck View Model.
+ * The State for the Build Deck Use Case.
  */
 
 public class BuildDeckState {
