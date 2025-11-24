@@ -2,13 +2,13 @@ package view;
 
 import entities.Pokemon;
 import entities.Stats;
+import interface_adapter.collection.ViewCollectionController;
 import interface_adapter.collection.ViewCollectionState;
 import interface_adapter.collection.ViewCollectionViewModel;
 import pokeapi.JSONLoader;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
-import javax.swing.text.View;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -17,6 +17,7 @@ import java.beans.PropertyChangeListener;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 public class CollectionView extends JPanel implements PropertyChangeListener, ActionListener {
@@ -25,6 +26,12 @@ public class CollectionView extends JPanel implements PropertyChangeListener, Ac
     final PokemonInfoPanel pokemonInfoPanel;
     final PokemonCollectionPanel pokemonCollectionPanel;
     private final ViewCollectionViewModel collectionViewModel;
+    private ViewCollectionController controller;
+
+    private Pokemon selectedPokemon;
+    private ArrayList<Pokemon> pokemonOnPage;
+    private String filter = "all";
+    private int currentPage = 0;
 
     public CollectionView(ViewCollectionViewModel collectionViewModel) {
         this.collectionViewModel = collectionViewModel;
@@ -51,7 +58,6 @@ public class CollectionView extends JPanel implements PropertyChangeListener, Ac
     public void onPokemonSelection(ActionEvent e) {
         JButton clicked = (JButton)e.getSource();
         int index = (int) clicked.getClientProperty("id");
-        System.out.println(index);
         pokemonInfoPanel.updatePokemon(JSONLoader.allPokemon.get(index));
         application.pack();
     }
@@ -64,8 +70,9 @@ public class CollectionView extends JPanel implements PropertyChangeListener, Ac
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
         final ViewCollectionState state = (ViewCollectionState) evt.getNewValue();
-        System.out.println(evt.getPropertyName());
         updatePanel(state);
+        this.pokemonOnPage = state.getPokemonOnPage();
+        this.selectedPokemon = state.getSelectedPokemon();
     }
 
     private void updatePanel(ViewCollectionState state) {
@@ -73,24 +80,16 @@ public class CollectionView extends JPanel implements PropertyChangeListener, Ac
         this.pokemonCollectionPanel.loadPage(state.getPokemonOnPage());
     }
 
-    public static void main(String[] args) {
-        application.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-
-        JSONLoader.loadPokemon();
-        ViewCollectionViewModel vcvm = new ViewCollectionViewModel();
-
-        application.add(new CollectionView(vcvm), BorderLayout.CENTER);
-        application.setMinimumSize(new Dimension(700, 600));
-        application.pack();
-        application.setVisible(true);
+    public ViewCollectionController getController() {
+        return controller;
     }
 
+    public void setController(ViewCollectionController controller) {
+        this.controller = controller;
+    }
+
+
     public class PokemonInfoPanel extends JPanel {
-
-        private JLabel spriteLabel;
-        private JLabel nameLabel;
-        private JPanel statsPanel;
-
         public PokemonInfoPanel(Pokemon pokemon) {
             setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
             setPreferredSize(new Dimension(300, 350));
@@ -100,6 +99,9 @@ public class CollectionView extends JPanel implements PropertyChangeListener, Ac
         }
 
         public void updatePokemon(Pokemon pokemon) {
+            JPanel statsPanel;
+            JLabel spriteLabel;
+            JLabel nameLabel;
             this.removeAll();
             spriteLabel = getSpriteLabel(pokemon);
             nameLabel = getNameLabel(pokemon.getName());
@@ -132,7 +134,6 @@ public class CollectionView extends JPanel implements PropertyChangeListener, Ac
                 spriteLabel.setMaximumSize(new Dimension(300, 100));
                 return spriteLabel;
             } catch (Exception e) {
-                System.out.println(e);
                 return new  JLabel();
             }
         }
@@ -158,7 +159,12 @@ public class CollectionView extends JPanel implements PropertyChangeListener, Ac
         private final JToggleButton ownedButton;
         private final JToggleButton shinyButton;
 
-        public PokemonFilterPanel(ActionListener filterListener) {
+        private void onFilterChanged(ActionEvent e) {
+            filter = e.getActionCommand().toLowerCase();
+            controller.execute(pokemonOnPage, currentPage, filter);
+        }
+
+        public PokemonFilterPanel() {
             setLayout(new FlowLayout(FlowLayout.LEFT, 8, 4));
 
             allButton   = new JToggleButton("All");
@@ -171,34 +177,25 @@ public class CollectionView extends JPanel implements PropertyChangeListener, Ac
             group.add(shinyButton);
             allButton.setSelected(true);
 
-            if (filterListener != null) {
-                allButton.setActionCommand("ALL");
-                ownedButton.setActionCommand("OWNED");
-                shinyButton.setActionCommand("SHINY");
+            allButton.setActionCommand("ALL");
+            ownedButton.setActionCommand("OWNED");
+            shinyButton.setActionCommand("SHINY");
 
-                allButton.addActionListener(filterListener);
-                ownedButton.addActionListener(filterListener);
-                shinyButton.addActionListener(filterListener);
-            }
+            allButton.addActionListener(this::onFilterChanged);
+            ownedButton.addActionListener(this::onFilterChanged);
+            shinyButton.addActionListener(this::onFilterChanged);
 
             add(allButton);
             add(ownedButton);
             add(shinyButton);
-        }
-
-        public String getSelectedFilter() {
-            if (ownedButton.isSelected()) return "OWNED";
-            if (shinyButton.isSelected()) return "SHINY";
-            return "ALL";
         }
     }
 
     public class PokemonCollectionPanel extends JPanel {
         private final JPanel pokemonPanel;
         private final JPanel filterPanel;
-        private int currentPage = 0;
 
-        public PokemonCollectionPanel(ArrayList<Pokemon> pokemons) {
+        public PokemonCollectionPanel(List<Pokemon> pokemons) {
             this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
             pokemonPanel = new JPanel();
@@ -206,26 +203,23 @@ public class CollectionView extends JPanel implements PropertyChangeListener, Ac
             pokemonPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
             pokemonPanel.setMinimumSize(new Dimension(600, 600));
 
-            loadPage(new ArrayList(JSONLoader.allPokemon.subList(0, 25)));
+            loadPage(new ArrayList<>(JSONLoader.allPokemon.subList(0, 25)));
 
-
-            filterPanel = new PokemonFilterPanel(null);
+            filterPanel = new PokemonFilterPanel();
             this.add(filterPanel);
             this.add(pokemonPanel);
             JButton backButton = new JButton("Prev");
-//            backButton.addActionListener(e -> {
-//                currentPage--;
-//                loadPage(currentPage);
-//                application.pack();
-//            });
+            backButton.addActionListener(e -> {
+                currentPage--;
+                controller.execute(pokemonOnPage, currentPage, filter);
+            });
             this.add(backButton);
 
             JButton nextButton = new JButton("Next");
-//            nextButton.addActionListener(e -> {
-//                currentPage++;
-//                loadPage(currentPage);
-//                application.pack();
-//            });
+            nextButton.addActionListener(e -> {
+                currentPage++;
+                controller.execute(pokemonOnPage, currentPage, filter);
+            });
             this.add(nextButton);
         }
 
@@ -247,5 +241,7 @@ public class CollectionView extends JPanel implements PropertyChangeListener, Ac
                 pokemonPanel.add(button);
             }
         }
+
+
     }
 }

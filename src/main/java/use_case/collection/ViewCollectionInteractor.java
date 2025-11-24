@@ -5,34 +5,41 @@ import entities.User;
 import pokeapi.JSONLoader;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
-public class ViewCollectionInteractor implements ViewCollectionInputBoundary{
+public class ViewCollectionInteractor implements ViewCollectionInputBoundary {
+    private ViewCollectionOutputBoundary viewCollectionPresenter;
+    private User user;
+
+    public ViewCollectionInteractor(ViewCollectionOutputBoundary viewCollectionPresenter, User user) {
+        this.viewCollectionPresenter = viewCollectionPresenter;
+        this.user = user;
+    }
 
     @Override
     public void execute(ViewCollectionInputData viewCollectionInputData) {
-        final User user = new User(0, "Teppi", "teppipersonal@gmail.com", 100);
-        for (int i = 0; i < 50; i++) {
-            user.addPokemon(JSONLoader.allPokemon.get(2*i));
-        }
-        JSONLoader.loadPokemon();
-
         String filter = viewCollectionInputData.getFilter();
-        int currentPage = viewCollectionInputData.getCurrentPage();
-        ArrayList<Pokemon> ownedPokemon = viewCollectionInputData.getOwnedPokemon();
+        int currentPage = Math.max(viewCollectionInputData.getCurrentPage(), 0);
+        ArrayList<Pokemon> currentPokemon = viewCollectionInputData.getPokemonOnPage();
 
         ViewCollectionOutputData outputData = new ViewCollectionOutputData();
 
         if (Objects.equals(filter, "all")) {
-            outputData.setDisplayedPokemon(JSONLoader.allPokemon);
+            List<Pokemon> pagePokemon = JSONLoader.allPokemon.subList(currentPage * 25, currentPage * 25 + 25);
+            outputData.setPokemonOnPage(new ArrayList<>(pagePokemon));
         } else if (Objects.equals(filter, "owned")) {
-            outputData.setDisplayedPokemon(ownedPokemon);
+            outputData.setPokemonOnPage(new ArrayList<>(user.getOwnedPokemon().subList(currentPage * 25, currentPage * 25 + 25)));
         } else if (Objects.equals(filter, "shiny")) {
-            outputData.setDisplayedPokemon(getShinies(ownedPokemon));
+            List<Pokemon> pagePokemon = getShinies(user.getOwnedPokemon()).subList(currentPage * 25, currentPage * 25 + 25);
+            outputData.setPokemonOnPage(new ArrayList<>(pagePokemon));
         }
+        outputData.setSelectedPokemon(JSONLoader.allPokemon.get(1));
+
+        viewCollectionPresenter.prepareSuccessView(outputData);
     }
 
-    private ArrayList<Pokemon> getShinies(ArrayList<Pokemon> ownedPokemon) {
+    private ArrayList<Pokemon> getShinies(List<Pokemon> ownedPokemon) {
         ArrayList<Pokemon> shinyPokemon = new ArrayList<>();
         for (Pokemon pokemon : ownedPokemon) {
             if (pokemon.isShiny()) {
