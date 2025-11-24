@@ -18,10 +18,8 @@ public class OpenPackPresenter implements OpenPackOutputBoundary {
     public void prepareSuccessView(OpenPackOutputData outputData) {
 
         OpenPackState openPackState = new OpenPackState();
-        List<Pokemon> opened = new ArrayList<>();
 
-        openPackState.setOpenedCards(opened);
-
+        openPackState.setOpenedCards(outputData.getOpenedCards());
         openPackState.setRemainingCurrency(outputData.getRemainingCurrency());
         openPackState.setErrorMessage(null);
 

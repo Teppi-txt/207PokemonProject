@@ -1,3 +1,4 @@
+/*
 package org.example;
 
 import java.util.ArrayList;
@@ -180,3 +181,5 @@ public class AIPlayer implements Player {
         }
     }
 }
+
+ */

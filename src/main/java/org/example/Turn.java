@@ -1,3 +1,4 @@
+/*
 package org.example;
 
 public abstract class Turn {
@@ -52,3 +53,5 @@ public abstract class Turn {
         this.result = result;
     }
 }
+
+ */
