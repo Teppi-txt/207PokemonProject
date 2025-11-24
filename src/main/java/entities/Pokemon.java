@@ -136,7 +136,3 @@ public class Pokemon implements Serializable {
     }
 }
 
-    public String getName() {
-        return name;
-    }
-}
