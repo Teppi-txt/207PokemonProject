@@ -1,17 +1,17 @@
-package cards;
-
-import entities.Pokemon;
+package entities;
 
 import java.util.ArrayList;
 
 public class Deck {
-    int id;
-    String name;
-    ArrayList<Pokemon> pokemons;
+    private static final int DECK_LIMIT = 5; //idk tbh we can change as needed
 
-    public Deck() {
-        this.id = 0; //this isnt final, need 2 find a way for ids to not overlap
-        this.name = "Deck " + (this.id + 1); //??
+    private int id;
+    private String name;
+    private ArrayList<Pokemon> pokemons;
+
+    public Deck(int id, String name) {
+        this.id = id;
+        this.name = (name == null || name.isEmpty()) ? ("Team " + id) : name;
         this.pokemons = new ArrayList<>();
     }
 
@@ -30,7 +30,11 @@ public class Deck {
     public ArrayList<Pokemon> getPokemons() { return pokemons; }
     public void setPokemons(ArrayList<Pokemon> pokemons) { this.pokemons = pokemons; }
 
-    public void addPokemon(Pokemon pokemon) { this.pokemons.add(pokemon); }
+    public void addPokemon(Pokemon pokemon) {
+        if (pokemons.size() < DECK_LIMIT) {
+            pokemons.add(pokemon);
+        }
+    }
     public void removePokemon(Pokemon pokemon) { this.pokemons.remove(pokemon); }
 
 }

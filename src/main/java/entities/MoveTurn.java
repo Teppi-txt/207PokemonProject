@@ -1,5 +1,4 @@
-/*
-package org.example;
+package entities;
 
 public class MoveTurn extends Turn {
     private Move move;
@@ -65,5 +64,3 @@ public class MoveTurn extends Turn {
         this.statusEffect = statusEffect;
     }
 }
-
- */

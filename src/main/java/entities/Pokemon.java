@@ -1,17 +1,22 @@
 package entities;
 
+import java.io.Serializable;
+import org.json.JSONObject;
+import pokeapi.JSONUtility;
+
 import java.util.ArrayList;
 
-public class Pokemon {
+public class Pokemon implements Serializable {
+    private static final long serialVersionUID = 1L;
     private String name;    // private so no other classes can modify/access
     private int id;
     private ArrayList<String> types;
     private Stats stats;
     private ArrayList<String> moves; // IDK if pokemon should have a list of MOVE objects (high redundancy)
-                             // or a list of Strings of move_names which can be looked up
+    // or a list of Strings of move_names which can be looked up
     private boolean shiny = false;  //default of each pokemon is not shiny
 
-    public Pokemon(String name, int id, ArrayList<String> types, Stats stats,  ArrayList<String> moves) {
+    public Pokemon(String name, int id, ArrayList<String> types, Stats stats, ArrayList<String> moves) {
         this.name = name;
         this.id = id;
         this.types = types;
@@ -19,22 +24,62 @@ public class Pokemon {
         this.moves = moves;
     }
 
-    // new for shiny pokemon
-    public boolean isShiny() {
-        return shiny;
+    public static Pokemon fromJSON(JSONObject jsonObject) {
+        String name = jsonObject.getString("name");
+        Integer id = jsonObject.getInt("id");
+        ArrayList<String> types = JSONUtility.jsonArrayToString(jsonObject.getJSONArray("types"));
+        ArrayList<String> moves = JSONUtility.jsonArrayToString(jsonObject.getJSONArray("moves"));
+        Stats stats = Stats.fromJSON(jsonObject.getJSONObject("stats"));
+        return new Pokemon(name, id, types, stats, moves);
     }
 
-    public int getID() {
-        return id;
+    public boolean isShiny() {
+        return shiny;
     }
 
     public void setShiny(boolean shiny) {
         this.shiny = shiny;
     }
 
+    public int getID() {
+        return id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public int getId() {
+        return this.id;
+    }
+
+    public ArrayList<String> getTypes() {
+        return this.types;
+    }
+
+    public Stats getStats() {
+        return this.stats;
+    }
+
+    public void setStats(Stats stats) {
+        this.stats = stats;
+    }
+
+    public ArrayList<String> getMoves() {
+        return this.moves;
+    }
+
+    public void setMoves(ArrayList<String> moves) {
+        this.moves = moves;
+    }
+
+    public boolean isFainted() {
+        return stats.getHp() <= 0;
+    }
+
     // cloning the pokemon so that they can be marked with the shiny attribute not changing the original data
     public Pokemon copy() {
-        Pokemon clone =  new Pokemon(
+        Pokemon clone = new Pokemon(
                 this.name,
                 this.id,
                 new ArrayList<>(this.types),
@@ -47,14 +92,8 @@ public class Pokemon {
 
     @Override
     public String toString() {
-        return name + "(#" + id + ", " + String.join(", ", types) + ")";
+        return name + "(#" + id + ", " + String.join(", ", types) + ", " + stats.toString() + ")";
     }
-
-    public Stats getStats() { return this.stats; }
-    public void setStats(Stats stats) { this.stats = stats; }
-
-    public ArrayList<String> getMoves() { return this.moves; }
-    public void setMoves(ArrayList<String> moves) { this.moves = moves; }
 
     public String toJSONString() {
         StringBuilder json = new StringBuilder();
@@ -69,7 +108,6 @@ public class Pokemon {
             if (i < types.size() - 1) json.append(",");
         }
         json.append("],");
-
 
         json.append("\"stats\":").append(stats.toJSONString()).append(",");
 
@@ -95,5 +133,10 @@ public class Pokemon {
 
     public String getSpriteUrl() {
         return shiny ? getShinySpriteURL() : getRegularSpriteURL();
+    }
+}
+
+    public String getName() {
+        return name;
     }
 }
