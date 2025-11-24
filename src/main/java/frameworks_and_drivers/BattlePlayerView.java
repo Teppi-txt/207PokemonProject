@@ -4,6 +4,7 @@ import interface_adapters.battle_player.BattlePlayerController;
 import interface_adapters.battle_player.BattlePlayerState;
 import interface_adapters.battle_player.BattlePlayerViewModel;
 import entities.*;
+import pokeapi.PokeAPIFetcher;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -11,30 +12,70 @@ import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.io.IOException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import javax.imageio.ImageIO;
 
-public class BattlePlayerView extends JFrame {
+public class BattlePlayerView extends JFrame implements PropertyChangeListener {
     private final BattlePlayerController battlePlayerController;
     private final BattlePlayerViewModel battlePlayerViewModel;
     
-    // UI Components
+    // UI Components - Status
     private JLabel battleStatusLabel;
+    
+    // UI Components - Player 1
+    private JPanel player1Panel;
     private JLabel player1NameLabel;
-    private JLabel player2NameLabel;
-    private JLabel player1PokemonLabel;
-    private JLabel player2PokemonLabel;
+    private JLabel player1PokemonImageLabel;
+    private JLabel player1PokemonNameLabel;
     private JLabel player1HPLabel;
+    private JProgressBar player1HPBar;
+    private JPanel player1MovesPanel;
+    private JPanel player1TeamPanel;
+    
+    // UI Components - Player 2
+    private JPanel player2Panel;
+    private JLabel player2NameLabel;
+    private JLabel player2PokemonImageLabel;
+    private JLabel player2PokemonNameLabel;
     private JLabel player2HPLabel;
+    private JProgressBar player2HPBar;
+    
+    // UI Components - Battle Info
     private JTextArea turnResultArea;
     private JLabel errorLabel;
     private JPanel battleEndedPanel;
     private JLabel winnerLabel;
+    
+    // UI Components - Main
     private JPanel mainPanel;
     private JScrollPane scrollPane;
+    
+    // Current battle state
+    private Battle currentBattle;
+    private User currentUser; // The user playing (not AI)
+    private UserPlayerAdapter currentUserAdapter;
+    private Player opponentPlayer;
+    
+    // Turn counter
+    private int turnCounter = 1;
+    
+    // Track max HP for each Pokemon (by Pokemon object reference)
+    private Map<Pokemon, Integer> maxHPMap = new HashMap<>();
 
     public BattlePlayerView(BattlePlayerController battlePlayerController, 
                            BattlePlayerViewModel battlePlayerViewModel) {
         this.battlePlayerController = battlePlayerController;
         this.battlePlayerViewModel = battlePlayerViewModel;
+        
+        // Register as listener for ViewModel changes
+        battlePlayerViewModel.addPropertyChangeListener(this);
         
         initializeGUI();
     }
@@ -89,7 +130,7 @@ public class BattlePlayerView extends JFrame {
         add(scrollPane, BorderLayout.CENTER);
         
         // Set window properties
-        setSize(800, 600);
+        setSize(1000, 800);
         setLocationRelativeTo(null);
         setVisible(true);
     }
@@ -117,56 +158,183 @@ public class BattlePlayerView extends JFrame {
         panel.setBorder(new TitledBorder("Battle Arena"));
         panel.setBackground(Color.WHITE);
         
-        // Player 1 Panel
-        JPanel player1Panel = new JPanel();
-        player1Panel.setLayout(new BoxLayout(player1Panel, BoxLayout.Y_AXIS));
-        player1Panel.setBorder(new TitledBorder("Player 1"));
-        player1Panel.setBackground(new Color(255, 240, 240));
-        player1Panel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        
-        player1NameLabel = new JLabel("Player: -");
-        player1NameLabel.setFont(new Font("Arial", Font.BOLD, 12));
-        player1Panel.add(player1NameLabel);
-        
-        player1Panel.add(Box.createVerticalStrut(5));
-        
-        player1PokemonLabel = new JLabel("Pokemon: -");
-        player1PokemonLabel.setFont(new Font("Arial", Font.PLAIN, 11));
-        player1Panel.add(player1PokemonLabel);
-        
-        player1Panel.add(Box.createVerticalStrut(5));
-        
-        player1HPLabel = new JLabel("HP: - / -");
-        player1HPLabel.setFont(new Font("Arial", Font.PLAIN, 11));
-        player1Panel.add(player1HPLabel);
-        
-        // Player 2 Panel
-        JPanel player2Panel = new JPanel();
-        player2Panel.setLayout(new BoxLayout(player2Panel, BoxLayout.Y_AXIS));
-        player2Panel.setBorder(new TitledBorder("Player 2"));
-        player2Panel.setBackground(new Color(240, 240, 255));
-        player2Panel.setAlignmentX(Component.RIGHT_ALIGNMENT);
-        
-        player2NameLabel = new JLabel("Player: -");
-        player2NameLabel.setFont(new Font("Arial", Font.BOLD, 12));
-        player2Panel.add(player2NameLabel);
-        
-        player2Panel.add(Box.createVerticalStrut(5));
-        
-        player2PokemonLabel = new JLabel("Pokemon: -");
-        player2PokemonLabel.setFont(new Font("Arial", Font.PLAIN, 11));
-        player2Panel.add(player2PokemonLabel);
-        
-        player2Panel.add(Box.createVerticalStrut(5));
-        
-        player2HPLabel = new JLabel("HP: - / -");
-        player2HPLabel.setFont(new Font("Arial", Font.PLAIN, 11));
-        player2Panel.add(player2HPLabel);
-        
+        // Player 1 Panel (Left side - User)
+        player1Panel = createPlayerPanel(true);
         panel.add(player1Panel);
+        
+        // Player 2 Panel (Right side - Opponent)
+        player2Panel = createPlayerPanel(false);
         panel.add(player2Panel);
         
         return panel;
+    }
+
+    /**
+     * Creates a player panel with Pokemon image, info, and controls
+     */
+    private JPanel createPlayerPanel(boolean isUser) {
+        JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        panel.setBorder(new TitledBorder(isUser ? "You" : "Opponent"));
+        panel.setBackground(isUser ? new Color(255, 240, 240) : new Color(240, 240, 255));
+        panel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        
+        // Player name
+        JLabel nameLabel = new JLabel("Player: -");
+        nameLabel.setFont(new Font("Arial", Font.BOLD, 12));
+        nameLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        panel.add(nameLabel);
+        if (isUser) {
+            player1NameLabel = nameLabel;
+        } else {
+            player2NameLabel = nameLabel;
+        }
+        
+        panel.add(Box.createVerticalStrut(10));
+        
+        // Pokemon image
+        JLabel imageLabel = new JLabel();
+        imageLabel.setPreferredSize(new Dimension(200, 200));
+        imageLabel.setMinimumSize(new Dimension(200, 200));
+        imageLabel.setMaximumSize(new Dimension(200, 200));
+        imageLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        imageLabel.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2));
+        imageLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        imageLabel.setIcon(createPlaceholderIcon());
+        panel.add(imageLabel);
+        if (isUser) {
+            player1PokemonImageLabel = imageLabel;
+        } else {
+            player2PokemonImageLabel = imageLabel;
+        }
+        
+        panel.add(Box.createVerticalStrut(5));
+        
+        // Pokemon name
+        JLabel pokemonNameLabel = new JLabel("Pokemon: -");
+        pokemonNameLabel.setFont(new Font("Arial", Font.PLAIN, 11));
+        pokemonNameLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        panel.add(pokemonNameLabel);
+        if (isUser) {
+            player1PokemonNameLabel = pokemonNameLabel;
+        } else {
+            player2PokemonNameLabel = pokemonNameLabel;
+        }
+        
+        panel.add(Box.createVerticalStrut(5));
+        
+        // HP Label
+        JLabel hpLabel = new JLabel("HP: - / -");
+        hpLabel.setFont(new Font("Arial", Font.PLAIN, 11));
+        hpLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        panel.add(hpLabel);
+        if (isUser) {
+            player1HPLabel = hpLabel;
+        } else {
+            player2HPLabel = hpLabel;
+        }
+        
+        panel.add(Box.createVerticalStrut(5));
+        
+        // HP Bar
+        JProgressBar hpBar = new JProgressBar(0, 100);
+        hpBar.setStringPainted(true);
+        hpBar.setPreferredSize(new Dimension(180, 20));
+        hpBar.setAlignmentX(Component.LEFT_ALIGNMENT);
+        panel.add(hpBar);
+        if (isUser) {
+            player1HPBar = hpBar;
+        } else {
+            player2HPBar = hpBar;
+        }
+        
+        // Moves panel (only for user)
+        if (isUser) {
+            panel.add(Box.createVerticalStrut(10));
+            JPanel movesPanel = createMovesPanel();
+            panel.add(movesPanel);
+            player1MovesPanel = movesPanel;
+            
+            panel.add(Box.createVerticalStrut(10));
+            JPanel teamPanel = createTeamPanel();
+            panel.add(teamPanel);
+            player1TeamPanel = teamPanel;
+        }
+        
+        return panel;
+    }
+
+    /**
+     * Creates the moves selection panel for the user
+     */
+    private JPanel createMovesPanel() {
+        JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        panel.setBorder(new TitledBorder("Moves"));
+        panel.setBackground(new Color(255, 255, 200));
+        panel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        
+        // Moves will be added dynamically
+        JLabel placeholder = new JLabel("Select a Pokemon to see moves");
+        placeholder.setAlignmentX(Component.LEFT_ALIGNMENT);
+        panel.add(placeholder);
+        
+        return panel;
+    }
+
+    /**
+     * Creates the team panel for switching Pokemon
+     */
+    private JPanel createTeamPanel() {
+        JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        panel.setBorder(new TitledBorder("Your Team"));
+        panel.setBackground(new Color(200, 255, 200));
+        panel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        
+        // Team will be added dynamically
+        JLabel placeholder = new JLabel("No Pokemon in team");
+        placeholder.setAlignmentX(Component.LEFT_ALIGNMENT);
+        panel.add(placeholder);
+        
+        return panel;
+    }
+
+    /**
+     * Creates a placeholder icon for Pokemon images
+     */
+    private ImageIcon createPlaceholderIcon() {
+        ImageIcon icon = new ImageIcon();
+        Image img = new ImageIcon().getImage();
+        Image scaledImg = img.getScaledInstance(200, 200, Image.SCALE_SMOOTH);
+        return new ImageIcon(scaledImg);
+    }
+
+    /**
+     * Loads and displays a Pokemon image from URL
+     */
+    private void loadPokemonImage(JLabel imageLabel, Pokemon pokemon) {
+        if (pokemon == null) {
+            imageLabel.setIcon(createPlaceholderIcon());
+            return;
+        }
+        
+        SwingUtilities.invokeLater(() -> {
+            try {
+                String imageUrl = pokemon.getSpriteUrl();
+                URL url = new URL(imageUrl);
+                Image image = ImageIO.read(url);
+                if (image != null) {
+                    Image scaledImage = image.getScaledInstance(200, 200, Image.SCALE_SMOOTH);
+                    imageLabel.setIcon(new ImageIcon(scaledImage));
+                } else {
+                    imageLabel.setIcon(createPlaceholderIcon());
+                }
+            } catch (IOException e) {
+                System.err.println("Error loading Pokemon image: " + e.getMessage());
+                imageLabel.setIcon(createPlaceholderIcon());
+            }
+        });
     }
 
     /**
@@ -225,12 +393,128 @@ public class BattlePlayerView extends JFrame {
     }
 
     /**
-     * Executes a turn in the battle
-     * @param turn The turn to execute
+     * Updates the moves panel with available moves for the active Pokemon
      */
-    public void executeTurn(Turn turn) {
+    private void updateMovesPanel(Pokemon activePokemon) {
+        player1MovesPanel.removeAll();
+        
+        if (activePokemon == null || activePokemon.getMoves() == null || activePokemon.getMoves().isEmpty()) {
+            JLabel noMoves = new JLabel("No moves available");
+            noMoves.setAlignmentX(Component.LEFT_ALIGNMENT);
+            player1MovesPanel.add(noMoves);
+        } else {
+            // Try to get Move objects from PokeAPIFetcher
+            PokeAPIFetcher fetcher = new PokeAPIFetcher();
+            for (String moveName : activePokemon.getMoves()) {
+                JButton moveButton = new JButton(moveName);
+                moveButton.setAlignmentX(Component.LEFT_ALIGNMENT);
+                moveButton.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30));
+                moveButton.addActionListener(e -> executeMove(moveName));
+                player1MovesPanel.add(moveButton);
+                player1MovesPanel.add(Box.createVerticalStrut(5));
+            }
+        }
+        
+        player1MovesPanel.revalidate();
+        player1MovesPanel.repaint();
+    }
+
+    /**
+     * Updates the team panel with available Pokemon for switching
+     */
+    private void updateTeamPanel(User user, Pokemon activePokemon) {
+        player1TeamPanel.removeAll();
+        
+        if (user == null || user.getOwnedPokemon() == null || user.getOwnedPokemon().isEmpty()) {
+            JLabel noTeam = new JLabel("No Pokemon in team");
+            noTeam.setAlignmentX(Component.LEFT_ALIGNMENT);
+            player1TeamPanel.add(noTeam);
+        } else {
+            for (Pokemon pokemon : user.getOwnedPokemon()) {
+                JPanel pokemonCard = new JPanel(new BorderLayout());
+                pokemonCard.setBorder(BorderFactory.createLineBorder(Color.GRAY, 1));
+                pokemonCard.setBackground(pokemon.isFainted() ? Color.LIGHT_GRAY : Color.WHITE);
+                
+                JLabel pokemonInfo = new JLabel(pokemon.getName() + 
+                    (pokemon.isShiny() ? " ✨" : "") + 
+                    (pokemon == activePokemon ? " (Active)" : "") +
+                    (pokemon.isFainted() ? " (Fainted)" : ""));
+                pokemonInfo.setAlignmentX(Component.LEFT_ALIGNMENT);
+                
+                if (pokemon != activePokemon && !pokemon.isFainted()) {
+                    JButton switchButton = new JButton("Switch");
+                    switchButton.addActionListener(e -> executeSwitch(pokemon));
+                    pokemonCard.add(pokemonInfo, BorderLayout.CENTER);
+                    pokemonCard.add(switchButton, BorderLayout.EAST);
+                } else {
+                    pokemonCard.add(pokemonInfo, BorderLayout.CENTER);
+                }
+                
+                pokemonCard.setAlignmentX(Component.LEFT_ALIGNMENT);
+                pokemonCard.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
+                player1TeamPanel.add(pokemonCard);
+                player1TeamPanel.add(Box.createVerticalStrut(5));
+            }
+        }
+        
+        player1TeamPanel.revalidate();
+        player1TeamPanel.repaint();
+    }
+
+    /**
+     * Executes a move turn
+     */
+    private void executeMove(String moveName) {
+        if (currentUserAdapter == null || currentUserAdapter.getActivePokemon() == null) {
+            displayError("No active Pokemon!");
+            return;
+        }
+        
+        if (currentBattle == null || !"IN_PROGRESS".equals(currentBattle.getBattleStatus())) {
+            displayError("Battle is not in progress!");
+            return;
+        }
+        
+        // Create a Move object
+        Move move = new Move()
+            .setName(moveName)
+            .setType("normal") // Default type, could be improved
+            .setPower(40)
+            .setAccuracy(100)
+            .setPriority(0);
+        
+        MoveTurn turn = new MoveTurn(turnCounter++, currentUserAdapter, turnCounter, move);
         battlePlayerController.battle(turn);
+    }
+
+    /**
+     * Executes a switch turn
+     */
+    private void executeSwitch(Pokemon newPokemon) {
+        if (currentUserAdapter == null) {
+            displayError("No active player!");
+            return;
+        }
+        
+        if (currentBattle == null || !"IN_PROGRESS".equals(currentBattle.getBattleStatus())) {
+            displayError("Battle is not in progress!");
+            return;
+        }
+        
+        Pokemon previousPokemon = currentUserAdapter.getActivePokemon();
+        SwitchTurn turn = new SwitchTurn(turnCounter++, currentUserAdapter, turnCounter, previousPokemon, newPokemon);
+        currentUserAdapter.switchPokemon(newPokemon);
+        battlePlayerController.battle(turn);
+    }
+
+    /**
+     * PropertyChangeListener implementation - called when ViewModel state changes
+     */
+    @Override
+    public void propertyChange(PropertyChangeEvent evt) {
+        if (evt.getPropertyName().equals(BattlePlayerViewModel.STATE_PROPERTY)) {
         updateView();
+        }
     }
 
     /**
@@ -263,70 +547,25 @@ public class BattlePlayerView extends JFrame {
         
         // Update battle status
         if (state.getBattle() != null) {
-            Battle battle = state.getBattle();
-            battleStatusLabel.setText("Battle ID: " + battle.getId() + " | Status: " + state.getBattleStatus());
+            currentBattle = state.getBattle();
+            battleStatusLabel.setText("Battle ID: " + currentBattle.getId() + " | Status: " + state.getBattleStatus());
             
-            // Update player 1 information
-            if (battle.getPlayer1() != null) {
-                User user1 = battle.getPlayer1();
-                player1NameLabel.setText("Player: " + user1.getName());
-                
-                // Display first available Pokemon from user's owned Pokemon
-                if (user1.getOwnedPokemon() != null && !user1.getOwnedPokemon().isEmpty()) {
-                    Pokemon pokemon1 = null;
-                    for (Pokemon p : user1.getOwnedPokemon()) {
-                        if (!p.isFainted()) {
-                            pokemon1 = p;
-                            break;
-                        }
-                    }
-                    if (pokemon1 != null) {
-                        Stats stats = pokemon1.getStats();
-                        player1PokemonLabel.setText("Pokemon: " + pokemon1.getName() + 
-                            (pokemon1.isShiny() ? " ✨" : ""));
-                        int currentHP = Math.max(0, stats.getHp());
-                        int maxHP = stats.getHp(); // Assuming max HP equals current HP initially
-                        player1HPLabel.setText(String.format("HP: %d / %d", currentHP, maxHP));
-                    } else {
-                        player1PokemonLabel.setText("Pokemon: None (All Fainted)");
-                        player1HPLabel.setText("HP: 0 / 0");
-                    }
-                } else {
-                    player1PokemonLabel.setText("Pokemon: None");
-                    player1HPLabel.setText("HP: - / -");
-                }
+            // Determine which player is the current user
+            User user1 = currentBattle.getPlayer1();
+            User user2 = currentBattle.getPlayer2();
+            
+            // For now, assume player1 is the user (could be made configurable)
+            if (currentUser == null) {
+                currentUser = user1;
+                currentUserAdapter = new UserPlayerAdapter(currentUser);
+                opponentPlayer = new UserPlayerAdapter(user2);
             }
             
-            // Update player 2 information
-            if (battle.getPlayer2() != null) {
-                User user2 = battle.getPlayer2();
-                player2NameLabel.setText("Player: " + user2.getName());
-                
-                // Display first available Pokemon from user's owned Pokemon
-                if (user2.getOwnedPokemon() != null && !user2.getOwnedPokemon().isEmpty()) {
-                    Pokemon pokemon2 = null;
-                    for (Pokemon p : user2.getOwnedPokemon()) {
-                        if (!p.isFainted()) {
-                            pokemon2 = p;
-                            break;
-                        }
-                    }
-                    if (pokemon2 != null) {
-                        Stats stats = pokemon2.getStats();
-                        player2PokemonLabel.setText("Pokemon: " + pokemon2.getName() + 
-                            (pokemon2.isShiny() ? " ✨" : ""));
-                        int currentHP = Math.max(0, stats.getHp());
-                        int maxHP = stats.getHp();
-                        player2HPLabel.setText(String.format("HP: %d / %d", currentHP, maxHP));
-                    } else {
-                        player2PokemonLabel.setText("Pokemon: None (All Fainted)");
-                        player2HPLabel.setText("HP: 0 / 0");
-                    }
-                } else {
-                    player2PokemonLabel.setText("Pokemon: None");
-                    player2HPLabel.setText("HP: - / -");
-                }
-            }
+            // Update player 1 (user) information
+            updatePlayerPanel(user1, currentUserAdapter, true);
+            
+            // Update player 2 (opponent) information
+            updatePlayerPanel(user2, opponentPlayer, false);
         } else {
             battleStatusLabel.setText("Status: " + (state.getBattleStatus() != null ? state.getBattleStatus() : "Unknown"));
         }
@@ -335,13 +574,125 @@ public class BattlePlayerView extends JFrame {
         if (state.getTurnResult() != null && !state.getTurnResult().isEmpty()) {
             turnResultArea.setText(state.getTurnResult());
         } else if (state.getTurn() != null) {
-            // Show turn details if available
             turnResultArea.setText(state.getTurn().getTurnDetails());
         }
         
         // Refresh the UI
         revalidate();
         repaint();
+    }
+
+    /**
+     * Updates a player panel with Pokemon information
+     */
+    private void updatePlayerPanel(User user, Player playerAdapter, boolean isUser) {
+        if (user == null) {
+            return;
+        }
+        
+        // Update player name
+        if (isUser) {
+            player1NameLabel.setText("Player: " + user.getName());
+        } else {
+            player2NameLabel.setText("Player: " + user.getName());
+        }
+        
+        // Get active Pokemon
+        Pokemon activePokemon = null;
+        if (playerAdapter != null) {
+            activePokemon = playerAdapter.getActivePokemon();
+        }
+        
+        // If no active Pokemon, find first available
+        if (activePokemon == null && user.getOwnedPokemon() != null) {
+            for (Pokemon p : user.getOwnedPokemon()) {
+                if (!p.isFainted()) {
+                    activePokemon = p;
+                    if (playerAdapter != null && playerAdapter instanceof UserPlayerAdapter) {
+                        ((UserPlayerAdapter) playerAdapter).switchPokemon(p);
+                    }
+                    break;
+                }
+            }
+        }
+        
+        if (activePokemon != null) {
+            // Update Pokemon image
+            if (isUser) {
+                loadPokemonImage(player1PokemonImageLabel, activePokemon);
+                player1PokemonNameLabel.setText("Pokemon: " + activePokemon.getName() + 
+                    (activePokemon.isShiny() ? " ✨" : ""));
+            } else {
+                loadPokemonImage(player2PokemonImageLabel, activePokemon);
+                player2PokemonNameLabel.setText("Pokemon: " + activePokemon.getName() + 
+                    (activePokemon.isShiny() ? " ✨" : ""));
+            }
+            
+            // Update HP
+            Stats stats = activePokemon.getStats();
+            int currentHP = Math.max(0, stats.getHp());
+            
+            // Track max HP - use current HP as max if we haven't seen this Pokemon before
+            // or if current HP is higher than our tracked max
+            int maxHP = maxHPMap.getOrDefault(activePokemon, currentHP);
+            if (currentHP > maxHP) {
+                maxHP = currentHP;
+                maxHPMap.put(activePokemon, maxHP);
+            } else if (!maxHPMap.containsKey(activePokemon)) {
+                // First time seeing this Pokemon - assume current HP is max
+                maxHPMap.put(activePokemon, currentHP);
+                maxHP = currentHP;
+            }
+            
+            if (isUser) {
+                player1HPLabel.setText(String.format("HP: %d / %d", currentHP, maxHP));
+                int hpPercentage = maxHP > 0 ? (int) ((currentHP * 100.0) / maxHP) : 0;
+                player1HPBar.setValue(hpPercentage);
+                player1HPBar.setString(String.format("%d/%d", currentHP, maxHP));
+                
+                // Update color based on HP
+                if (hpPercentage > 50) {
+                    player1HPBar.setForeground(Color.GREEN);
+                } else if (hpPercentage > 25) {
+                    player1HPBar.setForeground(Color.YELLOW);
+                } else {
+                    player1HPBar.setForeground(Color.RED);
+                }
+                
+                // Update moves and team panels
+                updateMovesPanel(activePokemon);
+                updateTeamPanel(user, activePokemon);
+            } else {
+                player2HPLabel.setText(String.format("HP: %d / %d", currentHP, maxHP));
+                int hpPercentage = maxHP > 0 ? (int) ((currentHP * 100.0) / maxHP) : 0;
+                player2HPBar.setValue(hpPercentage);
+                player2HPBar.setString(String.format("%d/%d", currentHP, maxHP));
+                
+                // Update color based on HP
+                if (hpPercentage > 50) {
+                    player2HPBar.setForeground(Color.GREEN);
+                } else if (hpPercentage > 25) {
+                    player2HPBar.setForeground(Color.YELLOW);
+                } else {
+                    player2HPBar.setForeground(Color.RED);
+                }
+            }
+        } else {
+            // No active Pokemon
+            if (isUser) {
+                loadPokemonImage(player1PokemonImageLabel, null);
+                player1PokemonNameLabel.setText("Pokemon: None (All Fainted)");
+                player1HPLabel.setText("HP: 0 / 0");
+                player1HPBar.setValue(0);
+                player1HPBar.setString("0/0");
+            } else {
+                loadPokemonImage(player2PokemonImageLabel, null);
+                player2PokemonNameLabel.setText("Pokemon: None (All Fainted)");
+                player2HPLabel.setText("HP: 0 / 0");
+                player2HPBar.setValue(0);
+                player2HPBar.setString("0/0");
+            }
+        }
     }
 
     /**
@@ -361,6 +712,13 @@ public class BattlePlayerView extends JFrame {
         
         if (state.getTurnResult() != null && !state.getTurnResult().isEmpty()) {
             turnResultArea.setText("FINAL RESULT:\n" + state.getTurnResult());
+        }
+        
+        // Disable move buttons when battle ends
+        for (Component comp : player1MovesPanel.getComponents()) {
+            if (comp instanceof JButton) {
+                comp.setEnabled(false);
+            }
         }
         
         // Refresh the UI
@@ -383,4 +741,3 @@ public class BattlePlayerView extends JFrame {
         repaint();
     }
 }
-
