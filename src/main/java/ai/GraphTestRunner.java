@@ -3,7 +3,7 @@ package ai;
 import ai.graph.BattleDecisionState;
 import ai.graph.Decision;
 import ai.graph.DecisionGraph;
-import cards.Deck;
+import entities.Deck;
 import entities.*;
 
 import java.util.ArrayList;
