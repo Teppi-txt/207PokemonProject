@@ -3,11 +3,13 @@ package interface_adapter.collection;
 import entities.Pokemon;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class ViewCollectionState {
-    private ArrayList<Pokemon> pokemonOnPage;
+    private List<Pokemon> pokemonOnPage;
     private Pokemon selectedPokemon;
     private String errorMessage;
+    private List<Pokemon> ownedPokemon;
 
     public Pokemon getSelectedPokemon() {
         return selectedPokemon;
@@ -17,11 +19,11 @@ public class ViewCollectionState {
         this.selectedPokemon = selectedPokemon;
     }
 
-    public ArrayList<Pokemon> getPokemonOnPage() {
+    public List<Pokemon> getPokemonOnPage() {
         return pokemonOnPage;
     }
 
-    public void setPokemonOnPage(ArrayList<Pokemon> pokemonOnPage) {
+    public void setPokemonOnPage(List<Pokemon> pokemonOnPage) {
         this.pokemonOnPage = pokemonOnPage;
     }
 
@@ -31,5 +33,13 @@ public class ViewCollectionState {
 
     public void setErrorMessage(String errorMessage) {
         this.errorMessage = errorMessage;
+    }
+
+    public List<Pokemon> getOwnedPokemon() {
+        return ownedPokemon;
+    }
+
+    public void setOwnedPokemon(List<Pokemon> ownedPokemon) {
+        this.ownedPokemon = ownedPokemon;
     }
 }

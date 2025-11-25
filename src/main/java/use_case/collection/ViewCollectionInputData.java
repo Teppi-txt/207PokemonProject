@@ -3,23 +3,24 @@ package use_case.collection;
 import entities.Pokemon;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class ViewCollectionInputData {
-    private ArrayList<Pokemon> pokemonOnPage;
+    private List<Pokemon> pokemonOnPage;
     private int currentPage = 0;
     private String filter;
 
-    public ViewCollectionInputData(ArrayList<Pokemon> pokemonOnPage, int currentPage, String filter) {
+    public ViewCollectionInputData(List<Pokemon> pokemonOnPage, int currentPage, String filter) {
         this.pokemonOnPage = pokemonOnPage;
         this.currentPage = currentPage;
         this.filter = filter;
     }
 
-    public ArrayList<Pokemon> getPokemonOnPage() {
+    public List<Pokemon> getPokemonOnPage() {
         return pokemonOnPage;
     }
 
-    public void setPokemonOnPage(ArrayList<Pokemon> pokemonOnPage) {
+    public void setPokemonOnPage(List<Pokemon> pokemonOnPage) {
         this.pokemonOnPage = pokemonOnPage;
     }
 

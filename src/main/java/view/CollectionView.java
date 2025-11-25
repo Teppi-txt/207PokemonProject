@@ -16,7 +16,6 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -29,7 +28,8 @@ public class CollectionView extends JPanel implements PropertyChangeListener, Ac
     private ViewCollectionController controller;
 
     private Pokemon selectedPokemon;
-    private ArrayList<Pokemon> pokemonOnPage;
+    private List<Pokemon> pokemonOnPage;
+    private List<Pokemon> ownedPokemon;
     private String filter = "all";
     private int currentPage = 0;
 
@@ -46,7 +46,7 @@ public class CollectionView extends JPanel implements PropertyChangeListener, Ac
         body.setLayout(new BoxLayout(body, BoxLayout.X_AXIS));
 
         pokemonInfoPanel = new PokemonInfoPanel(JSONLoader.allPokemon.get(1));
-        pokemonCollectionPanel = new PokemonCollectionPanel(JSONLoader.allPokemon);
+        pokemonCollectionPanel = new PokemonCollectionPanel();
 
         this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         this.add(title);
@@ -70,14 +70,15 @@ public class CollectionView extends JPanel implements PropertyChangeListener, Ac
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
         final ViewCollectionState state = (ViewCollectionState) evt.getNewValue();
-        updatePanel(state);
         this.pokemonOnPage = state.getPokemonOnPage();
         this.selectedPokemon = state.getSelectedPokemon();
+        this.ownedPokemon = state.getOwnedPokemon();
+        updatePanel(state);
     }
 
     private void updatePanel(ViewCollectionState state) {
         this.pokemonInfoPanel.updatePokemon(state.getSelectedPokemon());
-        this.pokemonCollectionPanel.loadPage(state.getPokemonOnPage());
+        this.pokemonCollectionPanel.loadPage(state.getPokemonOnPage(), state.getOwnedPokemon());
     }
 
     public ViewCollectionController getController() {
@@ -89,7 +90,7 @@ public class CollectionView extends JPanel implements PropertyChangeListener, Ac
     }
 
 
-    public class PokemonInfoPanel extends JPanel {
+    public static class PokemonInfoPanel extends JPanel {
         public PokemonInfoPanel(Pokemon pokemon) {
             setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
             setPreferredSize(new Dimension(300, 350));
@@ -161,6 +162,7 @@ public class CollectionView extends JPanel implements PropertyChangeListener, Ac
 
         private void onFilterChanged(ActionEvent e) {
             filter = e.getActionCommand().toLowerCase();
+            currentPage = 0;
             controller.execute(pokemonOnPage, currentPage, filter);
         }
 
@@ -195,15 +197,13 @@ public class CollectionView extends JPanel implements PropertyChangeListener, Ac
         private final JPanel pokemonPanel;
         private final JPanel filterPanel;
 
-        public PokemonCollectionPanel(List<Pokemon> pokemons) {
+        public PokemonCollectionPanel() {
             this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
             pokemonPanel = new JPanel();
             pokemonPanel.setLayout(new GridLayout(5, 5));
             pokemonPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
             pokemonPanel.setMinimumSize(new Dimension(600, 600));
-
-            loadPage(new ArrayList<>(JSONLoader.allPokemon.subList(0, 25)));
 
             filterPanel = new PokemonFilterPanel();
             this.add(filterPanel);
@@ -223,19 +223,23 @@ public class CollectionView extends JPanel implements PropertyChangeListener, Ac
             this.add(nextButton);
         }
 
-        private void loadPage(ArrayList<Pokemon> pokemons) {
+        private void loadPage(List<Pokemon> pokemons, List<Pokemon> ownedPokemon) {
             pokemonPanel.removeAll();
 
-            // Add 25 buttons to the frame
+            // Add buttons to the frame
             for (int i = 0; i < pokemons.size(); i++) {
                 ImageIcon pokeIcon = new ImageIcon();
                 try {
                     pokeIcon = new ImageIcon(new URL(pokemons.get(i).getSpriteUrl()));
+                    if (!ownedPokemon.contains(pokemons.get(i))) {
+                        pokeIcon.setImage(GrayFilter.createDisabledImage(pokeIcon.getImage()));
+                    }
                 } catch (MalformedURLException e) {
                     throw new RuntimeException(e);
                 }
                 JButton button = new JButton(pokeIcon);
                 button.setContentAreaFilled(false);
+                button.setFocusable(false);
                 button.putClientProperty("id", i);  // store index as command
                 button.addActionListener(CollectionView.this::onPokemonSelection);
                 pokemonPanel.add(button);

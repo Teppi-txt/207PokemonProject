@@ -10,7 +10,7 @@ import view.CollectionView;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.ArrayList;
+import java.util.List;
 
 public class ViewCollectionController {
     private final ViewCollectionInputBoundary interactor;
@@ -19,7 +19,7 @@ public class ViewCollectionController {
         this.interactor = interactor;
     }
 
-    public void execute(ArrayList<Pokemon> ownedPokemon, int currentPage, String filter) {
+    public void execute(List<Pokemon> ownedPokemon, int currentPage, String filter) {
         final ViewCollectionInputData inputData =
                 new ViewCollectionInputData(ownedPokemon, currentPage, filter);
 
@@ -28,10 +28,11 @@ public class ViewCollectionController {
 
     public static void main(String[] args) {
         JSONLoader.loadPokemon();
-        System.out.println(JSONLoader.allPokemon.size());
         final User user = new User(0, "Teppi", "teppipersonal@gmail.com", 100);
         for (int i = 0; i < 150; i++) {
-            user.addPokemon(JSONLoader.allPokemon.get(2 * i));
+            if (JSONLoader.allPokemon.get(i).getTypes().contains("water")) {
+                user.addPokemon(JSONLoader.allPokemon.get(i));
+            }
         }
 
         ViewCollectionViewModel vcvm = new ViewCollectionViewModel();
@@ -50,6 +51,6 @@ public class ViewCollectionController {
         application.pack();
         application.setVisible(true);
 
-        vcc.execute((ArrayList<Pokemon>) user.getOwnedPokemon(), 0, "all");
+        vcc.execute(user.getOwnedPokemon(), 0, "all");
     }
 }

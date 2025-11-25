@@ -7,21 +7,23 @@ import java.util.List;
 
 public class ViewCollectionOutputData {
 
-    private ArrayList<Pokemon> pokemonOnPage;
+    private List<Pokemon> pokemonOnPage;
     private Pokemon selectedPokemon;
+    private List<Pokemon> ownedPokemon;
 
     public ViewCollectionOutputData() {}
 
-    public ViewCollectionOutputData(ArrayList<Pokemon> pokemonOnPage, Pokemon selectedPokemon) {
+    public ViewCollectionOutputData(List<Pokemon> pokemonOnPage, Pokemon selectedPokemon, List<Pokemon> ownedPokemon) {
         this.pokemonOnPage = pokemonOnPage;
         this.selectedPokemon = selectedPokemon;
+        this.ownedPokemon = ownedPokemon;
     }
 
-    public ArrayList<Pokemon> getPokemonOnPage() {
+    public List<Pokemon> getPokemonOnPage() {
         return pokemonOnPage;
     }
 
-    public void setPokemonOnPage(ArrayList<Pokemon> pokemonOnPage) {
+    public void setPokemonOnPage(List<Pokemon> pokemonOnPage) {
         this.pokemonOnPage = pokemonOnPage;
     }
 
@@ -31,5 +33,13 @@ public class ViewCollectionOutputData {
 
     public void setSelectedPokemon(Pokemon selectedPokemon) {
         this.selectedPokemon = selectedPokemon;
+    }
+
+    public List<Pokemon> getOwnedPokemon() {
+        return ownedPokemon;
+    }
+
+    public void setOwnedPokemon(List<Pokemon> ownedPokemon) {
+        this.ownedPokemon = ownedPokemon;
     }
 }
