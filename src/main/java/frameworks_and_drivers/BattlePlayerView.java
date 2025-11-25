@@ -4,6 +4,7 @@ import interface_adapters.battle_player.BattlePlayerController;
 import interface_adapters.battle_player.BattlePlayerState;
 import interface_adapters.battle_player.BattlePlayerViewModel;
 import entities.*;
+import use_case.battle_player.BattlePlayerUserDataAccessInterface;
 import pokeapi.JSONLoader;
 import pokeapi.PokeAPIFetcher;
 
@@ -26,9 +27,12 @@ import java.awt.image.BufferedImage;
 public class BattlePlayerView extends JFrame implements PropertyChangeListener {
     private final BattlePlayerController battlePlayerController;
     private final BattlePlayerViewModel battlePlayerViewModel;
+    private final BattlePlayerUserDataAccessInterface dataAccess;
+    private final Runnable playAgainHandler;
     
     // UI Components - Status
     private JLabel battleStatusLabel;
+    private JButton playAgainButton;
     
     // UI Components - Player 1
     private JPanel player1Panel;
@@ -39,6 +43,7 @@ public class BattlePlayerView extends JFrame implements PropertyChangeListener {
     private JProgressBar player1HPBar;
     private JPanel player1MovesPanel;
     private JPanel player1TeamPanel;
+    private JButton player1QuitButton;
     
     // UI Components - Player 2
     private JPanel player2Panel;
@@ -49,6 +54,7 @@ public class BattlePlayerView extends JFrame implements PropertyChangeListener {
     private JProgressBar player2HPBar;
     private JPanel player2MovesPanel;
     private JPanel player2TeamPanel;
+    private JButton player2QuitButton;
     
     // UI Components - Battle Info
     private JTextArea turnResultArea;
@@ -74,10 +80,14 @@ public class BattlePlayerView extends JFrame implements PropertyChangeListener {
     // Track max HP for each Pokemon (by Pokemon object reference)
     private Map<Pokemon, Integer> maxHPMap = new HashMap<>();
 
-    public BattlePlayerView(BattlePlayerController battlePlayerController, 
-                           BattlePlayerViewModel battlePlayerViewModel) {
+    public BattlePlayerView(BattlePlayerController battlePlayerController,
+                           BattlePlayerViewModel battlePlayerViewModel,
+                           BattlePlayerUserDataAccessInterface dataAccess,
+                           Runnable playAgainHandler) {
         this.battlePlayerController = battlePlayerController;
         this.battlePlayerViewModel = battlePlayerViewModel;
+        this.dataAccess = dataAccess;
+        this.playAgainHandler = playAgainHandler;
         
         // Register as listener for ViewModel changes
         battlePlayerViewModel.addPropertyChangeListener(this);
@@ -185,6 +195,18 @@ public class BattlePlayerView extends JFrame implements PropertyChangeListener {
             player1NameLabel = nameLabel;
         } else {
             player2NameLabel = nameLabel;
+        }
+
+        panel.add(Box.createVerticalStrut(5));
+
+        JButton quitButton = new JButton(isUser ? "Quit Battle (Player 1)" : "Quit Battle (Player 2)");
+        quitButton.setAlignmentX(Component.LEFT_ALIGNMENT);
+        quitButton.addActionListener(e -> handleQuit(isUser));
+        panel.add(quitButton);
+        if (isUser) {
+            player1QuitButton = quitButton;
+        } else {
+            player2QuitButton = quitButton;
         }
         
         panel.add(Box.createVerticalStrut(10));
@@ -405,6 +427,13 @@ public class BattlePlayerView extends JFrame implements PropertyChangeListener {
         winnerLabel.setForeground(new Color(0, 100, 0));
         winnerLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
         panel.add(winnerLabel);
+
+        panel.add(Box.createVerticalStrut(10));
+
+        playAgainButton = new JButton("Play Again");
+        playAgainButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+        playAgainButton.addActionListener(e -> handlePlayAgain());
+        panel.add(playAgainButton);
         
         return panel;
     }
@@ -577,6 +606,48 @@ public class BattlePlayerView extends JFrame implements PropertyChangeListener {
                     .setPower(40)
                     .setAccuracy(100)
                     .setPriority(0);
+        }
+    }
+
+    private void handleQuit(boolean quittingPlayer1) {
+        if (currentBattle == null || "COMPLETED".equals(currentBattle.getBattleStatus())) {
+            return;
+        }
+        User quitter = quittingPlayer1 ? currentBattle.getPlayer1() : currentBattle.getPlayer2();
+        User winner = quittingPlayer1 ? currentBattle.getPlayer2() : currentBattle.getPlayer1();
+        if (winner == null) {
+            return;
+        }
+
+        currentBattle.endBattle(winner);
+        winner.addCurrency(500);
+        if (quitter != null) {
+            quitter.addCurrency(100);
+        }
+        if (dataAccess != null) {
+            dataAccess.saveBattle(currentBattle);
+            dataAccess.saveUser(winner);
+            if (quitter != null) {
+                dataAccess.saveUser(quitter);
+            }
+        }
+
+        player1Turn = false;
+
+        BattlePlayerState state = new BattlePlayerState();
+        state.setBattle(currentBattle);
+        state.setBattleStatus(currentBattle.getBattleStatus());
+        state.setBattleEnded(true);
+        String quitterName = quitter != null ? quitter.getName() : "Player";
+        String winnerName = winner.getName();
+        state.setTurnResult(quitterName + " forfeited. " + winnerName + " wins!");
+        battlePlayerViewModel.setState(state);
+    }
+
+    private void handlePlayAgain() {
+        dispose();
+        if (playAgainHandler != null) {
+            playAgainHandler.run();
         }
     }
 
@@ -778,12 +849,15 @@ public class BattlePlayerView extends JFrame implements PropertyChangeListener {
         displayBattleStatus(state); // Show final state first
         
         battleEndedPanel.setVisible(true);
+        if (playAgainButton != null) {
+            playAgainButton.setEnabled(true);
+        }
         
-        if (state.getBattle() != null && state.getBattle().getWinner() != null) {
-            User winner = state.getBattle().getWinner();
-            winnerLabel.setText("🏆 Winner: " + winner.getName() + " 🏆");
+        User winner = resolveWinner(state);
+        if (winner != null) {
+            winnerLabel.setText("Winner: " + winner.getName());
         } else {
-            winnerLabel.setText("🏆 Battle Ended 🏆");
+            winnerLabel.setText("Battle Ended");
         }
         
         if (state.getTurnResult() != null && !state.getTurnResult().isEmpty()) {
@@ -796,6 +870,19 @@ public class BattlePlayerView extends JFrame implements PropertyChangeListener {
         // Refresh the UI
         revalidate();
         repaint();
+    }
+
+    private User resolveWinner(BattlePlayerState state) {
+        if (state != null && state.getBattle() != null && state.getBattle().getWinner() != null) {
+            return state.getBattle().getWinner();
+        }
+        if (currentBattle != null && currentBattle.getWinner() != null) {
+            return currentBattle.getWinner();
+        }
+        if (dataAccess != null && dataAccess.getBattle() != null) {
+            return dataAccess.getBattle().getWinner();
+        }
+        return null;
     }
 
     // show an error in the banner and result area
@@ -818,6 +905,12 @@ public class BattlePlayerView extends JFrame implements PropertyChangeListener {
         toggleButtons(player1TeamPanel, player1Enable);
         toggleButtons(player2MovesPanel, player2Enable);
         toggleButtons(player2TeamPanel, player2Enable);
+        if (player1QuitButton != null) {
+            player1QuitButton.setEnabled(currentBattle != null && "IN_PROGRESS".equals(currentBattle.getBattleStatus()));
+        }
+        if (player2QuitButton != null) {
+            player2QuitButton.setEnabled(currentBattle != null && "IN_PROGRESS".equals(currentBattle.getBattleStatus()));
+        }
     }
 
     private void disableUserControls() {

@@ -31,7 +31,7 @@ public class BattlePlayerMain {
                 JSONLoader.loadMoves();
                 JSONLoader.loadPokemon();
                 seedDecks();
-                initializeApplication();
+                showSetup();
             } catch (Exception e) {
                 e.printStackTrace();
                 JOptionPane.showMessageDialog(null, 
@@ -43,9 +43,13 @@ public class BattlePlayerMain {
     }
     
     // wire clean-architecture layers together
-    private static void initializeApplication() {
+    public static void showSetup() {
         if (setupView != null) {
             setupView.dispose();
+        }
+        if (battleView != null) {
+            battleView.dispose();
+            battleView = null;
         }
         setupView = new BattleSetupView(PREBUILT_DECKS, BattlePlayerMain::startBattleWithSelection);
         setupView.setVisible(true);
@@ -72,7 +76,7 @@ public class BattlePlayerMain {
         BattlePlayerInteractor interactor = new BattlePlayerInteractor(dataAccess, presenter);
         BattlePlayerController controller = new BattlePlayerController(interactor);
 
-        battleView = new BattlePlayerView(controller, viewModel);
+        battleView = new BattlePlayerView(controller, viewModel, dataAccess, BattlePlayerMain::showSetup);
 
         BattlePlayerState initialState = new BattlePlayerState();
         initialState.setBattle(battle);

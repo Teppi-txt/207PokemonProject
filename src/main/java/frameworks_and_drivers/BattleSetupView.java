@@ -1,12 +1,18 @@
 package frameworks_and_drivers;
 
+import entities.Pokemon;
+import pokeapi.JSONLoader;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.awt.event.ItemEvent;
+import java.awt.image.BufferedImage;
+import java.net.URL;
 import java.util.List;
 import java.util.Map;
+import javax.imageio.ImageIO;
+import javax.swing.SwingWorker;
 
 public class BattleSetupView extends JFrame {
 
@@ -22,8 +28,8 @@ public class BattleSetupView extends JFrame {
     private JTextField player2NameField;
     private JComboBox<String> player1DeckBox;
     private JComboBox<String> player2DeckBox;
-    private JTextArea player1DeckPreview;
-    private JTextArea player2DeckPreview;
+    private JPanel player1DeckPreview;
+    private JPanel player2DeckPreview;
 
     public BattleSetupView(Map<String, List<String>> deckOptions, BattleStartHandler startHandler) {
         this.deckOptions = deckOptions;
@@ -86,10 +92,7 @@ public class BattleSetupView extends JFrame {
             player2DeckBox = deckBox;
         }
 
-        JTextArea deckPreview = new JTextArea(8, 20);
-        deckPreview.setEditable(false);
-        deckPreview.setLineWrap(true);
-        deckPreview.setWrapStyleWord(true);
+        JPanel deckPreview = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 8));
         deckPreview.setBackground(new Color(248, 248, 248));
         deckPreview.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY));
         updateDeckPreview(deckPreview, (String) deckBox.getSelectedItem());
@@ -120,13 +123,23 @@ public class BattleSetupView extends JFrame {
         return panel;
     }
 
-    private void updateDeckPreview(JTextArea preview, String deckKey) {
+    private void updateDeckPreview(JPanel previewPanel, String deckKey) {
+        previewPanel.removeAll();
         List<String> deck = deckOptions.get(deckKey);
         if (deck == null || deck.isEmpty()) {
-            preview.setText("No Pokemon in this deck.");
-            return;
+            previewPanel.add(new JLabel("No Pokemon in this deck."));
+        } else {
+            for (String name : deck) {
+                JLabel label = new JLabel(name, createPlaceholderIcon(80, 80), JLabel.CENTER);
+                label.setVerticalTextPosition(JLabel.BOTTOM);
+                label.setHorizontalTextPosition(JLabel.CENTER);
+                label.setToolTipText(name);
+                loadSpriteAsync(label, name, 64, 64);
+                previewPanel.add(label);
+            }
         }
-        preview.setText(String.join(", ", deck));
+        previewPanel.revalidate();
+        previewPanel.repaint();
     }
 
     private void fireStartBattle() {
@@ -142,5 +155,57 @@ public class BattleSetupView extends JFrame {
                 ? player2DeckBox.getSelectedItem().toString()
                 : null;
         startHandler.start(p1Name, p2Name, deck1, deck2);
+    }
+
+    private void loadSpriteAsync(JLabel label, String pokemonName, int width, int height) {
+        SwingWorker<ImageIcon, Void> worker = new SwingWorker<>() {
+            @Override
+            protected ImageIcon doInBackground() {
+                try {
+                    String spriteUrl = findSpriteUrl(pokemonName);
+                    if (spriteUrl == null) {
+                        return null;
+                    }
+                    Image img = ImageIO.read(new URL(spriteUrl));
+                    if (img != null) {
+                        Image scaled = img.getScaledInstance(width, height, Image.SCALE_SMOOTH);
+                        return new ImageIcon(scaled);
+                    }
+                } catch (Exception ignored) {
+                }
+                return null;
+            }
+
+            @Override
+            protected void done() {
+                try {
+                    ImageIcon icon = get();
+                    if (icon != null) {
+                        label.setIcon(icon);
+                    }
+                } catch (Exception ignored) {
+                }
+            }
+        };
+        worker.execute();
+    }
+
+    private String findSpriteUrl(String pokemonName) {
+        return JSONLoader.allPokemon.stream()
+                .filter(p -> p.getName().equalsIgnoreCase(pokemonName))
+                .findFirst()
+                .map(Pokemon::getSpriteUrl)
+                .orElse(null);
+    }
+
+    private ImageIcon createPlaceholderIcon(int width, int height) {
+        BufferedImage img = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g2 = img.createGraphics();
+        g2.setColor(new Color(230, 230, 230));
+        g2.fillRect(0, 0, width, height);
+        g2.setColor(Color.GRAY);
+        g2.drawRect(0, 0, width - 1, height - 1);
+        g2.dispose();
+        return new ImageIcon(img);
     }
 }
