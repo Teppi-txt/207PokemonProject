@@ -96,28 +96,51 @@ public class PokeAPIFetcher {
     }
 
     public static Move getMove(String move) throws MoveNotFoundException {
-        Request request = new Request.Builder().url(API_HEADER + "move/" + move).build();
-        final Call call = client.newCall(request);
+        Request request = new Request.Builder()
+                .url(API_HEADER + "move/" + move)
+                .build();
+        Call call = client.newCall(request);
 
         try {
             Response response = call.execute();
-            final JSONObject responseBody = new JSONObject(response.body().string());
-            Move returnMove = new Move()
-                    .setName(responseBody.optString("name"))
-                    .setAccuracy(responseBody.optInt("accuracy"))
-                    .setPriority(responseBody.optInt("priority"))
-                    .setPower(responseBody.optInt("power"))
-                    .setType(getNestedString(responseBody, "type", "name"))
-                    .setEffect(getNestedString(responseBody, "meta", "ailment", "name"))
-                    .setDamageClass(getNestedString(responseBody, "damage_class", "name"));
+            JSONObject json = new JSONObject(response.body().string());
 
-            return returnMove;
+            Move m = new Move()
+                    .setName(json.getString("name"))
+                    .setAccuracy(json.optInt("accuracy", 0))
+                    .setPower(json.optInt("power", 0))
+                    .setPp(json.optInt("pp", 0))
+                    .setPriority(json.optInt("priority", 0))
+                    .setType(json.getJSONObject("type").getString("name"))
+                    .setDamageClass(json.getJSONObject("damage_class").getString("name"));
 
-        } catch (IOException | JSONException exception) {
-            System.out.println(exception.getMessage());
+            // meta effects
+            if (json.has("meta")) {
+                JSONObject meta = json.getJSONObject("meta");
+                if (meta.has("ailment")) {
+                    m.setEffect(meta.getJSONObject("ailment").getString("name"));
+                }
+                if (meta.has("ailment_chance")) {
+                    m.setEffect_chance(meta.getInt("ailment_chance"));
+                }
+            }
+
+            // effect entries
+            if (json.has("effect_entries")) {
+                JSONArray arr = json.getJSONArray("effect_entries");
+                if (arr.length() > 0) {
+                    m.setShortEffect(arr.getJSONObject(0).getString("short_effect"));
+                }
+            }
+
+            return m;
+
+        } catch (Exception e) {
             throw new MoveNotFoundException(move);
         }
     }
+
+
 
     // given a json string nested in many json objects, extracts it while typechecking for null
     public static String getNestedString(JSONObject obj, String... keys) {
