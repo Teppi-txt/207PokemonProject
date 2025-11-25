@@ -1,8 +1,7 @@
-package interface_adapter.collection;
+package interface_adapters.collection;
 
 import use_case.collection.ViewCollectionOutputBoundary;
 import use_case.collection.ViewCollectionOutputData;
-import interface_adapter.ViewModel;
 
 public class ViewCollectionPresenter implements ViewCollectionOutputBoundary {
     private final ViewCollectionViewModel viewCollectionViewModel;

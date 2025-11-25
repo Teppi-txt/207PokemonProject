@@ -1,4 +1,4 @@
-package interface_adapter.collection;
+package interface_adapters.collection;
 
 import entities.Pokemon;
 

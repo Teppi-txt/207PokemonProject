@@ -2,9 +2,9 @@ package view;
 
 import entities.Pokemon;
 import entities.Stats;
-import interface_adapter.collection.ViewCollectionController;
-import interface_adapter.collection.ViewCollectionState;
-import interface_adapter.collection.ViewCollectionViewModel;
+import interface_adapters.collection.ViewCollectionController;
+import interface_adapters.collection.ViewCollectionState;
+import interface_adapters.collection.ViewCollectionViewModel;
 import pokeapi.JSONLoader;
 
 import javax.swing.*;

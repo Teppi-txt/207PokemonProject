@@ -53,10 +53,6 @@ public class Pokemon implements Serializable {
         return this.id;
     }
 
-    public ArrayList<String> getTypes() {
-        return this.types;
-    }
-
     public Stats getStats() {
         return this.stats;
     }
@@ -142,10 +138,6 @@ public class Pokemon implements Serializable {
 
     public void setTypes(ArrayList<String> types) {
         this.types = types;
-}
-
-    public String getName() {
-        return name;
     }
 }
 
