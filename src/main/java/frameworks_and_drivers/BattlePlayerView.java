@@ -4,14 +4,13 @@ import interface_adapters.battle_player.BattlePlayerController;
 import interface_adapters.battle_player.BattlePlayerState;
 import interface_adapters.battle_player.BattlePlayerViewModel;
 import entities.*;
+import pokeapi.JSONLoader;
 import pokeapi.PokeAPIFetcher;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.IOException;
@@ -554,6 +553,20 @@ public class BattlePlayerView extends JFrame implements PropertyChangeListener {
     }
 
     private Move loadMove(String moveName) {
+        if (JSONLoader.allMoves.isEmpty()) {
+            try {
+                JSONLoader.loadMoves();
+            } catch (Exception ignored) {
+                // ignore and fall through to default handling
+            }
+        }
+
+        for (Move move : JSONLoader.allMoves) {
+            if (move.getName().equalsIgnoreCase(moveName)) {
+                return move;
+            }
+        }
+
         try {
             return PokeAPIFetcher.getMove(moveName);
         } catch (Exception e) {
