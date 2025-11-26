@@ -31,7 +31,11 @@ public class ViewCollectionController {
         final User user = new User(0, "Teppi", "teppipersonal@gmail.com", 100);
         for (int i = 0; i < 150; i++) {
             if (JSONLoader.allPokemon.get(i).getTypes().contains("water")) {
-                user.addPokemon(JSONLoader.allPokemon.get(i));
+                Pokemon pok = JSONLoader.allPokemon.get(i).copy();
+                if (i % 2 == 0) {
+                    pok.setShiny(true);
+                }
+                user.addPokemon(pok);
             }
         }
 
