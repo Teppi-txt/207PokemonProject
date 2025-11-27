@@ -1,9 +1,11 @@
 package entities;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class User {
+public class User implements Serializable {
+    private static final long serialVersionUID = 1L;
 
     private final int id;
     private String name;
@@ -67,6 +69,14 @@ public class User {
         }
         return false;
     }
+
+    public Pokemon getPokemonById(int id){
+        for (Pokemon p : ownedPokemon){
+            if (p.getID() == id) return p;
+        }
+        return null;
+    }
+
 
 
 }

@@ -1,11 +1,13 @@
 package entities;
 
+import java.io.Serializable;
 import org.json.JSONObject;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class Stats {
+public class Stats implements Serializable {
+    private static final long serialVersionUID = 1L;
     private int hp;
     private int attack;
     private int defense;
@@ -153,20 +155,30 @@ public class Stats {
 
     private String normalizeStatName(String name) {
         switch (name.toLowerCase()) {
-            case "hp", "health":
+            case "hp":
+            case "health":
                 return "hp";
-            case "attack", "atk":
+            case "attack":
+            case "atk":
                 return "attack";
-            case "defense", "def":
+            case "defense":
+            case "def":
                 return "defense";
-            case "special-attack", "spatk":
+            case "special-attack":
+            case "spatk":
             case "sp-attack":
                 return "spattack";
-            case "special-defense", "spdef", "sp-defense":
+            case "special-defense":
+            case "spdef":
+            case "sp-defense":
                 return "spdefense";
-            case "speed", "spe":
+            case "speed":
+            case "spe":
                 return "speed";
-            default: throw new IllegalArgumentException("Unknown stat: " + name); } }
+            default:
+                throw new IllegalArgumentException("Unknown stat: " + name);
+        }
+    }
 
     @Override
     public String toString() {
