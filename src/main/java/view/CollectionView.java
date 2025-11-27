@@ -5,7 +5,7 @@ import entities.Stats;
 import interface_adapter.collection.ViewCollectionController;
 import interface_adapter.collection.ViewCollectionState;
 import interface_adapter.collection.ViewCollectionViewModel;
-import pokeapi.JSONLoader;
+import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -46,16 +46,24 @@ public class CollectionView extends JPanel implements PropertyChangeListener, Ac
         title.setAlignmentX(Component.CENTER_ALIGNMENT);
         title.setBorder(new EmptyBorder(10, 10, 10, 10));
 
+        final JButton returnButton = new JButton("Back to menu:");
+        returnButton.setFont(new Font(title.getFont().getFontName(), Font.PLAIN, 18));
+        returnButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        returnButton.setBorder(new EmptyBorder(10, 10, 10, 10));
+
         final JPanel body = new JPanel();
         body.setLayout(new BoxLayout(body, BoxLayout.X_AXIS));
+        body.setBorder(new EmptyBorder(10, 10, 10, 10));
 
-        pokemonInfoPanel = new PokemonInfoPanel(JSONLoader.allPokemon.get(1));
+        pokemonInfoPanel = new PokemonInfoPanel();
         pokemonCollectionPanel = new PokemonCollectionPanel();
-
         pokemonCollectionPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
 
         this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         this.add(title);
+        this.add(returnButton);
+
         body.add(pokemonInfoPanel);
         body.add(pokemonCollectionPanel);
         this.add(body);
@@ -64,8 +72,7 @@ public class CollectionView extends JPanel implements PropertyChangeListener, Ac
     public void onPokemonSelection(ActionEvent e) {
         JButton clicked = (JButton)e.getSource();
         int index = (int) clicked.getClientProperty("id");
-        pokemonInfoPanel.updatePokemon(pokemonOnPage.get(index));
-        application.pack();
+        pokemonInfoPanel.setPokemon(pokemonOnPage.get(index));
     }
 
     @Override
@@ -83,7 +90,7 @@ public class CollectionView extends JPanel implements PropertyChangeListener, Ac
     }
 
     private void updatePanel(ViewCollectionState state) {
-        this.pokemonInfoPanel.updatePokemon(state.getSelectedPokemon());
+        this.pokemonInfoPanel.setPokemon(state.getSelectedPokemon());
         this.pokemonCollectionPanel.loadPage(state.getPokemonOnPage(), state.getOwnedPokemon());
     }
 
@@ -97,20 +104,17 @@ public class CollectionView extends JPanel implements PropertyChangeListener, Ac
 
 
     public class PokemonInfoPanel extends JPanel {
-        public PokemonInfoPanel(Pokemon pokemon) {
+        public PokemonInfoPanel() {
             setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
             setPreferredSize(new Dimension(300, 350));
             setBorder(BorderFactory.createLineBorder(Color.GRAY, 4, true));
         }
 
-        public void updatePokemon(Pokemon pokemon) {
-            JPanel statsPanel;
-            JLabel spriteLabel;
-            JLabel nameLabel;
+        public void setPokemon(Pokemon pokemon) {
+            JLabel spriteLabel = getSpriteLabel(pokemon);
+            JLabel nameLabel = getNameLabel(pokemon.getName());
+            JPanel statsPanel = getStatsPanel(pokemon.getStats());
             this.removeAll();
-            spriteLabel = getSpriteLabel(pokemon);
-            nameLabel = getNameLabel(pokemon.getName());
-            statsPanel = getStatsPanel(pokemon.getStats());
 
             if (!pokemonIsInList(pokemon, ownedPokemon)) {
                 spriteLabel.setIcon(spriteLabel.getDisabledIcon());
@@ -154,7 +158,7 @@ public class CollectionView extends JPanel implements PropertyChangeListener, Ac
             statsPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
             for (String stat : Stats.STAT_NAMES) {
-                JLabel statLabel = new JLabel(stat + ": " + String.valueOf(map.get(stat)));
+                JLabel statLabel = new JLabel(stat + ": " + map.get(stat));
                 statLabel.setFont(new Font("Arial", Font.BOLD, 24));
                 statsPanel.add(statLabel);
             }
@@ -203,29 +207,30 @@ public class CollectionView extends JPanel implements PropertyChangeListener, Ac
 
     public class PokemonCollectionPanel extends JPanel {
         private final JPanel pokemonPanel;
-        private final JPanel filterPanel;
-        private final JPanel pageButtonPanel;
+        private final Label pageLabel;
+        private final JButton backButton;
 
         public PokemonCollectionPanel() {
             this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
             pokemonPanel = new JPanel();
-            pokemonPanel.setLayout(new GridLayout(5, 5));
             pokemonPanel.setMinimumSize(new Dimension(600, 600));
 
-            filterPanel = new PokemonFilterPanel();
-            pageButtonPanel = new JPanel();
+            JPanel filterPanel = new PokemonFilterPanel();
+            JPanel pageButtonPanel = new JPanel();
 
             this.add(filterPanel);
             this.add(pokemonPanel);
-            JButton backButton = new JButton("Prev");
+
+            backButton = new JButton("Prev");
+            backButton.setEnabled(false);
             backButton.addActionListener(e -> {
                 currentPage--;
                 controller.execute(pokemonOnPage, currentPage, filter);
             });
             pageButtonPanel.add(backButton);
 
-            Label pageLabel = new Label(String.valueOf(currentPage));
+            pageLabel = new Label(String.valueOf(currentPage));
             pageLabel.setAlignment(Label.CENTER);
             pageButtonPanel.add(pageLabel);
 
@@ -238,8 +243,18 @@ public class CollectionView extends JPanel implements PropertyChangeListener, Ac
             this.add(pageButtonPanel);
         }
 
+        private void updatePageNumbers() {
+            if (currentPage == 0) {
+                backButton.setEnabled(false);
+            } else {
+                backButton.setEnabled(true);
+            }
+            pageLabel.setText(String.valueOf(currentPage));
+        }
+
         private void loadPage(List<Pokemon> pokemons, List<Pokemon> ownedPokemon) {
             pokemonPanel.removeAll();
+            pokemonPanel.setLayout(new GridLayout(0, 5));
 
             // Add buttons to the frame
             for (int i = 0; i < pokemons.size(); i++) {
@@ -250,15 +265,27 @@ public class CollectionView extends JPanel implements PropertyChangeListener, Ac
                         pokeIcon.setImage(GrayFilter.createDisabledImage(pokeIcon.getImage()));
                     }
                 } catch (MalformedURLException e) {
-                    throw new RuntimeException(e);
+                    pokeIcon = new ImageIcon("src/assets/sprites/no_image_icon.png");
                 }
-                JButton button = new JButton(pokeIcon);
-                button.setContentAreaFilled(false);
-                button.setFocusable(false);
+
+                JButton button = createPokemonButton(pokeIcon);
                 button.putClientProperty("id", i);  // store index as command
-                button.addActionListener(CollectionView.this::onPokemonSelection);
+                button.setText("#" + pokemons.get(i).getID());
                 pokemonPanel.add(button);
             }
+
+            updatePageNumbers();
+        }
+
+        @NotNull
+        private JButton createPokemonButton(ImageIcon pokeIcon) {
+            JButton button = new JButton(pokeIcon);
+            button.setContentAreaFilled(false);
+            button.setFocusable(false);
+            button.setVerticalTextPosition(SwingConstants.BOTTOM);
+            button.setHorizontalTextPosition(SwingConstants.CENTER);
+            button.addActionListener(CollectionView.this::onPokemonSelection);
+            return button;
         }
     }
 

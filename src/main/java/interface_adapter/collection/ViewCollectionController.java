@@ -51,10 +51,9 @@ public class ViewCollectionController {
         application.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
         application.add(view, BorderLayout.CENTER);
-        application.setMinimumSize(new Dimension(700, 600));
+        application.setMinimumSize(new Dimension(1000, 800));
+        vcc.execute(user.getOwnedPokemon(), 0, "all");
         application.pack();
         application.setVisible(true);
-
-        vcc.execute(user.getOwnedPokemon(), 0, "all");
     }
 }

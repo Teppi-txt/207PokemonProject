@@ -12,7 +12,7 @@ import java.util.Objects;
 public class ViewCollectionInteractor implements ViewCollectionInputBoundary {
     private ViewCollectionOutputBoundary viewCollectionPresenter;
     private User user;
-    private final int PAGE_SIZE = 25;
+    private final int PAGE_SIZE = 20;
 
     public ViewCollectionInteractor(ViewCollectionOutputBoundary viewCollectionPresenter, User user) {
         this.viewCollectionPresenter = viewCollectionPresenter;
@@ -23,7 +23,6 @@ public class ViewCollectionInteractor implements ViewCollectionInputBoundary {
     public void execute(ViewCollectionInputData viewCollectionInputData) {
         String filter = viewCollectionInputData.getFilter();
         int currentPage = Math.max(viewCollectionInputData.getCurrentPage(), 0);
-        List<Pokemon> currentPokemon = viewCollectionInputData.getPokemonOnPage();
 
         ViewCollectionOutputData outputData = new ViewCollectionOutputData();
 
@@ -36,9 +35,11 @@ public class ViewCollectionInteractor implements ViewCollectionInputBoundary {
             outputData.setPokemonOnPage(new ArrayList<>());
         }
 
-        outputData.setOwnedPokemon(user.getOwnedPokemon());
-        outputData.setSelectedPokemon(JSONLoader.allPokemon.get(1));
-        viewCollectionPresenter.prepareSuccessView(outputData);
+        if (!outputData.getPokemonOnPage().isEmpty()) {
+            outputData.setOwnedPokemon(user.getOwnedPokemon());
+            outputData.setSelectedPokemon(outputData.getPokemonOnPage().get(0));
+            viewCollectionPresenter.prepareSuccessView(outputData);
+        }
     }
 
     private List<Pokemon> getPokemonList(String filter) {
