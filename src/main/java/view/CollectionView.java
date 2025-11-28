@@ -20,9 +20,9 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
 
-public class CollectionView extends JPanel implements PropertyChangeListener, ActionListener {
-    final PokemonInfoPanel pokemonInfoPanel;
-    final PokemonCollectionPanel pokemonCollectionPanel;
+public class CollectionView extends JPanel implements PropertyChangeListener {
+    private final PokemonInfoPanel pokemonInfoPanel;
+    private final PokemonCollectionPanel pokemonCollectionPanel;
     private final ViewCollectionViewModel collectionViewModel;
     private ViewCollectionController controller;
 
@@ -32,7 +32,7 @@ public class CollectionView extends JPanel implements PropertyChangeListener, Ac
     private String filter = "all";
     private int currentPage = 0;
 
-    public CollectionView(ViewCollectionViewModel collectionViewModel) {
+    public CollectionView(final ViewCollectionViewModel collectionViewModel) {
         this.collectionViewModel = collectionViewModel;
         this.collectionViewModel.addPropertyChangeListener(this);
 
@@ -73,10 +73,6 @@ public class CollectionView extends JPanel implements PropertyChangeListener, Ac
         pokemonInfoPanel.setPokemon(pokemonOnPage.get(index));
     }
 
-    @Override
-    public void actionPerformed(ActionEvent e) {
-
-    }
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
@@ -249,11 +245,7 @@ public class CollectionView extends JPanel implements PropertyChangeListener, Ac
 
 
         private void updatePageNumbers() {
-            if (currentPage == 0) {
-                backButton.setEnabled(false);
-            } else {
-                backButton.setEnabled(true);
-            }
+            backButton.setEnabled(currentPage != 0);
             pageLabel.setText(String.valueOf(currentPage));
         }
 

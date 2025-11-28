@@ -56,4 +56,8 @@ public class ViewCollectionController {
         application.pack();
         application.setVisible(true);
     }
+
+    public void switchToHomeView() {
+        interactor.switchToHomeView();
+    }
 }

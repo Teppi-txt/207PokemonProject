@@ -69,4 +69,8 @@ public class ViewCollectionInteractor implements ViewCollectionInputBoundary {
         }
         return shinyPokemon;
     }
+
+    public void switchToHomeView() {
+        viewCollectionPresenter.switchToHomeView();
+    }
 }

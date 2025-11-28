@@ -14,4 +14,6 @@ public interface ViewCollectionOutputBoundary {
      * @param errorMessage the explanation of the failure
      */
     void prepareFailView(String errorMessage);
+
+    void switchToHomeView();
 }
