@@ -2,9 +2,9 @@ package view;
 
 import entities.Pokemon;
 import entities.Stats;
-import interface_adapter.collection.ViewCollectionController;
-import interface_adapter.collection.ViewCollectionState;
-import interface_adapter.collection.ViewCollectionViewModel;
+import interface_adapters.collection.ViewCollectionController;
+import interface_adapters.collection.ViewCollectionState;
+import interface_adapters.collection.ViewCollectionViewModel;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
@@ -16,18 +16,17 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
 
 public class CollectionView extends JPanel implements PropertyChangeListener, ActionListener {
-    static final JFrame application  = new JFrame("Pokemon Collection Example");
-
     final PokemonInfoPanel pokemonInfoPanel;
     final PokemonCollectionPanel pokemonCollectionPanel;
     private final ViewCollectionViewModel collectionViewModel;
     private ViewCollectionController controller;
 
-    private Pokemon selectedPokemon;
+
     private List<Pokemon> pokemonOnPage;
     private List<Pokemon> ownedPokemon;
     private String filter = "all";
@@ -49,7 +48,6 @@ public class CollectionView extends JPanel implements PropertyChangeListener, Ac
         final JButton returnButton = new JButton("Back to menu:");
         returnButton.setFont(new Font(title.getFont().getFontName(), Font.PLAIN, 18));
         returnButton.setAlignmentX(Component.CENTER_ALIGNMENT);
-
         returnButton.setBorder(new EmptyBorder(10, 10, 10, 10));
 
         final JPanel body = new JPanel();
@@ -84,7 +82,6 @@ public class CollectionView extends JPanel implements PropertyChangeListener, Ac
     public void propertyChange(PropertyChangeEvent evt) {
         final ViewCollectionState state = (ViewCollectionState) evt.getNewValue();
         this.pokemonOnPage = state.getPokemonOnPage();
-        this.selectedPokemon = state.getSelectedPokemon();
         this.ownedPokemon = state.getOwnedPokemon();
         updatePanel(state);
     }
@@ -168,10 +165,6 @@ public class CollectionView extends JPanel implements PropertyChangeListener, Ac
 
     public class PokemonFilterPanel extends JPanel {
 
-        private final JToggleButton allButton;
-        private final JToggleButton ownedButton;
-        private final JToggleButton shinyButton;
-
         private void onFilterChanged(ActionEvent e) {
             filter = e.getActionCommand().toLowerCase();
             currentPage = 0;
@@ -181,9 +174,9 @@ public class CollectionView extends JPanel implements PropertyChangeListener, Ac
         public PokemonFilterPanel() {
             setLayout(new FlowLayout(FlowLayout.LEFT, 8, 4));
 
-            allButton   = new JToggleButton("All");
-            ownedButton = new JToggleButton("Owned");
-            shinyButton = new JToggleButton("Shiny");
+            JToggleButton allButton = new JToggleButton("All");
+            JToggleButton ownedButton = new JToggleButton("Owned");
+            JToggleButton shinyButton = new JToggleButton("Shiny");
 
             ButtonGroup group = new ButtonGroup();
             group.add(allButton);
@@ -191,41 +184,46 @@ public class CollectionView extends JPanel implements PropertyChangeListener, Ac
             group.add(shinyButton);
             allButton.setSelected(true);
 
-            allButton.setActionCommand("ALL");
-            ownedButton.setActionCommand("OWNED");
-            shinyButton.setActionCommand("SHINY");
+            Enumeration<AbstractButton> buttons = group.getElements();
 
-            allButton.addActionListener(this::onFilterChanged);
-            ownedButton.addActionListener(this::onFilterChanged);
-            shinyButton.addActionListener(this::onFilterChanged);
-
-            add(allButton);
-            add(ownedButton);
-            add(shinyButton);
+            while (buttons.hasMoreElements()) {
+                AbstractButton button = buttons.nextElement();
+                button.setActionCommand(button.getText().toUpperCase());
+                button.addActionListener(this::onFilterChanged);
+                add(button);
+            }
         }
     }
 
     public class PokemonCollectionPanel extends JPanel {
-        private final JPanel pokemonPanel;
-        private final Label pageLabel;
-        private final JButton backButton;
+        private JPanel pokemonPanel;
+        private JPanel filterPanel;
+        private JPanel pageButtonPanel;
+        private JButton backButton;
+        private Label pageLabel;
 
         public PokemonCollectionPanel() {
-            this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+            setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+            createPanels();
+            createPageButtons();
 
+            add(filterPanel);
+            add(pokemonPanel);
+            add(pageButtonPanel);
+        }
+
+        private void createPanels() {
             pokemonPanel = new JPanel();
-            pokemonPanel.setMinimumSize(new Dimension(600, 600));
+            pokemonPanel.setMinimumSize(new Dimension(600, 1000));
 
-            JPanel filterPanel = new PokemonFilterPanel();
-            JPanel pageButtonPanel = new JPanel();
+            filterPanel = new PokemonFilterPanel();
+            pageButtonPanel = new JPanel();
+        }
 
-            this.add(filterPanel);
-            this.add(pokemonPanel);
-
-            backButton = new JButton("Prev");
-            backButton.setEnabled(false);
-            backButton.addActionListener(e -> {
+        private void createPageButtons() {
+            backButton = createButton("Prev", false, e -> {
                 currentPage--;
+                updatePageNumbers();
                 controller.execute(pokemonOnPage, currentPage, filter);
             });
             pageButtonPanel.add(backButton);
@@ -234,14 +232,21 @@ public class CollectionView extends JPanel implements PropertyChangeListener, Ac
             pageLabel.setAlignment(Label.CENTER);
             pageButtonPanel.add(pageLabel);
 
-            JButton nextButton = new JButton("Next");
-            nextButton.addActionListener(e -> {
+            JButton nextButton = createButton("Next", true, e -> {
                 currentPage++;
+                updatePageNumbers();
                 controller.execute(pokemonOnPage, currentPage, filter);
             });
             pageButtonPanel.add(nextButton);
-            this.add(pageButtonPanel);
         }
+
+        private JButton createButton(String text, boolean enabled, ActionListener listener) {
+            JButton button = new JButton(text);
+            button.setEnabled(enabled);
+            button.addActionListener(listener);
+            return button;
+        }
+
 
         private void updatePageNumbers() {
             if (currentPage == 0) {
@@ -258,7 +263,7 @@ public class CollectionView extends JPanel implements PropertyChangeListener, Ac
 
             // Add buttons to the frame
             for (int i = 0; i < pokemons.size(); i++) {
-                ImageIcon pokeIcon = new ImageIcon();
+                ImageIcon pokeIcon;
                 try {
                     pokeIcon = new ImageIcon(new URL(pokemons.get(i).getSpriteUrl()));
                     if (!pokemonIsInList(pokemons.get(i), ownedPokemon)) {

@@ -1,9 +1,6 @@
-package interface_adapter.collection;
+package interface_adapters.collection;
 
-import entities.Pokemon;
-import interface_adapter.ViewModel;
-
-import java.util.ArrayList;
+import interface_adapters.ViewModel;
 
 public class ViewCollectionViewModel extends ViewModel<ViewCollectionState> {
     public ViewCollectionViewModel() {

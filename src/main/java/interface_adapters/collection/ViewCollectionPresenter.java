@@ -1,8 +1,7 @@
-package interface_adapter.collection;
+package interface_adapters.collection;
 
 import use_case.collection.ViewCollectionOutputBoundary;
 import use_case.collection.ViewCollectionOutputData;
-import interface_adapter.ViewModel;
 
 public class ViewCollectionPresenter implements ViewCollectionOutputBoundary {
     private final ViewCollectionViewModel viewCollectionViewModel;
@@ -17,7 +16,7 @@ public class ViewCollectionPresenter implements ViewCollectionOutputBoundary {
         viewCollectionState.setSelectedPokemon(outputData.getSelectedPokemon());
         viewCollectionState.setPokemonOnPage(outputData.getPokemonOnPage());
         viewCollectionState.setOwnedPokemon(outputData.getOwnedPokemon());
-        this.viewCollectionViewModel.firePropertyChange();
+        this.viewCollectionViewModel.firePropertyChanged();
     }
 
     @Override
@@ -26,6 +25,6 @@ public class ViewCollectionPresenter implements ViewCollectionOutputBoundary {
         viewCollectionState.setSelectedPokemon(null);
         viewCollectionState.setPokemonOnPage(null);
         viewCollectionState.setOwnedPokemon(null);
-        this.viewCollectionViewModel.firePropertyChange();
+        this.viewCollectionViewModel.firePropertyChanged();
     }
 }
