@@ -4,6 +4,7 @@ import entities.Pokemon;
 import entities.User;
 import interface_adapters.battle_ai.BattleAIController;
 import interface_adapters.ui.*;
+import view.BattleMovesetSelectionView;
 
 import javax.swing.*;
 import java.awt.*;
@@ -229,13 +230,34 @@ public class DeckSelectionView extends JFrame {
 
     private void startBattle() {
         String difficulty = ((String) difficultyCombo.getSelectedItem()).toLowerCase();
-        controller.startBattle(user, selectedDeck, difficulty);
 
-        // Open battle view with return callback
-        BattleAIView battleView = new BattleAIView(controller, returnCallback);
-        battleView.setViewModel(controller.getViewModel());
-        battleView.setVisible(true);
-        dispose();
+        // Create copies of selected Pokemon for battle (to preserve originals)
+        List<Pokemon> battleDeck = new ArrayList<>();
+        for (Pokemon p : selectedDeck) {
+            battleDeck.add(p.copy());
+        }
+
+        // Show moveset selection view before battle
+        Runnable onMovesetComplete = () -> {
+            // Now start the actual battle with selected movesets
+            controller.startBattle(user, battleDeck, difficulty);
+
+            // Open battle view with return callback
+            BattleAIView battleView = new BattleAIView(controller, returnCallback);
+            battleView.setViewModel(controller.getViewModel());
+            battleView.setVisible(true);
+        };
+
+        Runnable onMovesetCancel = () -> {
+            // User cancelled - go back to this view
+            this.setVisible(true);
+        };
+
+        BattleMovesetSelectionView movesetView = new BattleMovesetSelectionView(
+            battleDeck, onMovesetComplete, onMovesetCancel
+        );
+        movesetView.setVisible(true);
+        this.setVisible(false);
     }
 
     private String capitalize(String str) {

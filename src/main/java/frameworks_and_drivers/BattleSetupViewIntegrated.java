@@ -6,6 +6,7 @@ import interface_adapters.battle_player.BattlePlayerPresenter;
 import interface_adapters.battle_player.BattlePlayerViewModel;
 import interface_adapters.ui.*;
 import use_case.battle_player.BattlePlayerInteractor;
+import view.BattleMovesetSelectionView;
 
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
@@ -278,11 +279,48 @@ public class BattleSetupViewIntegrated extends JFrame {
         if (player1Name.isEmpty()) player1Name = "Player 1";
         if (player2Name.isEmpty()) player2Name = "Player 2";
 
+        final String p1Name = player1Name;
+        final String p2Name = player2Name;
+
+        // Show moveset selection for Player 1 first
+        Runnable onPlayer1Complete = () -> {
+            // Then show moveset selection for Player 2
+            Runnable onPlayer2Complete = () -> {
+                // Both players have selected movesets - start the actual battle
+                startActualBattle(p1Name, p2Name);
+            };
+
+            Runnable onPlayer2Cancel = () -> {
+                // Player 2 cancelled - go back to setup
+                this.setVisible(true);
+            };
+
+            BattleMovesetSelectionView player2MovesetView = new BattleMovesetSelectionView(
+                player2Deck, onPlayer2Complete, onPlayer2Cancel
+            );
+            player2MovesetView.setTitle("Player 2 (" + p2Name + ") - Select Moves");
+            player2MovesetView.setVisible(true);
+        };
+
+        Runnable onPlayer1Cancel = () -> {
+            // Player 1 cancelled - go back to setup
+            this.setVisible(true);
+        };
+
+        BattleMovesetSelectionView player1MovesetView = new BattleMovesetSelectionView(
+            player1Deck, onPlayer1Complete, onPlayer1Cancel
+        );
+        player1MovesetView.setTitle("Player 1 (" + p1Name + ") - Select Moves");
+        player1MovesetView.setVisible(true);
+        this.setVisible(false);
+    }
+
+    private void startActualBattle(String player1Name, String player2Name) {
         // Create users for the battle
         User user1 = new User(1, player1Name, "player1@battle.com", 0);
         User user2 = new User(2, player2Name, "player2@battle.com", 0);
 
-        // Add selected Pokemon to each user
+        // Add selected Pokemon (with selected movesets) to each user
         for (Pokemon p : player1Deck) {
             user1.addPokemon(p);
         }

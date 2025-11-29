@@ -1,8 +1,10 @@
 package entities;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
-public class Deck {
+public class Deck implements Serializable {
+    private static final long serialVersionUID = 1L;
     private static final int DECK_LIMIT = 5; //idk tbh we can change as needed
 
     private int id;
