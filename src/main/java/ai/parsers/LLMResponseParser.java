@@ -4,6 +4,7 @@ import ai.graph.BattleDecisionState;
 import ai.graph.Decision;
 import entities.Move;
 import entities.Pokemon;
+import pokeapi.JSONLoader;
 
 import java.util.List;
 import java.util.regex.Matcher;
@@ -67,7 +68,20 @@ public class LLMResponseParser {
         }
 
         String moveName = moves.get(moveIndex);
-        Move selectedMove = new Move().setName(moveName);
+
+        // Look up the full move from JSONLoader to get power and other properties
+        Move selectedMove = null;
+        for (Move move : JSONLoader.allMoves) {
+            if (move.getName().equalsIgnoreCase(moveName)) {
+                selectedMove = move;
+                break;
+            }
+        }
+
+        // If move not found, create a basic move with default power
+        if (selectedMove == null) {
+            selectedMove = new Move().setName(moveName).setPower(50);
+        }
 
         return Decision.move(selectedMove, reasoning, confidence);
     }

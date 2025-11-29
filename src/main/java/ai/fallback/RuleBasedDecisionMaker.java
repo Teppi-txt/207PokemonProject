@@ -4,6 +4,7 @@ import ai.graph.BattleDecisionState;
 import ai.graph.Decision;
 import entities.Move;
 import entities.Pokemon;
+import pokeapi.JSONLoader;
 
 import java.util.List;
 import java.util.Random;
@@ -28,7 +29,10 @@ public class RuleBasedDecisionMaker {
         // Easy: Just pick a random move
         List<String> moves = activePokemon.getMoves();
         int randomIndex = random.nextInt(moves.size());
-        Move selectedMove = new Move().setName(moves.get(randomIndex));
+        String moveName = moves.get(randomIndex);
+
+        // Look up the full move from JSONLoader
+        Move selectedMove = lookupMove(moveName);
 
         return Decision.move(selectedMove, "Random move selection (Easy difficulty)", 0.3);
     }
@@ -59,7 +63,7 @@ public class RuleBasedDecisionMaker {
             }
         }
 
-        Move selectedMove = new Move().setName(selectedMoveName);
+        Move selectedMove = lookupMove(selectedMoveName);
         return Decision.move(selectedMove, "Selected move based on type matchup (Medium difficulty)", 0.6);
     }
 
@@ -92,7 +96,7 @@ public class RuleBasedDecisionMaker {
             }
         }
 
-        Move selectedMove = new Move().setName(selectedMoveName);
+        Move selectedMove = lookupMove(selectedMoveName);
         return Decision.move(selectedMove, reasoning, 0.8);
     }
 
@@ -146,5 +150,20 @@ public class RuleBasedDecisionMaker {
             default:
                 return decideMoveMedium(state);
         }
+    }
+
+    /**
+     * Helper method to look up a move from JSONLoader by name
+     */
+    private static Move lookupMove(String moveName) {
+        // Look up the full move from JSONLoader to get power and other properties
+        for (Move move : JSONLoader.allMoves) {
+            if (move.getName().equalsIgnoreCase(moveName)) {
+                return move;
+            }
+        }
+
+        // If move not found, create a basic move with default power
+        return new Move().setName(moveName).setPower(50);
     }
 }
