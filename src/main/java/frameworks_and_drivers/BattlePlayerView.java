@@ -532,7 +532,7 @@ public class BattlePlayerView extends JFrame implements PropertyChangeListener {
                 try {
                     // Try animated GIF first
                     // Use back sprite for Player 1, front sprite for Player 2
-                    String animatedUrl = isPlayer1 ? pokemon.getAnimatedBackSpriteUrl() : pokemon.getAnimatedSpriteUrl();
+                    String animatedUrl = isPlayer1 ? pokemon.getBackGIF() : pokemon.getFrontGIF();
                     if (animatedUrl.endsWith(".gif")) {
                         URL url = new URL(animatedUrl);
                         // For GIFs, load directly as ImageIcon to preserve animation

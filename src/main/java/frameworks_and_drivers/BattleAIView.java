@@ -568,7 +568,7 @@ public class BattleAIView extends JFrame implements BattleAIViewModel.ViewModelL
                 try {
                     // Try animated GIF first
                     // Use back sprite for player's Pokemon, front sprite for AI
-                    String animatedUrl = isPlayer ? pokemon.getAnimatedBackSpriteUrl() : pokemon.getAnimatedSpriteUrl();
+                    String animatedUrl = isPlayer ? pokemon.getBackGIF() : pokemon.getFrontGIF();
                     if (animatedUrl.endsWith(".gif")) {
                         URL url = new URL(animatedUrl);
                         // For GIFs, load directly as ImageIcon to preserve animation
