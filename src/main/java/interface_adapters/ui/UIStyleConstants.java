@@ -5,20 +5,38 @@ import java.util.Map;
 
 /**
  * Centralized UI styling constants for consistent visual design across all views.
- * Provides color palette, typography, spacing, and Pokemon type colors.
+ * Retro Pokemon 64-bit theme inspired by classic Pokemon games.
  */
 public class UIStyleConstants {
 
-    // ============ COLOR PALETTE ============
-    public static final Color PRIMARY_COLOR = new Color(59, 76, 202);        // Pokemon blue
-    public static final Color SECONDARY_COLOR = new Color(255, 203, 5);      // Pokemon yellow
-    public static final Color BACKGROUND = new Color(245, 245, 245);         // Light gray
-    public static final Color CARD_BG = Color.WHITE;                         // White
-    public static final Color HP_HIGH = new Color(76, 175, 80);              // Green
-    public static final Color HP_MEDIUM = new Color(255, 193, 7);            // Yellow/Orange
-    public static final Color HP_LOW = new Color(244, 67, 54);               // Red
-    public static final Color TEXT_PRIMARY = new Color(33, 33, 33);          // Dark gray
-    public static final Color TEXT_SECONDARY = new Color(117, 117, 117);     // Medium gray
+    // ============ RETRO POKEMON COLOR PALETTE ============
+    // Classic Pokemon Red/Blue inspired colors
+    public static final Color PRIMARY_COLOR = new Color(200, 56, 56);        // Pokemon Red
+    public static final Color PRIMARY_DARK = new Color(168, 40, 40);         // Darker red for borders
+    public static final Color SECONDARY_COLOR = new Color(255, 203, 5);      // Pokemon Yellow
+    public static final Color POKEMON_BLUE = new Color(48, 80, 200);         // Pokemon Blue
+    public static final Color POKEMON_BLUE_LIGHT = new Color(88, 128, 232);  // Lighter blue
+
+    // Retro game-style backgrounds
+    public static final Color BACKGROUND = new Color(248, 248, 248);         // Off-white like old games
+    public static final Color MENU_BG = new Color(248, 248, 216);            // Cream/tan menu background
+    public static final Color CARD_BG = new Color(255, 255, 255);            // White
+    public static final Color DARK_BG = new Color(40, 40, 40);               // Dark background
+
+    // HP Colors (classic Pokemon style)
+    public static final Color HP_HIGH = new Color(56, 168, 72);              // Classic green
+    public static final Color HP_MEDIUM = new Color(248, 176, 32);           // Classic yellow
+    public static final Color HP_LOW = new Color(240, 64, 56);               // Classic red
+
+    // Text colors
+    public static final Color TEXT_PRIMARY = new Color(40, 40, 40);          // Near black
+    public static final Color TEXT_SECONDARY = new Color(96, 96, 96);        // Dark gray
+    public static final Color TEXT_LIGHT = new Color(248, 248, 248);         // Off-white
+
+    // Retro border colors
+    public static final Color BORDER_DARK = new Color(64, 64, 64);           // Dark border
+    public static final Color BORDER_LIGHT = new Color(192, 192, 192);       // Light border
+    public static final Color SHADOW_COLOR = new Color(88, 88, 88);          // Shadow effect
 
     // ============ POKEMON TYPE COLORS ============
     public static final Map<String, Color> TYPE_COLORS = Map.ofEntries(
@@ -42,12 +60,15 @@ public class UIStyleConstants {
             Map.entry("fairy", new Color(238, 153, 172))
     );
 
-    // ============ TYPOGRAPHY ============
-    public static final Font TITLE_FONT = new Font("Segoe UI", Font.BOLD, 24);
-    public static final Font HEADING_FONT = new Font("Segoe UI", Font.BOLD, 18);
-    public static final Font BODY_FONT = new Font("Segoe UI", Font.PLAIN, 14);
-    public static final Font SMALL_FONT = new Font("Segoe UI", Font.PLAIN, 12);
-    public static final Font EXTRA_LARGE_FONT = new Font("Segoe UI", Font.BOLD, 48);
+    // ============ RETRO TYPOGRAPHY ============
+    // Use monospace/pixel-style fonts for retro feel
+    public static final Font TITLE_FONT = new Font("Courier New", Font.BOLD, 28);
+    public static final Font HEADING_FONT = new Font("Courier New", Font.BOLD, 18);
+    public static final Font BODY_FONT = new Font("Courier New", Font.BOLD, 14);
+    public static final Font SMALL_FONT = new Font("Courier New", Font.PLAIN, 12);
+    public static final Font EXTRA_LARGE_FONT = new Font("Courier New", Font.BOLD, 36);
+    public static final Font PIXEL_FONT = new Font("Monospaced", Font.BOLD, 16);
+    public static final Font MENU_FONT = new Font("Courier New", Font.BOLD, 20);
 
     // ============ SPACING ============
     public static final int SMALL_PADDING = 8;

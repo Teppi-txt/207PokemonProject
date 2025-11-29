@@ -2,21 +2,26 @@ package view;
 
 import entities.User;
 import interface_adapters.ViewManagerModel;
-import interface_adapters.ui.StyledButton;
+import interface_adapters.ui.RetroButton;
 import interface_adapters.ui.UIStyleConstants;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.io.File;
 
 /**
- * Main menu view - the home screen of the Pokemon application.
- * Displays user info and navigation buttons to all features.
+ * Retro Pokemon-themed main menu view.
+ * Features pixel art aesthetic with Pokemon logo and Charizard images.
  */
 public class MainMenuView extends JPanel implements PropertyChangeListener {
 
     public static final String VIEW_NAME = "main_menu";
+    private static final String POKEMON_LOGO_PATH = "src/assets/pokemon.png";
+    private static final String CHARIZARD_PATH = "src/assets/charizard.png";
 
     private final User user;
     private JLabel currencyLabel;
@@ -31,155 +36,292 @@ public class MainMenuView extends JPanel implements PropertyChangeListener {
         viewManagerModel.addPropertyChangeListener(this);
 
         setLayout(new BorderLayout());
-        setBackground(UIStyleConstants.BACKGROUND);
+        setBackground(UIStyleConstants.DARK_BG);
 
-        add(createTitlePanel(), BorderLayout.NORTH);
-        add(createMenuPanel(), BorderLayout.CENTER);
+        add(createHeaderPanel(), BorderLayout.NORTH);
+        add(createMainPanel(), BorderLayout.CENTER);
         add(createFooterPanel(), BorderLayout.SOUTH);
     }
 
-    private JPanel createTitlePanel() {
-        JPanel panel = new JPanel();
-        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-        panel.setBackground(UIStyleConstants.PRIMARY_COLOR);
-        panel.setBorder(BorderFactory.createEmptyBorder(40, 20, 40, 20));
+    private JPanel createHeaderPanel() {
+        JPanel panel = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                Graphics2D g2d = (Graphics2D) g;
+                // Gradient background - dark blue to red (Pokemon theme)
+                GradientPaint gradient = new GradientPaint(
+                    0, 0, new Color(20, 40, 80),
+                    0, getHeight(), UIStyleConstants.PRIMARY_COLOR
+                );
+                g2d.setPaint(gradient);
+                g2d.fillRect(0, 0, getWidth(), getHeight());
 
-        JLabel title = new JLabel("POKEMON BATTLE GAME");
-        title.setFont(UIStyleConstants.EXTRA_LARGE_FONT);
-        title.setForeground(UIStyleConstants.SECONDARY_COLOR);
-        title.setAlignmentX(Component.CENTER_ALIGNMENT);
-        panel.add(title);
+                // Add pixel-style border at bottom
+                g2d.setColor(UIStyleConstants.SECONDARY_COLOR);
+                for (int i = 0; i < 4; i++) {
+                    g2d.drawLine(0, getHeight() - 1 - i, getWidth(), getHeight() - 1 - i);
+                }
+            }
+        };
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        panel.setPreferredSize(new Dimension(0, 200));
+
+        // Pokemon Logo
+        try {
+            BufferedImage logoImage = ImageIO.read(new File(POKEMON_LOGO_PATH));
+            int logoWidth = 350;
+            int logoHeight = (int) ((double) logoImage.getHeight() / logoImage.getWidth() * logoWidth);
+            Image scaledLogo = logoImage.getScaledInstance(logoWidth, logoHeight, Image.SCALE_SMOOTH);
+            JLabel logoLabel = new JLabel(new ImageIcon(scaledLogo));
+            logoLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+            panel.add(logoLabel);
+        } catch (Exception e) {
+            // Fallback to text title
+            JLabel title = new JLabel("POKEMON");
+            title.setFont(new Font("Courier New", Font.BOLD, 48));
+            title.setForeground(UIStyleConstants.SECONDARY_COLOR);
+            title.setAlignmentX(Component.CENTER_ALIGNMENT);
+            panel.add(title);
+        }
 
         panel.add(Box.createVerticalStrut(10));
 
-        JLabel subtitle = new JLabel("Collect, Build, Battle!");
-        subtitle.setFont(UIStyleConstants.HEADING_FONT);
-        subtitle.setForeground(Color.WHITE);
+        JLabel subtitle = new JLabel("BATTLE GAME");
+        subtitle.setFont(new Font("Courier New", Font.BOLD, 24));
+        subtitle.setForeground(UIStyleConstants.TEXT_LIGHT);
         subtitle.setAlignmentX(Component.CENTER_ALIGNMENT);
         panel.add(subtitle);
 
         return panel;
     }
 
-    private JPanel createMenuPanel() {
-        JPanel container = new JPanel(new GridBagLayout());
-        container.setBackground(UIStyleConstants.BACKGROUND);
+    private JPanel createMainPanel() {
+        JPanel container = new JPanel(new BorderLayout());
+        container.setBackground(UIStyleConstants.DARK_BG);
 
-        JPanel menuPanel = new JPanel();
-        menuPanel.setLayout(new BoxLayout(menuPanel, BoxLayout.Y_AXIS));
-        menuPanel.setBackground(UIStyleConstants.BACKGROUND);
-        menuPanel.setBorder(BorderFactory.createEmptyBorder(30, 50, 30, 50));
+        // Left side - Charizard image
+        JPanel leftPanel = createCharizardPanel();
+        container.add(leftPanel, BorderLayout.WEST);
 
-        // User info panel
-        JPanel userInfoPanel = createUserInfoPanel();
-        userInfoPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
-        menuPanel.add(userInfoPanel);
+        // Center - Menu
+        JPanel menuPanel = createMenuPanel();
+        container.add(menuPanel, BorderLayout.CENTER);
 
-        menuPanel.add(Box.createVerticalStrut(30));
+        // Right side - User info
+        JPanel rightPanel = createUserInfoPanel();
+        container.add(rightPanel, BorderLayout.EAST);
 
-        // Menu buttons
-        JButton collectionBtn = createMenuButton("View Collection", "Browse your Pokemon collection", true);
-        collectionBtn.addActionListener(e -> {
-            if (onCollectionClick != null) onCollectionClick.run();
-        });
-        menuPanel.add(collectionBtn);
-        menuPanel.add(Box.createVerticalStrut(15));
-
-        // Open Pack button - disabled placeholder for future implementation
-        JButton openPackBtn = createMenuButton("Open Pack", "Coming Soon - Spend currency to get new Pokemon", false);
-        openPackBtn.setEnabled(false);
-        openPackBtn.addActionListener(e -> {
-            if (onOpenPackClick != null) onOpenPackClick.run();
-        });
-        menuPanel.add(openPackBtn);
-        menuPanel.add(Box.createVerticalStrut(15));
-
-        JButton battleAIBtn = createMenuButton("Battle AI", "Battle against computer opponent", true);
-        battleAIBtn.addActionListener(e -> {
-            if (onBattleAIClick != null) onBattleAIClick.run();
-        });
-        menuPanel.add(battleAIBtn);
-        menuPanel.add(Box.createVerticalStrut(15));
-
-        JButton battlePlayerBtn = createMenuButton("Battle Player", "Local 2-player battle", true);
-        battlePlayerBtn.addActionListener(e -> {
-            if (onBattlePlayerClick != null) onBattlePlayerClick.run();
-        });
-        menuPanel.add(battlePlayerBtn);
-
-        container.add(menuPanel);
         return container;
     }
 
-    private JPanel createUserInfoPanel() {
+    private JPanel createCharizardPanel() {
         JPanel panel = new JPanel();
-        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-        panel.setBackground(UIStyleConstants.CARD_BG);
-        panel.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(UIStyleConstants.PRIMARY_COLOR, 2),
-            BorderFactory.createEmptyBorder(15, 30, 15, 30)
-        ));
+        panel.setBackground(UIStyleConstants.DARK_BG);
+        panel.setPreferredSize(new Dimension(250, 0));
+        panel.setLayout(new GridBagLayout());
 
-        JLabel welcomeLabel = new JLabel("Welcome, " + user.getName() + "!");
-        welcomeLabel.setFont(UIStyleConstants.HEADING_FONT);
-        welcomeLabel.setForeground(UIStyleConstants.TEXT_PRIMARY);
-        welcomeLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-        panel.add(welcomeLabel);
-
-        panel.add(Box.createVerticalStrut(10));
-
-        currencyLabel = new JLabel("Currency: " + user.getCurrency());
-        currencyLabel.setFont(UIStyleConstants.BODY_FONT);
-        currencyLabel.setForeground(UIStyleConstants.TEXT_SECONDARY);
-        currencyLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-        panel.add(currencyLabel);
-
-        pokemonCountLabel = new JLabel("Pokemon Owned: " + user.getOwnedPokemon().size());
-        pokemonCountLabel.setFont(UIStyleConstants.BODY_FONT);
-        pokemonCountLabel.setForeground(UIStyleConstants.TEXT_SECONDARY);
-        pokemonCountLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-        panel.add(pokemonCountLabel);
+        try {
+            BufferedImage charizardImage = ImageIO.read(new File(CHARIZARD_PATH));
+            int imgWidth = 200;
+            int imgHeight = (int) ((double) charizardImage.getHeight() / charizardImage.getWidth() * imgWidth);
+            Image scaledImg = charizardImage.getScaledInstance(imgWidth, imgHeight, Image.SCALE_SMOOTH);
+            JLabel imgLabel = new JLabel(new ImageIcon(scaledImg));
+            panel.add(imgLabel);
+        } catch (Exception e) {
+            // No image fallback
+        }
 
         return panel;
     }
 
-    private JButton createMenuButton(String title, String description, boolean enabled) {
-        JPanel buttonContent = new JPanel();
-        buttonContent.setLayout(new BoxLayout(buttonContent, BoxLayout.Y_AXIS));
-        buttonContent.setOpaque(false);
+    private JPanel createMenuPanel() {
+        JPanel outerPanel = new JPanel(new GridBagLayout());
+        outerPanel.setBackground(UIStyleConstants.DARK_BG);
 
-        JLabel titleLabel = new JLabel(title);
-        titleLabel.setFont(UIStyleConstants.HEADING_FONT);
-        titleLabel.setForeground(Color.WHITE);
-        titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        // Retro menu box
+        JPanel menuBox = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                Graphics2D g2d = (Graphics2D) g;
 
-        JLabel descLabel = new JLabel(description);
-        descLabel.setFont(UIStyleConstants.SMALL_FONT);
-        descLabel.setForeground(new Color(200, 200, 200));
-        descLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+                int w = getWidth();
+                int h = getHeight();
+                int border = 6;
 
-        StyledButton button = new StyledButton("");
-        button.setLayout(new BoxLayout(button, BoxLayout.Y_AXIS));
-        button.add(Box.createVerticalStrut(10));
-        button.add(titleLabel);
-        button.add(Box.createVerticalStrut(5));
-        button.add(descLabel);
-        button.add(Box.createVerticalStrut(10));
+                // Outer border (white)
+                g2d.setColor(UIStyleConstants.TEXT_LIGHT);
+                g2d.fillRect(0, 0, w, h);
 
-        button.setPreferredSize(new Dimension(400, 70));
-        button.setMaximumSize(new Dimension(400, 70));
-        button.setAlignmentX(Component.CENTER_ALIGNMENT);
-        button.setEnabled(enabled);
+                // Dark border
+                g2d.setColor(UIStyleConstants.BORDER_DARK);
+                g2d.fillRect(border, border, w - border * 2, h - border * 2);
 
-        return button;
+                // Inner background (cream color like Pokemon menus)
+                g2d.setColor(UIStyleConstants.MENU_BG);
+                g2d.fillRect(border * 2, border * 2, w - border * 4, h - border * 4);
+
+                // 3D effect - light top-left
+                g2d.setColor(Color.WHITE);
+                g2d.drawLine(border * 2, border * 2, w - border * 2, border * 2);
+                g2d.drawLine(border * 2, border * 2, border * 2, h - border * 2);
+
+                // 3D effect - dark bottom-right
+                g2d.setColor(UIStyleConstants.SHADOW_COLOR);
+                g2d.drawLine(w - border * 2, border * 2, w - border * 2, h - border * 2);
+                g2d.drawLine(border * 2, h - border * 2, w - border * 2, h - border * 2);
+            }
+        };
+        menuBox.setLayout(new BoxLayout(menuBox, BoxLayout.Y_AXIS));
+        menuBox.setBorder(BorderFactory.createEmptyBorder(30, 40, 30, 40));
+        menuBox.setPreferredSize(new Dimension(380, 400));
+
+        // Menu title
+        JLabel menuTitle = new JLabel("- MAIN MENU -");
+        menuTitle.setFont(UIStyleConstants.HEADING_FONT);
+        menuTitle.setForeground(UIStyleConstants.TEXT_PRIMARY);
+        menuTitle.setAlignmentX(Component.CENTER_ALIGNMENT);
+        menuBox.add(menuTitle);
+
+        menuBox.add(Box.createVerticalStrut(25));
+
+        // Menu buttons
+        RetroButton collectionBtn = new RetroButton("VIEW COLLECTION");
+        collectionBtn.setButtonColor(UIStyleConstants.POKEMON_BLUE);
+        collectionBtn.setPreferredSize(new Dimension(280, 55));
+        collectionBtn.setMaximumSize(new Dimension(280, 55));
+        collectionBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
+        collectionBtn.addActionListener(e -> {
+            if (onCollectionClick != null) onCollectionClick.run();
+        });
+        menuBox.add(collectionBtn);
+
+        menuBox.add(Box.createVerticalStrut(15));
+
+        RetroButton openPackBtn = new RetroButton("OPEN PACK");
+        openPackBtn.setButtonColor(Color.GRAY);
+        openPackBtn.setPreferredSize(new Dimension(280, 55));
+        openPackBtn.setMaximumSize(new Dimension(280, 55));
+        openPackBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
+        openPackBtn.setEnabled(false);
+        openPackBtn.addActionListener(e -> {
+            if (onOpenPackClick != null) onOpenPackClick.run();
+        });
+        menuBox.add(openPackBtn);
+
+        menuBox.add(Box.createVerticalStrut(15));
+
+        RetroButton battleAIBtn = new RetroButton("BATTLE vs AI");
+        battleAIBtn.setButtonColor(UIStyleConstants.PRIMARY_COLOR);
+        battleAIBtn.setPreferredSize(new Dimension(280, 55));
+        battleAIBtn.setMaximumSize(new Dimension(280, 55));
+        battleAIBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
+        battleAIBtn.addActionListener(e -> {
+            if (onBattleAIClick != null) onBattleAIClick.run();
+        });
+        menuBox.add(battleAIBtn);
+
+        menuBox.add(Box.createVerticalStrut(15));
+
+        RetroButton battlePlayerBtn = new RetroButton("BATTLE vs PLAYER");
+        battlePlayerBtn.setButtonColor(new Color(80, 160, 80));
+        battlePlayerBtn.setPreferredSize(new Dimension(280, 55));
+        battlePlayerBtn.setMaximumSize(new Dimension(280, 55));
+        battlePlayerBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
+        battlePlayerBtn.addActionListener(e -> {
+            if (onBattlePlayerClick != null) onBattlePlayerClick.run();
+        });
+        menuBox.add(battlePlayerBtn);
+
+        outerPanel.add(menuBox);
+        return outerPanel;
+    }
+
+    private JPanel createUserInfoPanel() {
+        JPanel panel = new JPanel();
+        panel.setBackground(UIStyleConstants.DARK_BG);
+        panel.setPreferredSize(new Dimension(250, 0));
+        panel.setLayout(new GridBagLayout());
+
+        // User info box
+        JPanel infoBox = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                Graphics2D g2d = (Graphics2D) g;
+
+                int w = getWidth();
+                int h = getHeight();
+                int border = 4;
+
+                // Border
+                g2d.setColor(UIStyleConstants.SECONDARY_COLOR);
+                g2d.fillRect(0, 0, w, h);
+
+                // Inner background
+                g2d.setColor(new Color(40, 40, 60));
+                g2d.fillRect(border, border, w - border * 2, h - border * 2);
+            }
+        };
+        infoBox.setLayout(new BoxLayout(infoBox, BoxLayout.Y_AXIS));
+        infoBox.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        infoBox.setPreferredSize(new Dimension(200, 150));
+
+        JLabel trainerLabel = new JLabel("TRAINER");
+        trainerLabel.setFont(UIStyleConstants.BODY_FONT);
+        trainerLabel.setForeground(UIStyleConstants.SECONDARY_COLOR);
+        trainerLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        infoBox.add(trainerLabel);
+
+        infoBox.add(Box.createVerticalStrut(5));
+
+        JLabel nameLabel = new JLabel(user.getName());
+        nameLabel.setFont(UIStyleConstants.HEADING_FONT);
+        nameLabel.setForeground(UIStyleConstants.TEXT_LIGHT);
+        nameLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        infoBox.add(nameLabel);
+
+        infoBox.add(Box.createVerticalStrut(15));
+
+        currencyLabel = new JLabel("$ " + user.getCurrency());
+        currencyLabel.setFont(UIStyleConstants.BODY_FONT);
+        currencyLabel.setForeground(UIStyleConstants.SECONDARY_COLOR);
+        currencyLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        infoBox.add(currencyLabel);
+
+        infoBox.add(Box.createVerticalStrut(5));
+
+        pokemonCountLabel = new JLabel("POKeMON: " + user.getOwnedPokemon().size());
+        pokemonCountLabel.setFont(UIStyleConstants.BODY_FONT);
+        pokemonCountLabel.setForeground(UIStyleConstants.TEXT_LIGHT);
+        pokemonCountLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        infoBox.add(pokemonCountLabel);
+
+        panel.add(infoBox);
+        return panel;
     }
 
     private JPanel createFooterPanel() {
-        JPanel panel = new JPanel();
-        panel.setBackground(UIStyleConstants.BACKGROUND);
-        panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 20, 10));
+        JPanel panel = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                Graphics2D g2d = (Graphics2D) g;
 
-        JLabel footer = new JLabel("CSC207 Pokemon Project");
+                // Yellow stripe at top
+                g2d.setColor(UIStyleConstants.SECONDARY_COLOR);
+                for (int i = 0; i < 4; i++) {
+                    g2d.drawLine(0, i, getWidth(), i);
+                }
+            }
+        };
+        panel.setBackground(UIStyleConstants.DARK_BG);
+        panel.setBorder(BorderFactory.createEmptyBorder(15, 10, 15, 10));
+        panel.setLayout(new FlowLayout(FlowLayout.CENTER));
+
+        JLabel footer = new JLabel("CSC207 Pokemon Project - Press START!");
         footer.setFont(UIStyleConstants.SMALL_FONT);
         footer.setForeground(UIStyleConstants.TEXT_SECONDARY);
         panel.add(footer);
@@ -191,8 +333,8 @@ public class MainMenuView extends JPanel implements PropertyChangeListener {
      * Refreshes the user info display with current values.
      */
     public void refreshUserInfo() {
-        currencyLabel.setText("Currency: " + user.getCurrency());
-        pokemonCountLabel.setText("Pokemon Owned: " + user.getOwnedPokemon().size());
+        currencyLabel.setText("$ " + user.getCurrency());
+        pokemonCountLabel.setText("POKeMON: " + user.getOwnedPokemon().size());
     }
 
     public void setOnCollectionClick(Runnable callback) {
