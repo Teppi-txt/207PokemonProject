@@ -123,6 +123,7 @@ public class Pokemon implements Serializable {
 
     //Sprite images
     private static final String SPRITE_BASE_URL = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/";
+    private static final String ANIMATED_SPRITE_BASE_URL = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/";
 
     public String getRegularSpriteURL() {
         return SPRITE_BASE_URL + id + ".png";
@@ -134,6 +135,36 @@ public class Pokemon implements Serializable {
 
     public String getSpriteUrl() {
         return shiny ? getShinySpriteURL() : getRegularSpriteURL();
+    }
+
+    /**
+     * Get animated GIF sprite URL for battle animations (front-facing, for enemy).
+     * Note: Animated sprites only exist for Pokemon up to Gen 5 (ID <= 649)
+     */
+    public String getAnimatedSpriteUrl() {
+        if (id <= 649) {
+            if (shiny) {
+                return ANIMATED_SPRITE_BASE_URL + "shiny/" + id + ".gif";
+            }
+            return ANIMATED_SPRITE_BASE_URL + id + ".gif";
+        }
+        // Fall back to static sprite for newer Pokemon
+        return getSpriteUrl();
+    }
+
+    /**
+     * Get animated GIF sprite URL for back-facing sprite (for player's Pokemon).
+     * Note: Animated sprites only exist for Pokemon up to Gen 5 (ID <= 649)
+     */
+    public String getAnimatedBackSpriteUrl() {
+        if (id <= 649) {
+            if (shiny) {
+                return ANIMATED_SPRITE_BASE_URL + "back/shiny/" + id + ".gif";
+            }
+            return ANIMATED_SPRITE_BASE_URL + "back/" + id + ".gif";
+        }
+        // Fall back to static back sprite for newer Pokemon
+        return SPRITE_BASE_URL + "back/" + id + ".png";
     }
 
     public void setTypes(ArrayList<String> types) {
