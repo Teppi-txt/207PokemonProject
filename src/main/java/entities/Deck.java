@@ -5,11 +5,18 @@ import java.util.ArrayList;
 
 public class Deck implements Serializable {
     private static final long serialVersionUID = 1L;
-    private static final int DECK_LIMIT = 5; //idk tbh we can change as needed
+    public static final int DECK_LIMIT = 5; //idk tbh we can change as needed
 
     private int id;
     private String name;
     private ArrayList<Pokemon> pokemons;
+
+    public Deck(Deck source) {
+        this.id = source.id;
+        this.name = source.name;
+        // CRUCIAL: Create a new ArrayList copy of the Pokemons list references
+        this.pokemons = new ArrayList<>(source.pokemons);
+    }
 
     public Deck(int id, String name) {
         this.id = id;
@@ -43,4 +50,8 @@ public class Deck implements Serializable {
     }
     public void removePokemon(Pokemon pokemon) { this.pokemons.remove(pokemon); }
 
+    @Override
+    public String toString() {
+        return this.name;
+    }
 }
