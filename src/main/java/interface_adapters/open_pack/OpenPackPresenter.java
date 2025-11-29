@@ -1,10 +1,10 @@
 package interface_adapters.open_pack;
 
-import entities.Pokemon;
 import use_case.open_pack.OpenPackOutputBoundary;
 import use_case.open_pack.OpenPackOutputData;
 
 public class OpenPackPresenter implements OpenPackOutputBoundary {
+
     private final OpenPackViewModel viewModel;
 
     public OpenPackPresenter(OpenPackViewModel viewModel) {
@@ -14,21 +14,29 @@ public class OpenPackPresenter implements OpenPackOutputBoundary {
     @Override
     public void prepareSuccessView(OpenPackOutputData outputData) {
 
-        OpenPackState openPackState = new OpenPackState();
+        OpenPackState newState = new OpenPackState();
 
-        openPackState.setOpenedCards(outputData.getOpenedCards());
-        openPackState.setRemainingCurrency(outputData.getRemainingCurrency());
-        openPackState.setErrorMessage(null);
+        newState.setOpenedCards(outputData.getOpenedCards());
+        newState.setDuplicateFlags(outputData.getDuplicateFlags());
+        newState.setRemainingCurrency(outputData.getRemainingCurrency());
 
-        viewModel.setState(openPackState);
+        newState.setRevealIndex(0);
+        newState.setRevealMode(true);
 
+        newState.setErrorMessage(null);
+
+        viewModel.setState(newState);
     }
 
     @Override
     public void prepareFailView(String errorMessage) {
-        OpenPackState openPackState = new OpenPackState();
-        openPackState.setErrorMessage(errorMessage);
-        viewModel.setState(openPackState);
+
+        OpenPackState newState = new OpenPackState();
+
+        newState.setErrorMessage(errorMessage);
+        newState.setRevealMode(false);
+
+        viewModel.setState(newState);
     }
 
 }
