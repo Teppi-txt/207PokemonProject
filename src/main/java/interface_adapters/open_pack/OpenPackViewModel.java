@@ -1,21 +1,25 @@
 package interface_adapters.open_pack;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 
 public class OpenPackViewModel {
 
-    public static final String VIEW_NAME = "open pack";
+    private final PropertyChangeSupport support = new PropertyChangeSupport(this);
 
     private OpenPackState state = new OpenPackState();
 
-    public String getViewName() {
-        return VIEW_NAME;
+    public void addPropertyChangeListener(PropertyChangeListener listener) {
+        support.addPropertyChangeListener(listener);
     }
+
 
     public OpenPackState getState() {
         return state;
     }
 
-    public void setState(OpenPackState state) {
-        this.state = state;
+    public void setState(OpenPackState newState) {
+        OpenPackState oldState = this.state;
+        this.state = newState;
+        support.firePropertyChange("state", oldState, newState);
     }
-
 }
