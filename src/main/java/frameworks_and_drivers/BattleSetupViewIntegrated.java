@@ -107,23 +107,23 @@ public class BattleSetupViewIntegrated extends JFrame {
         contentPanel.setBackground(Color.WHITE);
         contentPanel.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 0));
 
-        // Name field
-        JPanel namePanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
-        namePanel.setBackground(Color.WHITE);
-        namePanel.setMaximumSize(new Dimension(180, 35));
-
+        // Name field - stacked vertically
         JLabel nameLabel = new JLabel("Name:");
         nameLabel.setFont(new Font("SansSerif", Font.PLAIN, 12));
-        namePanel.add(nameLabel);
+        nameLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        contentPanel.add(nameLabel);
 
-        JTextField nameField = new JTextField(isPlayer1 ? "Player 1" : "Player 2", 10);
+        contentPanel.add(Box.createVerticalStrut(3));
+
+        JTextField nameField = new JTextField(isPlayer1 ? "Player 1" : "Player 2");
         nameField.setFont(new Font("SansSerif", Font.PLAIN, 12));
-        namePanel.add(nameField);
+        nameField.setMaximumSize(new Dimension(170, 25));
+        nameField.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         if (isPlayer1) player1NameField = nameField;
         else player2NameField = nameField;
 
-        contentPanel.add(namePanel);
+        contentPanel.add(nameField);
         contentPanel.add(Box.createVerticalStrut(10));
 
         // Select button
@@ -311,7 +311,10 @@ public class BattleSetupViewIntegrated extends JFrame {
 
         JButton removeBtn = new JButton("X");
         removeBtn.setFont(new Font("SansSerif", Font.BOLD, 9));
-        removeBtn.setMargin(new Insets(0, 3, 0, 3));
+        removeBtn.setMargin(new Insets(0, 0, 0, 0));
+        removeBtn.setPreferredSize(new Dimension(22, 20));
+        removeBtn.setMinimumSize(new Dimension(22, 20));
+        removeBtn.setMaximumSize(new Dimension(22, 20));
         removeBtn.setFocusPainted(false);
         removeBtn.addActionListener(e -> {
             deck.remove(index);
