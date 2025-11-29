@@ -49,6 +49,11 @@ public class BattleAIView extends JFrame implements BattleAIViewModel.ViewModelL
     // Track max HP for each Pokemon
     private Map<Pokemon, Integer> maxHPMap = new HashMap<>();
 
+    // Track currently displayed Pokemon to avoid reloading same image (prevents flickering)
+    private int currentPlayerPokemonId = -1;
+    private int currentAIPokemonId = -1;
+    private Map<String, ImageIcon> imageCache = new HashMap<>();
+
     public BattleAIView(BattleAIController controller) {
         this(controller, null);
     }
@@ -530,10 +535,32 @@ public class BattleAIView extends JFrame implements BattleAIViewModel.ViewModelL
     private void loadPokemonImage(JLabel imageLabel, Pokemon pokemon, boolean isPlayer) {
         if (pokemon == null) {
             imageLabel.setIcon(null);
+            if (isPlayer) currentPlayerPokemonId = -1;
+            else currentAIPokemonId = -1;
             return;
         }
 
+        // Skip reloading if same Pokemon is already displayed (prevents flickering)
+        int pokemonId = pokemon.getId();
+        if (isPlayer && pokemonId == currentPlayerPokemonId) {
+            return; // Same Pokemon, skip reload
+        }
+        if (!isPlayer && pokemonId == currentAIPokemonId) {
+            return; // Same Pokemon, skip reload
+        }
+
+        // Update tracking
+        if (isPlayer) currentPlayerPokemonId = pokemonId;
+        else currentAIPokemonId = pokemonId;
+
         int size = isPlayer ? 180 : 120;
+        String cacheKey = pokemonId + "_" + (isPlayer ? "back" : "front") + "_" + size;
+
+        // Check cache first
+        if (imageCache.containsKey(cacheKey)) {
+            imageLabel.setIcon(imageCache.get(cacheKey));
+            return;
+        }
 
         SwingWorker<ImageIcon, Void> worker = new SwingWorker<>() {
             @Override
@@ -577,6 +604,7 @@ public class BattleAIView extends JFrame implements BattleAIViewModel.ViewModelL
                 try {
                     ImageIcon icon = get();
                     if (icon != null) {
+                        imageCache.put(cacheKey, icon);
                         imageLabel.setIcon(icon);
                     }
                 } catch (Exception e) {

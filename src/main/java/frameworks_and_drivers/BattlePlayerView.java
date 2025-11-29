@@ -68,6 +68,11 @@ public class BattlePlayerView extends JFrame implements PropertyChangeListener {
     // Track max HP for each Pokemon
     private Map<Pokemon, Integer> maxHPMap = new HashMap<>();
 
+    // Track currently displayed Pokemon to avoid reloading same image (prevents flickering)
+    private int currentPlayer1PokemonId = -1;
+    private int currentPlayer2PokemonId = -1;
+    private Map<String, ImageIcon> imageCache = new HashMap<>();
+
     public BattlePlayerView(BattlePlayerController battlePlayerController,
                            BattlePlayerViewModel battlePlayerViewModel,
                            BattlePlayerUserDataAccessInterface dataAccess,
@@ -137,75 +142,94 @@ public class BattlePlayerView extends JFrame implements PropertyChangeListener {
     }
 
     private JPanel createArenaPanel() {
+        // Store references for repositioning
+        JPanel player2InfoBox = createPokemonInfoBox(false);  // Player 2 info top-left
+        JPanel player1InfoBox = createPokemonInfoBox(true);   // Player 1 info bottom-right
+
+        player2PokemonImageLabel = new JLabel();
+        player2PokemonImageLabel.setHorizontalAlignment(SwingConstants.CENTER);
+
+        player1PokemonImageLabel = new JLabel();
+        player1PokemonImageLabel.setHorizontalAlignment(SwingConstants.CENTER);
+
         JPanel panel = new JPanel() {
             @Override
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
                 Graphics2D g2d = (Graphics2D) g;
+                int w = getWidth();
+                int h = getHeight();
 
-                // Draw battle background gradient
+                // Draw battle background gradient (sky)
                 GradientPaint skyGradient = new GradientPaint(
                     0, 0, new Color(135, 206, 235),
-                    0, getHeight() / 2, new Color(176, 224, 230)
+                    0, h / 2, new Color(176, 224, 230)
                 );
                 g2d.setPaint(skyGradient);
-                g2d.fillRect(0, 0, getWidth(), getHeight() / 2);
+                g2d.fillRect(0, 0, w, h / 2);
 
                 // Draw ground
                 GradientPaint groundGradient = new GradientPaint(
-                    0, getHeight() / 2, new Color(144, 238, 144),
-                    0, getHeight(), new Color(34, 139, 34)
+                    0, h / 2, new Color(144, 238, 144),
+                    0, h, new Color(34, 139, 34)
                 );
                 g2d.setPaint(groundGradient);
-                g2d.fillRect(0, getHeight() / 2, getWidth(), getHeight() / 2);
+                g2d.fillRect(0, h / 2, w, h / 2);
 
-                // Draw VS text
-                g2d.setFont(UIStyleConstants.EXTRA_LARGE_FONT);
-                g2d.setColor(new Color(255, 255, 255, 150));
-                String vs = "VS";
-                FontMetrics fm = g2d.getFontMetrics();
-                int vsX = (getWidth() - fm.stringWidth(vs)) / 2;
-                int vsY = getHeight() / 2;
-                g2d.drawString(vs, vsX, vsY);
+                // Calculate platform positions relative to panel size
+                int player1PlatformX = (int)(w * 0.08);
+                int player1PlatformY = h - 70;
+                int player1PlatformW = 220;
+                int player1PlatformH = 55;
 
-                // Draw battle platforms
+                int player2PlatformX = (int)(w * 0.65);
+                int player2PlatformY = (int)(h * 0.42);
+                int player2PlatformW = 180;
+                int player2PlatformH = 45;
+
+                // Player 1 platform (bottom left) - back sprite
                 g2d.setColor(new Color(139, 90, 43));
-                // Player 1 platform (left)
-                g2d.fillOval(100, getHeight() - 120, 200, 50);
+                g2d.fillOval(player1PlatformX, player1PlatformY, player1PlatformW, player1PlatformH);
                 g2d.setColor(new Color(160, 120, 80));
-                g2d.fillOval(105, getHeight() - 115, 190, 40);
+                g2d.fillOval(player1PlatformX + 5, player1PlatformY + 5, player1PlatformW - 10, player1PlatformH - 10);
 
-                // Player 2 platform (right)
+                // Player 2 platform (top right) - front sprite
                 g2d.setColor(new Color(139, 90, 43));
-                g2d.fillOval(getWidth() - 300, getHeight() - 120, 200, 50);
+                g2d.fillOval(player2PlatformX, player2PlatformY, player2PlatformW, player2PlatformH);
                 g2d.setColor(new Color(160, 120, 80));
-                g2d.fillOval(getWidth() - 295, getHeight() - 115, 190, 40);
+                g2d.fillOval(player2PlatformX + 5, player2PlatformY + 5, player2PlatformW - 10, player2PlatformH - 10);
+            }
+
+            @Override
+            public void doLayout() {
+                super.doLayout();
+                int w = getWidth();
+                int h = getHeight();
+
+                // Position Player 2 info box (top left - like enemy in BattleAIView)
+                player2InfoBox.setBounds(15, 10, 260, 75);
+
+                // Position Player 2 Pokemon (above Player 2 platform - top right)
+                int player2PlatformX = (int)(w * 0.65);
+                int player2PlatformY = (int)(h * 0.42);
+                player2PokemonImageLabel.setBounds(player2PlatformX + 15, player2PlatformY - 130, 150, 150);
+
+                // Position Player 1 info box (bottom right - like player in BattleAIView)
+                player1InfoBox.setBounds(w - 275, h - 95, 260, 75);
+
+                // Position Player 1 Pokemon (above Player 1 platform - bottom left)
+                int player1PlatformX = (int)(w * 0.08);
+                int player1PlatformY = h - 70;
+                player1PokemonImageLabel.setBounds(player1PlatformX + 10, player1PlatformY - 180, 200, 200);
             }
         };
         panel.setLayout(null);
         panel.setPreferredSize(new Dimension(1080, 300));
 
-        // Player 1 Pokemon (left side)
-        player1PokemonImageLabel = new JLabel();
-        player1PokemonImageLabel.setBounds(130, 80, 150, 150);
-        player1PokemonImageLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        panel.add(player1PokemonImageLabel);
-
-        // Player 1 HP Box (top left)
-        JPanel player1InfoBox = createPokemonInfoBox(true);
-        player1InfoBox.setBounds(20, 20, 280, 80);
-        panel.add(player1InfoBox);
-
-        // Player 2 Pokemon (right side)
-        player2PokemonImageLabel = new JLabel();
-        player2PokemonImageLabel.setBounds(800, 80, 150, 150);
-        player2PokemonImageLabel.setHorizontalAlignment(SwingConstants.CENTER);
         panel.add(player2PokemonImageLabel);
-
-        // Player 2 HP Box (top right)
-        JPanel player2InfoBox = createPokemonInfoBox(false);
-        player2InfoBox.setBounds(780, 20, 280, 80);
         panel.add(player2InfoBox);
+        panel.add(player1PokemonImageLabel);
+        panel.add(player1InfoBox);
 
         return panel;
     }
@@ -472,9 +496,33 @@ public class BattlePlayerView extends JFrame implements PropertyChangeListener {
         return panel;
     }
 
-    private void loadPokemonImage(JLabel imageLabel, Pokemon pokemon) {
+    private void loadPokemonImage(JLabel imageLabel, Pokemon pokemon, boolean isPlayer1) {
         if (pokemon == null) {
             imageLabel.setIcon(null);
+            if (isPlayer1) currentPlayer1PokemonId = -1;
+            else currentPlayer2PokemonId = -1;
+            return;
+        }
+
+        // Skip reloading if same Pokemon is already displayed (prevents flickering)
+        int pokemonId = pokemon.getId();
+        if (isPlayer1 && pokemonId == currentPlayer1PokemonId) {
+            return; // Same Pokemon, skip reload
+        }
+        if (!isPlayer1 && pokemonId == currentPlayer2PokemonId) {
+            return; // Same Pokemon, skip reload
+        }
+
+        // Update tracking
+        if (isPlayer1) currentPlayer1PokemonId = pokemonId;
+        else currentPlayer2PokemonId = pokemonId;
+
+        int size = isPlayer1 ? 180 : 150;
+        String cacheKey = pokemonId + "_" + (isPlayer1 ? "back" : "front") + "_" + size;
+
+        // Check cache first
+        if (imageCache.containsKey(cacheKey)) {
+            imageLabel.setIcon(imageCache.get(cacheKey));
             return;
         }
 
@@ -482,11 +530,31 @@ public class BattlePlayerView extends JFrame implements PropertyChangeListener {
             @Override
             protected ImageIcon doInBackground() {
                 try {
-                    String imageUrl = pokemon.getSpriteUrl();
+                    // Try animated GIF first
+                    // Use back sprite for Player 1, front sprite for Player 2
+                    String animatedUrl = isPlayer1 ? pokemon.getAnimatedBackSpriteUrl() : pokemon.getAnimatedSpriteUrl();
+                    if (animatedUrl.endsWith(".gif")) {
+                        URL url = new URL(animatedUrl);
+                        // For GIFs, load directly as ImageIcon to preserve animation
+                        ImageIcon gifIcon = new ImageIcon(url);
+                        if (gifIcon.getIconWidth() > 0) {
+                            // Scale the GIF
+                            Image scaledImage = gifIcon.getImage().getScaledInstance(size, size, Image.SCALE_DEFAULT);
+                            return new ImageIcon(scaledImage);
+                        }
+                    }
+
+                    // Fallback to static PNG
+                    String imageUrl;
+                    if (isPlayer1) {
+                        imageUrl = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/back/" + pokemon.getId() + ".png";
+                    } else {
+                        imageUrl = pokemon.getSpriteUrl();
+                    }
                     URL url = new URL(imageUrl);
                     Image image = ImageIO.read(url);
                     if (image != null) {
-                        Image scaledImage = image.getScaledInstance(150, 150, Image.SCALE_SMOOTH);
+                        Image scaledImage = image.getScaledInstance(size, size, Image.SCALE_SMOOTH);
                         return new ImageIcon(scaledImage);
                     }
                 } catch (IOException e) {
@@ -500,6 +568,7 @@ public class BattlePlayerView extends JFrame implements PropertyChangeListener {
                 try {
                     ImageIcon icon = get();
                     if (icon != null) {
+                        imageCache.put(cacheKey, icon);
                         imageLabel.setIcon(icon);
                     }
                 } catch (Exception e) {
@@ -692,7 +761,7 @@ public class BattlePlayerView extends JFrame implements PropertyChangeListener {
 
         if (activePokemon != null) {
             nameLabel.setText(activePokemon.getName().toUpperCase());
-            loadPokemonImage(imageLabel, activePokemon);
+            loadPokemonImage(imageLabel, activePokemon, isPlayer1);
 
             int currentHP = activePokemon.getStats().getHp();
             Integer maxHP = maxHPMap.get(activePokemon);
