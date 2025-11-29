@@ -2,6 +2,7 @@ package view;
 
 import entities.Deck;
 import entities.Pokemon;
+import entities.Stats;
 import entities.User;
 import interface_adapters.build_deck.BuildDeckController;
 import interface_adapters.build_deck.BuildDeckState;
@@ -16,6 +17,7 @@ import java.beans.PropertyChangeListener;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
+import java.util.Map;
 
 public class BuildDeckView extends JPanel implements PropertyChangeListener {
     private final BuildDeckViewModel viewModel;
@@ -190,34 +192,27 @@ public class BuildDeckView extends JPanel implements PropertyChangeListener {
     }
 
     public void onPokemonSelection(ActionEvent e) {
-        // Determine the source of the click (JButton from selection panel or JLabel from deck slot)
-        Component source = (Component)e.getSource();
-        Pokemon selected;
-        // Use a conditional check to safely get the client property from the correct component type
+        Component source = (Component) e.getSource();
+        Pokemon selected = null;
+
+        // Pokémon button in OwnedPokemonSelectionPanel was clicked
         if (source instanceof JButton button) {
             selected = (Pokemon) button.getClientProperty("pokemon");
-        } else if (source instanceof JLabel label) {
-            selected = (Pokemon) label.getClientProperty("pokemon");
-        } else {
-            // If the source is neither, ignore the action
-            return;
         }
-        // Ensure a Pokémon was actually retrieved before proceeding
+        // Deck slot was clicked
+        else if (source instanceof JPanel panel) {
+            selected = (Pokemon) panel.getClientProperty("pokemon");
+        }
         if (selected == null) {
             return;
         }
-        // Deck modification logic
+        // Modify current deck
         if (currentDeck.getPokemons().contains(selected)) {
-            // Remove from deck if it's already there
             currentDeck.removePokemon(selected);
         } else {
-            // Add to deck (Deck class handles the limit)
             currentDeck.addPokemon(selected);
-            System.out.println("Deck size after attempt to add: " + currentDeck.getPokemons().size());
-            System.out.println("Pokemon list contents: " + currentDeck.getPokemons());
         }
-        // NO controller call here: only update the view state locally and allow the Save button to persist the change.
-        // call updateView directly with the locally modified deck
+        // Update view with changes
         updateView(currentDeck, viewModel.getState().getAllDecks(), null);
     }
 
@@ -286,79 +281,123 @@ public class BuildDeckView extends JPanel implements PropertyChangeListener {
      */
     public class DeckDisplayPanel extends JPanel {
 
-        private final JLabel[] slotLabels;
+        private final JPanel[] slotPanels;
         private static final int DECK_LIMIT = entities.Deck.DECK_LIMIT;
 
         public DeckDisplayPanel() {
-            this.setLayout(new GridLayout(1, DECK_LIMIT, 10, 0)); // 1 row, 5 columns
-            this.setPreferredSize(new Dimension(350, 150));
+            this.setLayout(new GridLayout(1, DECK_LIMIT, 10, 0));
+            this.setPreferredSize(new Dimension(550, 250));
             this.setBorder(BorderFactory.createTitledBorder("Current Deck (Max " + DECK_LIMIT + ")"));
-            this.slotLabels = new JLabel[DECK_LIMIT];
+
+            slotPanels = new JPanel[DECK_LIMIT];
 
             for (int i = 0; i < DECK_LIMIT; i++) {
-                JLabel slot = new JLabel("[Empty Slot " + (i + 1) + "]", SwingConstants.CENTER);
-                slot.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY));
-                slot.setOpaque(true);
-                slot.setBackground(new Color(240, 240, 240));
-                slotLabels[i] = slot;
+                JPanel slot = createEmptySlotPanel(i);
+                slotPanels[i] = slot;
                 this.add(slot);
             }
         }
 
+        private JPanel createEmptySlotPanel(int index) {
+            JPanel slot = new JPanel();
+            slot.setLayout(new BoxLayout(slot, BoxLayout.Y_AXIS));
+            slot.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY));
+            slot.setOpaque(true);
+            slot.setBackground(new Color(240, 240, 240));
+
+            JLabel empty = new JLabel("[Empty Slot " + (index + 1) + "]", SwingConstants.CENTER);
+            empty.setAlignmentX(Component.CENTER_ALIGNMENT);
+            slot.add(Box.createVerticalGlue());
+            slot.add(empty);
+            slot.add(Box.createVerticalGlue());
+
+            return slot;
+        }
+
         public void updateDeck(Deck deck) {
             List<Pokemon> pokemons = deck.getPokemons();
-            final int DECK_LIMIT = 5;
 
             for (int i = 0; i < DECK_LIMIT; i++) {
-                JLabel slot = slotLabels[i];
-                for(java.awt.event.MouseListener ml : slot.getListeners(java.awt.event.MouseListener.class)) {
+                JPanel slot = slotPanels[i];
+                slot.removeAll();
+
+                for (MouseListener ml : slot.getListeners(MouseListener.class)) {
                     slot.removeMouseListener(ml);
                 }
+
                 if (i < pokemons.size()) {
                     Pokemon p = pokemons.get(i);
-                    slot.setText(p.getName()); // set text first
-                    try {
-                        // fetch and scale the sprite image
-                        ImageIcon sprite = getScaledSprite(p.getSpriteUrl(), 60, 60);
-                        slot.setIcon(sprite);
-                    } catch (Exception e) {
-                        // handle image loading failure
-                        slot.setIcon(null);
-                    }
-                    // make icon appear above the name
-                    slot.setHorizontalTextPosition(SwingConstants.CENTER);
-                    slot.setVerticalTextPosition(SwingConstants.BOTTOM);
-                    // center the whole label
-                    slot.setHorizontalAlignment(SwingConstants.CENTER);
-                    slot.setVerticalAlignment(SwingConstants.CENTER);
-
-                    slot.setToolTipText(p.getName() + " (Click to remove)");
-                    slot.setOpaque(true);
-                    slot.setBackground(new Color(200, 255, 200)); // light green for filled slot
-                    slot.putClientProperty("pokemon", p); // store Pokémon for removal logic
-
-                    slot.addMouseListener(new java.awt.event.MouseAdapter() {
-                        @Override
-                        public void mouseClicked(java.awt.event.MouseEvent e) {
-                            JLabel clickedSlot = (JLabel) e.getSource();
-                            Pokemon removedPokemon = (Pokemon) clickedSlot.getClientProperty("pokemon");
-                            if (removedPokemon != null) {
-                                BuildDeckView.this.onPokemonSelection(new ActionEvent(clickedSlot, ActionEvent.ACTION_PERFORMED, "remove"));
-                            }
-                        }
-                    });
-
+                    fillSlotWithPokemon(slot, p);
                 } else {
-                    // empty slot logic
-                    slot.setIcon(null);
-                    slot.setText("[Empty Slot " + (i + 1) + "]");
-                    slot.setToolTipText(null);
-                    slot.setBackground(new Color(240, 240, 240));
-                    slot.putClientProperty("pokemon", null);
+                    JPanel empty = createEmptySlotPanel(i);
+                    slot.add(empty.getComponent(1));
                 }
+
+                slot.revalidate();
+                slot.repaint();
             }
-            this.revalidate();
-            this.repaint();
+        }
+
+        private void fillSlotWithPokemon(JPanel slot, Pokemon p) {
+            slot.setBackground(new Color(200, 255, 200));
+            slot.putClientProperty("pokemon", p);
+
+            JLabel sprite = createSpriteLabel(p);
+            JLabel name = createNameLabel(p);
+            JPanel statsPanel = createStatsPanel(p);
+
+            slot.add(Box.createVerticalStrut(5));
+            slot.add(sprite);
+            slot.add(name);
+            slot.add(statsPanel);
+            slot.add(Box.createVerticalGlue());
+
+            // Click anywhere on the slot to remove
+            slot.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    BuildDeckView.this.onPokemonSelection(
+                            new ActionEvent(slot, ActionEvent.ACTION_PERFORMED, "remove")
+                    );
+                }
+            });
+        }
+
+        private JLabel createSpriteLabel(Pokemon pokemon) {
+            try {
+                ImageIcon sprite = new ImageIcon(new URL(pokemon.getSpriteUrl()));
+                sprite.setImage(sprite.getImage().getScaledInstance(120, 120, Image.SCALE_SMOOTH));
+
+                JLabel lbl = new JLabel(sprite);
+                lbl.setAlignmentX(Component.CENTER_ALIGNMENT);
+                return lbl;
+            } catch (Exception e) {
+                return new JLabel();
+            }
+        }
+
+        private JLabel createNameLabel(Pokemon pokemon) {
+            JLabel name = new JLabel(pokemon.getName());
+            name.setFont(new Font("Arial", Font.BOLD, 16));
+            name.setAlignmentX(Component.CENTER_ALIGNMENT);
+            name.setBorder(BorderFactory.createEmptyBorder(5, 0, 5, 0));
+            return name;
+        }
+
+        private JPanel createStatsPanel(Pokemon pokemon) {
+            JPanel statsPanel = new JPanel();
+            statsPanel.setLayout(new BoxLayout(statsPanel, BoxLayout.Y_AXIS));
+            statsPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+            Map<String, Integer> stats = pokemon.getStats().getStatMap();
+
+            for (String s : Stats.STAT_NAMES) {
+                JLabel statLabel = new JLabel(s + ": " + stats.get(s));
+                statLabel.setFont(new Font("Arial", Font.PLAIN, 14));
+                statsPanel.add(statLabel);
+            }
+
+            return statsPanel;
         }
     }
 
@@ -374,7 +413,7 @@ public class BuildDeckView extends JPanel implements PropertyChangeListener {
             this.setBorder(BorderFactory.createTitledBorder("Owned Pokémon (Click to Add/Remove)"));
 
             // Use 0 rows for flexible vertical size, 5 columns
-            pokemonGrid = new JPanel(new GridLayout(0, 1, 5, 5));
+            pokemonGrid = new JPanel(new GridLayout(0, 5, 5, 5));
 
             // Populate initial buttons
             for (Pokemon pokemon : ownedPokemon) {

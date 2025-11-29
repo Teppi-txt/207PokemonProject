@@ -28,7 +28,7 @@ public class BuildDeckControllerTest {
         User user = new User(0, "Anvi", "anviraj@gmail.com", 100);
         List<Pokemon> allPokemon = JSONLoader.allPokemon;
         // give the user this first 20 Pokémon
-        for (int i = 0; i < 20; i++) {
+        for (int i = 0; i < 40; i++) {
             if (i < allPokemon.size()) {
                 user.addPokemon(allPokemon.get(i));
             }
