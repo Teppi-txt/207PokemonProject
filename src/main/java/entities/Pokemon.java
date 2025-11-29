@@ -138,7 +138,7 @@ public class Pokemon implements Serializable {
     }
 
     public String getShinyFrontGIF() {
-        return ANIMATED_FRONT_BASE_URL + "shiny/" + id + ".png";
+        return ANIMATED_FRONT_BASE_URL + "shiny/" + id + ".gif";
     }
 
     public String getFrontGIF() {
@@ -150,7 +150,7 @@ public class Pokemon implements Serializable {
     }
 
     public String getShinyBackGIF() {
-        return ANIMATED_BACK_BASE_URL + "shiny/" + id + ".png";
+        return ANIMATED_BACK_BASE_URL + "shiny/" + id + ".gif";
     }
 
     public String getBackGIF() {
