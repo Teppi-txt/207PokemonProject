@@ -90,7 +90,6 @@ public class CollectionView extends JPanel implements PropertyChangeListener {
     }
 
     private void updatePanel(ViewCollectionState state) {
-        System.out.println(0);
         if (state.getPokemonOnPage() != null) {
             this.pokemonCollectionPanel.loadPage(state.getPokemonOnPage(), state.getOwnedPokemon());
             this.pokemonInfoPanel.setPokemon(state.getSelectedPokemon());
