@@ -70,5 +70,13 @@ public class User implements Serializable {
         return false;
     }
 
+    public Pokemon getPokemonById(int id){
+        for (Pokemon p : ownedPokemon){
+            if (p.getID() == id) return p;
+        }
+        return null;
+    }
+
+
 
 }

@@ -3,6 +3,7 @@ package entities;
 import java.io.Serializable;
 import org.json.JSONObject;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public class Stats implements Serializable {
@@ -13,6 +14,8 @@ public class Stats implements Serializable {
     private int spAttack;
     private int spDefense;
     private int speed;
+
+    public static final String[] STAT_NAMES = {"HP", "Attack", "Sp. Attack", "Defense", "Sp. Defense", "Speed"};
 
     // some moves have stat level increases, so STAT_LEVEL maps the level to the multiplier for the stat
     // i.e. ATK raised by +2 -> ATK *= STAT_LEVEL.get(+2)
@@ -54,6 +57,19 @@ public class Stats implements Serializable {
         statsObj.spDefense = stats.getInt("sp_defense");
         statsObj.speed = stats.getInt("speed");
         return statsObj;
+    }
+
+    public Map<String, Integer> getStatMap() {
+        Map<String, Integer> statMap = new HashMap<>();
+
+        statMap.put(STAT_NAMES[0], hp);
+        statMap.put(STAT_NAMES[1], attack);
+        statMap.put(STAT_NAMES[2], spAttack);
+        statMap.put(STAT_NAMES[3], defense);
+        statMap.put(STAT_NAMES[4], spDefense);
+        statMap.put(STAT_NAMES[5], speed);
+
+        return statMap;
     }
 
     public int getHp() { return hp; }
@@ -173,5 +189,9 @@ public class Stats implements Serializable {
     public String toJSONString() {
         return String.format("{\"hp\": %d, \"attack\": %d, \"defense\": %d, \"sp_attack\": %d, \"sp_defense\": %d, \"speed\": %d}",
                 hp, attack, defense, spAttack, spDefense, speed);
+    }
+
+    public Integer[] getStatsArray() {
+        return new Integer[]{this.hp, this.attack, this.defense, this.spAttack, this.spDefense, this.speed};
     }
 }
