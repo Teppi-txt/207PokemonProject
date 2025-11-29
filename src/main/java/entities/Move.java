@@ -23,11 +23,22 @@ public class Move implements Serializable {
             .setName(jsonObject.getString("name"))
             .setType(jsonObject.getString("type"))
             .setDamageClass(jsonObject.getString("damageClass"))
-            .setPower(jsonObject.getInt("power"))
-            .setAccuracy(jsonObject.getInt("accuracy"))
-            .setPriority(jsonObject.getInt("priority"))
+            .setPower(parseIntValue(jsonObject, "power"))
+            .setAccuracy(parseIntValue(jsonObject, "accuracy"))
+            .setPriority(parseIntValue(jsonObject, "priority"))
             .setEffect(jsonObject.getString("effect"));
         return returnMove;
+    }
+
+    private static Integer parseIntValue(JSONObject jsonObject, String key) {
+        if (!jsonObject.has(key) || jsonObject.isNull(key)) {
+            return null;
+        }
+        try {
+            return Integer.parseInt(jsonObject.getString(key));
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     public String getName() { return name; }

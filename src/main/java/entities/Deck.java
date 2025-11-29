@@ -28,6 +28,10 @@ public class Deck {
         this.pokemons = pokemons;
     }
 
+    public Deck() {
+
+    }
+
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
 

@@ -117,8 +117,9 @@ public class Pokemon implements Serializable {
     }
 
 
-    //Sprite images
     private static final String SPRITE_BASE_URL = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/";
+    private static final String ANIMATED_FRONT_BASE_URL = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/";
+    private static final String ANIMATED_BACK_BASE_URL = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/back/";
 
     public String getRegularSpriteURL() {
         return SPRITE_BASE_URL + id + ".png";
@@ -132,13 +133,33 @@ public class Pokemon implements Serializable {
         return shiny ? getShinySpriteURL() : getRegularSpriteURL();
     }
 
-    public ArrayList<String> getTypes() {
-        return this.types;
+    public String getRegularFrontGIF() {
+        return ANIMATED_FRONT_BASE_URL + id + ".gif";
     }
 
+    public String getShinyFrontGIF() {
+        return ANIMATED_FRONT_BASE_URL + "shiny/" + id + ".gif";
+    }
+
+    public String getFrontGIF() {
+        return shiny ? getShinyFrontGIF() : getRegularFrontGIF();
+    }
+
+    public String getRegularBackGIF() {
+        return ANIMATED_BACK_BASE_URL + id + ".gif";
+    }
+
+    public String getShinyBackGIF() {
+        return ANIMATED_BACK_BASE_URL + "shiny/" + id + ".gif";
+    }
+
+    public String getBackGIF() {
+        return shiny ? getShinyFrontGIF() : getRegularFrontGIF();
+    }
     public void setTypes(ArrayList<String> types) {
         this.types = types;
     }
+    public ArrayList<String> getTypes() {return this.types;}
 }
 
 
