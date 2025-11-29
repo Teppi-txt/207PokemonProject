@@ -294,7 +294,7 @@ public class CollectionView extends JPanel implements PropertyChangeListener {
             for (int i = 0; i < pokemons.size(); i++) {
                 ImageIcon pokeIcon;
                 try {
-                    pokeIcon = new ImageIcon(new URL(pokemons.get(i).getSpriteUrl()));
+                    pokeIcon = new ImageIcon(new URL(pokemons.get(i).getFrontGIF()));
                     if (!pokemonIsInList(pokemons.get(i), ownedPokemon)) {
                         pokeIcon.setImage(GrayFilter.createDisabledImage(pokeIcon.getImage()));
                     }
