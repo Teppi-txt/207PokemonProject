@@ -343,10 +343,16 @@ public class BattleAIController {
         List<Pokemon> aiTeam = new ArrayList<>();
 
         if ("easy".equalsIgnoreCase(difficulty)) {
-            // Easy: Pick weaker Pokemon (low IDs)
+            // Easy: Pick actually weak Pokemon (low base stats, unevolved)
             List<Pokemon> weakPokemon = new ArrayList<>();
             for (Pokemon p : JSONLoader.allPokemon) {
-                if (p.getId() <= 151) { // Gen 1 Pokemon
+                // Calculate total base stats
+                Stats s = p.getStats();
+                int totalStats = s.getHp() + s.getAttack() + s.getDefense() +
+                                 s.getSpAttack() + s.getSpDefense() + s.getSpeed();
+                // Only pick Pokemon with total stats < 350 (weak/unevolved Pokemon)
+                // Also limit to Gen 1-2 for familiarity
+                if (totalStats < 350 && p.getId() <= 251) {
                     weakPokemon.add(p);
                 }
             }
@@ -355,10 +361,13 @@ public class BattleAIController {
                 aiTeam.add(weakPokemon.get(i).copy());
             }
         } else if ("hard".equalsIgnoreCase(difficulty)) {
-            // Hard: Pick legendary/strong Pokemon
+            // Hard: Pick strong fully-evolved Pokemon (total stats > 500)
             List<Pokemon> strongPokemon = new ArrayList<>();
             for (Pokemon p : JSONLoader.allPokemon) {
-                if (p.getStats().getHp() > 80) { // High HP Pokemon
+                Stats s = p.getStats();
+                int totalStats = s.getHp() + s.getAttack() + s.getDefense() +
+                                 s.getSpAttack() + s.getSpDefense() + s.getSpeed();
+                if (totalStats > 500) {
                     strongPokemon.add(p);
                 }
             }
@@ -367,11 +376,19 @@ public class BattleAIController {
                 aiTeam.add(strongPokemon.get(i).copy());
             }
         } else {
-            // Medium: Random Pokemon
-            List<Pokemon> shuffled = new ArrayList<>(JSONLoader.allPokemon);
-            Collections.shuffle(shuffled);
-            for (int i = 0; i < 3 && i < shuffled.size(); i++) {
-                aiTeam.add(shuffled.get(i).copy());
+            // Medium: Pick mid-tier Pokemon (total stats 350-480)
+            List<Pokemon> midPokemon = new ArrayList<>();
+            for (Pokemon p : JSONLoader.allPokemon) {
+                Stats s = p.getStats();
+                int totalStats = s.getHp() + s.getAttack() + s.getDefense() +
+                                 s.getSpAttack() + s.getSpDefense() + s.getSpeed();
+                if (totalStats >= 350 && totalStats <= 480 && p.getId() <= 386) {
+                    midPokemon.add(p);
+                }
+            }
+            Collections.shuffle(midPokemon);
+            for (int i = 0; i < 3 && i < midPokemon.size(); i++) {
+                aiTeam.add(midPokemon.get(i).copy());
             }
         }
 
