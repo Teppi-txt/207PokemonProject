@@ -17,16 +17,21 @@ public class ViewManagerFrame extends JFrame implements ViewManager {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         // Create PreOpenPackView
-        preView = new PreOpenPackView(vm, controller, this::showOpenPack, this::showPreOpenPack);
+        preView = new PreOpenPackView(vm, this);
 
         // Create OpenPackView
-        openView = new OpenPackView(controller, vm, this);
+        openView = new OpenPackView(vm, this);
 
         // Start on pre-open screen
         showPreOpenPack();
 
         setLocationRelativeTo(null);
         setVisible(true);
+    }
+
+    public void setController(OpenPackController controller) {
+        openView.setController(controller);
+        preView.setController(controller);
     }
 
     @Override

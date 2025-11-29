@@ -6,14 +6,17 @@
   <component name="ChangeListManager">
     <list default="true" id="9dec9f17-26e6-4643-bace-3bd84e99933c" name="Changes" comment="Merge branch 'main' into rescue_work&#10;&#10;# Conflicts:&#10;#&#9;pom.xml&#10;#&#9;src/main/java/entities/AIPlayer.java&#10;#&#9;src/main/java/entities/MoveTurn.java&#10;#&#9;src/main/java/entities/Player.java&#10;#&#9;src/main/java/entities/SwitchTurn.java&#10;#&#9;src/main/java/entities/Turn.java">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/entities/Pokemon.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/entities/Pokemon.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/frameworks_and_drivers/OpenPackView.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/frameworks_and_drivers/OpenPackView.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/frameworks_and_drivers/PreOpenPackView.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/frameworks_and_drivers/PreOpenPackView.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/frameworks_and_drivers/UofTCGApp.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/frameworks_and_drivers/UofTCGApp.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/frameworks_and_drivers/ViewManagerFrame.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/frameworks_and_drivers/ViewManagerFrame.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/interface_adapters/open_pack/OpenPackController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/interface_adapters/open_pack/OpenPackController.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/interface_adapters/open_pack/OpenPackPresenter.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/interface_adapters/open_pack/OpenPackPresenter.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/interface_adapters/open_pack/OpenPackState.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/interface_adapters/open_pack/OpenPackState.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/interface_adapters/open_pack/OpenPackViewModel.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/interface_adapters/open_pack/OpenPackViewModel.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/use_case/open_pack/OpenPackInteractor.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/use_case/open_pack/OpenPackInteractor.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/use_case/open_pack/OpenPackOutputData.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/use_case/open_pack/OpenPackOutputData.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/user.json" beforeDir="false" afterPath="$PROJECT_DIR$/user.json" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -149,5 +152,16 @@
       <updated>1762806140485</updated>
     </task>
     <servers />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
   </component>
 </project>

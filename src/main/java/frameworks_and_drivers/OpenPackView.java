@@ -12,71 +12,86 @@ import java.util.List;
 
 public class OpenPackView extends JPanel {
 
+    private OpenPackController controller;
     private final OpenPackViewModel viewModel;
     private final ViewManager viewManager;
 
     private final JPanel cardsPanel = new JPanel();
-
-    // Components
     private final JLabel currencyLabel = new JLabel("Currency: 0");
     private final JButton openPackButton = new JButton("Open Pack");
     private final JButton nextButton = new JButton("Next");
     private final JLabel messageLabel = new JLabel("");
     private final JButton addCollectionButton = new JButton("Add to Collection");
 
-    public OpenPackView(OpenPackController controller, OpenPackViewModel viewModel, ViewManager viewManager) {
+    public OpenPackView(OpenPackViewModel viewModel, ViewManager viewManager) {
         this.viewModel = viewModel;
         this.viewManager = viewManager;
 
         setLayout(new BorderLayout());
 
-        // Panels
+        // Top
         JPanel topPanel = new JPanel(new FlowLayout());
+        JButton backButton = new JButton("Back");
+
         topPanel.add(currencyLabel);
         topPanel.add(openPackButton);
-        JButton backButton = new JButton("Back");
         topPanel.add(backButton);
+
         add(topPanel, BorderLayout.NORTH);
 
+        // Center
         cardsPanel.setLayout(new GridLayout(1, 1));
         add(cardsPanel, BorderLayout.CENTER);
 
-        messageLabel.setForeground(Color.RED);
+        // Bottom
         JPanel bottomPanel = new JPanel(new FlowLayout());
+        messageLabel.setForeground(Color.RED);
+
         bottomPanel.add(messageLabel);
         bottomPanel.add(nextButton);
         bottomPanel.add(addCollectionButton);
+
         add(bottomPanel, BorderLayout.SOUTH);
 
         nextButton.setVisible(false);
         addCollectionButton.setVisible(false);
 
-        // Listeners
-        openPackButton.addActionListener(e -> controller.openPack());
         nextButton.addActionListener(e -> revealNext());
         addCollectionButton.addActionListener(e -> finishCollection());
         backButton.addActionListener(e -> viewManager.showPreOpenPack());
 
-        this.viewModel.addPropertyChangeListener(evt -> {
+        viewModel.addPropertyChangeListener(evt -> {
             if ("state".equals(evt.getPropertyName())) {
                 updateView((OpenPackState) evt.getNewValue());
             }
         });
     }
 
-    private void revealNext() {
-        OpenPackState newState = new OpenPackState(); // make a copy
-        int index = newState.getRevealIndex() + 1;
+    /** Called by ViewManagerFrame */
+    public void setController(OpenPackController controller) {
+        this.controller = controller;
 
-        if (index >= newState.getOpenedCards().size()) {
-            newState.setRevealMode(false);
+        for (var l : openPackButton.getActionListeners())
+            openPackButton.removeActionListener(l);
+
+        openPackButton.addActionListener(e -> controller.openPack());
+    }
+
+    private void revealNext() {
+        OpenPackState oldState = viewModel.getState();
+        OpenPackState newState = new OpenPackState(oldState);
+
+        int nextIndex = oldState.getRevealIndex() + 1;
+
+        if (nextIndex >= oldState.getOpenedCards().size()) {
+            newState.setRevealMode(false);   // Switch to summary
         } else {
-            newState.setRevealIndex(index);
+            newState.setRevealIndex(nextIndex);
+            newState.setRevealMode(true);    // Stay in reveal mode
         }
 
         viewModel.setState(newState);
     }
-
 
     private void finishCollection() {
         messageLabel.setText("Cards added to your collection!");
@@ -85,13 +100,12 @@ public class OpenPackView extends JPanel {
     }
 
     public void updateView(OpenPackState state) {
-        if (state == null) return;
-
         currencyLabel.setText("Currency: " + state.getRemainingCurrency());
         cardsPanel.removeAll();
 
         List<Pokemon> opened = state.getOpenedCards();
 
+        // ========== REVEAL MODE ==========
         if (state.isRevealMode()) {
             nextButton.setVisible(true);
             addCollectionButton.setVisible(false);
@@ -104,10 +118,12 @@ public class OpenPackView extends JPanel {
             boolean isDup = state.getDuplicateFlags().get(idx);
             messageLabel.setText(isDup ? "Duplicate!" : "NEW card!");
 
-            nextButton.setEnabled(idx < opened.size() - 1);
+            // ⭐ FIX: Always allow next button to be clicked
+            nextButton.setEnabled(true);
             openPackButton.setEnabled(false);
 
         } else {
+            // ========== SUMMARY MODE ==========
             for (Pokemon p : opened) {
                 cardsPanel.add(makeCardPanel(p));
             }
@@ -128,6 +144,7 @@ public class OpenPackView extends JPanel {
         card.setBackground(Color.WHITE);
 
         JLabel spriteLabel;
+
         try {
             ImageIcon icon = new ImageIcon(new URL(pokemon.getSpriteUrl()));
             Image scaled = icon.getImage().getScaledInstance(120, 120, Image.SCALE_SMOOTH);
@@ -141,6 +158,7 @@ public class OpenPackView extends JPanel {
 
         card.add(spriteLabel, BorderLayout.CENTER);
         card.add(name, BorderLayout.SOUTH);
+
         return card;
     }
 }

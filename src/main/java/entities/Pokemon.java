@@ -79,12 +79,16 @@ public class Pokemon implements Serializable {
 
     // cloning the pokemon so that they can be marked with the shiny attribute not changing the original data
     public Pokemon copy() {
+        ArrayList<String> typesCopy = this.types == null ? new ArrayList<>() : new ArrayList<>(this.types);
+        ArrayList<String> movesCopy = this.moves == null ? new ArrayList<>() : new ArrayList<>(this.moves);
+        Stats statsCopy = this.stats == null ? null : this.stats.copy(); // if Stats has no copy, reuse
+
         Pokemon clone = new Pokemon(
                 this.name,
                 this.id,
-                new ArrayList<>(this.types),
-                this.stats,
-                new ArrayList<>(this.moves)
+                typesCopy,
+                statsCopy,
+                movesCopy
         );
         clone.setShiny(this.shiny);
         return clone;
@@ -92,7 +96,11 @@ public class Pokemon implements Serializable {
 
     @Override
     public String toString() {
-        return name + "(#" + id + ", " + String.join(", ", types) + ", " + stats.toString() + ")";
+        String typesStr = types == null ? "no-types" : String.join(", ", types);
+        String statsStr = stats == null ? "no-stats" : stats.toString();
+
+        return name + "(#" + id + ", " + typesStr + ", " + statsStr + ")";
+
     }
 
     public String toJSONString() {

@@ -11,7 +11,9 @@ import pokeapi.JSONLoader;
 import use_case.open_pack.OpenPackInputBoundary;
 import use_case.open_pack.OpenPackInteractor;
 import use_case.open_pack.OpenPackOutputBoundary;
+import use_case.open_pack.OpenPackOutputData;
 
+import javax.swing.*;
 import java.util.List;
 
 public class UofTCGApp {
@@ -19,7 +21,10 @@ public class UofTCGApp {
     public static void main(String[] args) {
 
         JSONLoader.loadPokemon();
+
         List<Pokemon> cardPool = JSONLoader.allPokemon;
+        System.out.println("Card pool size = " + cardPool.size());
+
         Pack pack = new Pack(1, "UofT Base Set", cardPool);
 
         JsonUserDataAccess userDataAccess = new JsonUserDataAccess("user.json");
@@ -31,18 +36,16 @@ public class UofTCGApp {
         User user = userDataAccess.get();
 
         OpenPackViewModel viewModel = new OpenPackViewModel();
-        OpenPackState initState = new OpenPackState();
-        initState.setRemainingCurrency(user.getCurrency());
-        initState.setRevealMode(false);
-        initState.setRevealIndex(0);
-        viewModel.setState(initState);
+        viewModel.getState().setRemainingCurrency(user.getCurrency());
 
-        OpenPackOutputBoundary presenter = new OpenPackPresenter(viewModel);
-        OpenPackInputBoundary interactor = new OpenPackInteractor(userDataAccess, presenter, pack);
-        OpenPackController controller = new OpenPackController(interactor);
+        SwingUtilities.invokeLater(() -> {
+            ViewManagerFrame frame = new ViewManagerFrame(viewModel, null);
+            OpenPackOutputBoundary presenter = new OpenPackPresenter(viewModel, frame);
+            OpenPackInputBoundary interactor = new OpenPackInteractor(userDataAccess, presenter, pack);
+            OpenPackController controller = new OpenPackController(interactor);
 
-        javax.swing.SwingUtilities.invokeLater(() -> {
-            new ViewManagerFrame(viewModel, controller);
+            frame.setController(controller);
         });
+
     }
 }

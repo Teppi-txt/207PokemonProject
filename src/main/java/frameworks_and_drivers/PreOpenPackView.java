@@ -9,20 +9,21 @@ import java.awt.*;
 
 public class PreOpenPackView extends JPanel {
 
+    private OpenPackController controller;
+
     private final JLabel currencyLabel = new JLabel("Currency: 0", SwingConstants.LEFT);
+    private JButton openPackButton;
 
     public PreOpenPackView(OpenPackViewModel viewModel,
-                           OpenPackController controller,
-                           Runnable onOpenPack,
-                           Runnable onBack) {
+                           ViewManager viewManager) {
 
         setLayout(new BorderLayout());
         setBackground(new Color(225, 235, 245));
 
         viewModel.addPropertyChangeListener(evt -> {
             if ("state".equals(evt.getPropertyName())) {
-                OpenPackState newState = (OpenPackState) evt.getNewValue();
-                updateCurrency(newState.getRemainingCurrency());
+                OpenPackState state = (OpenPackState) evt.getNewValue();
+                updateCurrency(state.getRemainingCurrency());
             }
         });
 
@@ -33,8 +34,7 @@ public class PreOpenPackView extends JPanel {
         currencyLabel.setBorder(BorderFactory.createEmptyBorder(10, 15, 10, 10));
 
         JButton backButton = new JButton("Back");
-        backButton.setFont(new Font("SansSerif", Font.PLAIN, 14));
-        backButton.addActionListener(e -> onBack.run());
+        backButton.addActionListener(e -> viewManager.showPreOpenPack());
 
         topBar.add(currencyLabel, BorderLayout.WEST);
         topBar.add(backButton, BorderLayout.EAST);
@@ -55,19 +55,13 @@ public class PreOpenPackView extends JPanel {
         bottomPanel.setOpaque(false);
         bottomPanel.setLayout(new BoxLayout(bottomPanel, BoxLayout.Y_AXIS));
 
-        JButton openPackButton = new JButton("Open Pack");
+        openPackButton = new JButton("Open Pack");
         openPackButton.setAlignmentX(Component.CENTER_ALIGNMENT);
         openPackButton.setFont(new Font("SansSerif", Font.BOLD, 14));
-
-        openPackButton.addActionListener(e -> {
-            controller.openPack();
-            onOpenPack.run();
-        });
 
         JLabel costLabel = new JLabel("1,000 to open a pack", SwingConstants.CENTER);
         costLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
         costLabel.setFont(new Font("SansSerif", Font.PLAIN, 12));
-        costLabel.setBorder(BorderFactory.createEmptyBorder(5, 0, 20, 0));
 
         bottomPanel.add(openPackButton);
         bottomPanel.add(costLabel);
@@ -75,6 +69,16 @@ public class PreOpenPackView extends JPanel {
         add(topBar, BorderLayout.NORTH);
         add(cardsContainer, BorderLayout.CENTER);
         add(bottomPanel, BorderLayout.SOUTH);
+    }
+
+    /** NEW: controller injection */
+    public void setController(OpenPackController controller) {
+        this.controller = controller;
+
+        for (var l : openPackButton.getActionListeners())
+            openPackButton.removeActionListener(l);
+
+        openPackButton.addActionListener(e -> controller.openPack());
     }
 
     private JPanel createPackCard(int width, int height) {

@@ -26,6 +26,14 @@ public class OpenPackInteractor implements OpenPackInputBoundary {
     @Override
     public void execute(OpenPackInputData input) {
         User user = userDataAccess.get();
+        user.addCurrency(5000);
+
+        System.out.println("User currency = " + user.getCurrency());
+        System.out.println("Pack cost = " + PACK_COST);
+        System.out.println("Can afford? " + user.canAffordPack(PACK_COST));
+
+        System.out.println("INTERACTOR: execute() called");
+
 
         if (!user.canAffordPack(PACK_COST)) {
             presenter.prepareFailView("Not enough currency!");
@@ -48,6 +56,11 @@ public class OpenPackInteractor implements OpenPackInputBoundary {
                 duplicateFlags,
                 user.getCurrency()
         );
+        System.out.println("INTERACTOR: openedCards = " + openedCards.size());
+        for (Pokemon p : openedCards) {
+            System.out.println("CARD BEFORE CHECK = " + p);
+        }
+        System.out.println("INTERACTOR: presenter class = " + presenter.getClass().getName());
 
         presenter.prepareSuccessView(outputData);
     }
