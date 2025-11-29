@@ -2,8 +2,6 @@ package view;
 
 import entities.Move;
 import entities.Pokemon;
-import interface_adapters.ui.RetroButton;
-import interface_adapters.ui.UIStyleConstants;
 import pokeapi.JSONLoader;
 
 import javax.swing.*;
@@ -14,8 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Retro-styled view for selecting moves for each Pokemon before battle.
- * After selecting moves for all Pokemon, proceeds to battle via callback.
+ * Simple view for selecting moves for each Pokemon before battle.
  */
 public class BattleMovesetSelectionView extends JFrame {
 
@@ -25,23 +22,22 @@ public class BattleMovesetSelectionView extends JFrame {
     private final Map<Pokemon, List<String>> selectedMoves = new HashMap<>();
     private final Map<Pokemon, JPanel> movesDisplayPanels = new HashMap<>();
     private final Map<Pokemon, JLabel> movesCountLabels = new HashMap<>();
-    private RetroButton proceedButton;
+    private JButton proceedButton;
 
     public BattleMovesetSelectionView(List<Pokemon> battlePokemon, Runnable onComplete, Runnable onCancel) {
         this.battlePokemon = battlePokemon;
         this.onComplete = onComplete;
         this.onCancel = onCancel;
 
-        // Initialize with empty selections
         for (Pokemon p : battlePokemon) {
             selectedMoves.put(p, new ArrayList<>());
         }
 
         setTitle("Select Moves For Battle");
-        setSize(950, 700);
+        setSize(900, 600);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
-        getContentPane().setBackground(UIStyleConstants.DARK_BG);
+        getContentPane().setBackground(Color.WHITE);
         setLayout(new BorderLayout());
 
         add(createHeaderPanel(), BorderLayout.NORTH);
@@ -50,39 +46,24 @@ public class BattleMovesetSelectionView extends JFrame {
     }
 
     private JPanel createHeaderPanel() {
-        JPanel panel = new JPanel() {
-            @Override
-            protected void paintComponent(Graphics g) {
-                super.paintComponent(g);
-                Graphics2D g2d = (Graphics2D) g;
-                GradientPaint gradient = new GradientPaint(
-                    0, 0, UIStyleConstants.POKEMON_BLUE,
-                    getWidth(), 0, UIStyleConstants.POKEMON_BLUE_LIGHT
-                );
-                g2d.setPaint(gradient);
-                g2d.fillRect(0, 0, getWidth(), getHeight());
-
-                // Bottom accent
-                g2d.setColor(UIStyleConstants.SECONDARY_COLOR);
-                g2d.fillRect(0, getHeight() - 4, getWidth(), 4);
-            }
-        };
+        JPanel panel = new JPanel();
+        panel.setBackground(Color.WHITE);
+        panel.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createMatteBorder(0, 0, 1, 0, new Color(220, 220, 220)),
+            BorderFactory.createEmptyBorder(20, 20, 20, 20)
+        ));
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-        panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
-        panel.setPreferredSize(new Dimension(0, 100));
 
         JLabel title = new JLabel("SELECT MOVES FOR BATTLE");
-        title.setFont(UIStyleConstants.TITLE_FONT);
-        title.setForeground(UIStyleConstants.TEXT_LIGHT);
+        title.setFont(new Font("SansSerif", Font.BOLD, 24));
         title.setAlignmentX(Component.CENTER_ALIGNMENT);
         panel.add(title);
 
-        panel.add(Box.createVerticalStrut(8));
-
         JLabel instructions = new JLabel("Click SELECT MOVES to choose 1-4 moves for each Pokemon");
-        instructions.setFont(UIStyleConstants.BODY_FONT);
-        instructions.setForeground(UIStyleConstants.SECONDARY_COLOR);
+        instructions.setFont(new Font("SansSerif", Font.PLAIN, 14));
+        instructions.setForeground(new Color(100, 100, 100));
         instructions.setAlignmentX(Component.CENTER_ALIGNMENT);
+        panel.add(Box.createVerticalStrut(5));
         panel.add(instructions);
 
         return panel;
@@ -90,55 +71,29 @@ public class BattleMovesetSelectionView extends JFrame {
 
     private JPanel createMainPanel() {
         JPanel container = new JPanel(new BorderLayout());
-        container.setBackground(UIStyleConstants.DARK_BG);
+        container.setBackground(Color.WHITE);
         container.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
 
-        // Pokemon cards grid
         JPanel gridPanel = new JPanel(new GridLayout(1, battlePokemon.size(), 20, 0));
-        gridPanel.setBackground(UIStyleConstants.DARK_BG);
+        gridPanel.setBackground(Color.WHITE);
 
         for (Pokemon pokemon : battlePokemon) {
             JPanel pokemonCard = createPokemonCard(pokemon);
             gridPanel.add(pokemonCard);
         }
 
-        JScrollPane scrollPane = new JScrollPane(gridPanel);
-        scrollPane.setBorder(null);
-        scrollPane.getViewport().setBackground(UIStyleConstants.DARK_BG);
-        scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-        container.add(scrollPane, BorderLayout.CENTER);
-
+        container.add(gridPanel, BorderLayout.CENTER);
         return container;
     }
 
     private JPanel createPokemonCard(Pokemon pokemon) {
-        JPanel card = new JPanel() {
-            @Override
-            protected void paintComponent(Graphics g) {
-                super.paintComponent(g);
-                Graphics2D g2d = (Graphics2D) g;
-                int w = getWidth();
-                int h = getHeight();
-
-                // Outer border
-                g2d.setColor(UIStyleConstants.BORDER_DARK);
-                g2d.fillRect(0, 0, w, h);
-
-                // Inner background
-                g2d.setColor(UIStyleConstants.MENU_BG);
-                g2d.fillRect(4, 4, w - 8, h - 8);
-
-                // 3D effect
-                g2d.setColor(Color.WHITE);
-                g2d.drawLine(4, 4, w - 4, 4);
-                g2d.drawLine(4, 4, 4, h - 4);
-                g2d.setColor(UIStyleConstants.SHADOW_COLOR);
-                g2d.drawLine(w - 4, 4, w - 4, h - 4);
-                g2d.drawLine(4, h - 4, w - 4, h - 4);
-            }
-        };
+        JPanel card = new JPanel();
         card.setLayout(new BoxLayout(card, BoxLayout.Y_AXIS));
-        card.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
+        card.setBackground(Color.WHITE);
+        card.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(220, 220, 220)),
+            BorderFactory.createEmptyBorder(15, 15, 15, 15)
+        ));
 
         // Pokemon image
         JLabel imgLabel = new JLabel();
@@ -150,58 +105,32 @@ public class BattleMovesetSelectionView extends JFrame {
             imgLabel.setIcon(new ImageIcon(scaled));
         } catch (Exception ignored) {
             imgLabel.setText("?");
-            imgLabel.setFont(UIStyleConstants.TITLE_FONT);
+            imgLabel.setFont(new Font("SansSerif", Font.BOLD, 24));
         }
         card.add(imgLabel);
 
         // Pokemon name
         JLabel nameLabel = new JLabel(capitalize(pokemon.getName()));
-        nameLabel.setFont(UIStyleConstants.HEADING_FONT);
-        nameLabel.setForeground(UIStyleConstants.TEXT_PRIMARY);
+        nameLabel.setFont(new Font("SansSerif", Font.BOLD, 16));
         nameLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
         card.add(nameLabel);
-
-        // Pokemon types with colored background
-        JPanel typePanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 0));
-        typePanel.setOpaque(false);
-        for (String type : pokemon.getTypes()) {
-            JLabel typeLabel = new JLabel(type.toUpperCase());
-            typeLabel.setFont(UIStyleConstants.SMALL_FONT);
-            typeLabel.setForeground(Color.WHITE);
-            typeLabel.setOpaque(true);
-            typeLabel.setBackground(UIStyleConstants.getTypeColor(type));
-            typeLabel.setBorder(BorderFactory.createEmptyBorder(2, 6, 2, 6));
-            typePanel.add(typeLabel);
-        }
-        typePanel.setAlignmentX(Component.CENTER_ALIGNMENT);
-        card.add(typePanel);
 
         card.add(Box.createVerticalStrut(15));
 
         // Selected moves panel
-        JPanel movesBox = new JPanel() {
-            @Override
-            protected void paintComponent(Graphics g) {
-                super.paintComponent(g);
-                Graphics2D g2d = (Graphics2D) g;
-                int w = getWidth();
-                int h = getHeight();
-
-                g2d.setColor(new Color(60, 60, 80));
-                g2d.fillRect(0, 0, w, h);
-                g2d.setColor(UIStyleConstants.BORDER_DARK);
-                g2d.drawRect(0, 0, w - 1, h - 1);
-            }
-        };
+        JPanel movesBox = new JPanel();
         movesBox.setLayout(new BoxLayout(movesBox, BoxLayout.Y_AXIS));
-        movesBox.setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
+        movesBox.setBackground(new Color(248, 248, 248));
+        movesBox.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(220, 220, 220)),
+            BorderFactory.createEmptyBorder(8, 8, 8, 8)
+        ));
         movesBox.setAlignmentX(Component.CENTER_ALIGNMENT);
-        movesBox.setMaximumSize(new Dimension(250, 120));
-        movesBox.setPreferredSize(new Dimension(250, 120));
+        movesBox.setMaximumSize(new Dimension(220, 110));
 
         JLabel movesHeader = new JLabel("SELECTED MOVES (0/4)");
-        movesHeader.setFont(UIStyleConstants.SMALL_FONT);
-        movesHeader.setForeground(UIStyleConstants.SECONDARY_COLOR);
+        movesHeader.setFont(new Font("SansSerif", Font.BOLD, 11));
+        movesHeader.setForeground(new Color(100, 100, 100));
         movesHeader.setAlignmentX(Component.CENTER_ALIGNMENT);
         movesBox.add(movesHeader);
         movesCountLabels.put(pokemon, movesHeader);
@@ -219,9 +148,10 @@ public class BattleMovesetSelectionView extends JFrame {
         card.add(Box.createVerticalStrut(15));
 
         // Select moves button
-        RetroButton selectBtn = new RetroButton("SELECT MOVES");
-        selectBtn.setButtonColor(UIStyleConstants.POKEMON_BLUE);
+        JButton selectBtn = new JButton("SELECT MOVES");
+        selectBtn.setFont(new Font("SansSerif", Font.BOLD, 12));
         selectBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
+        selectBtn.setFocusPainted(false);
         selectBtn.addActionListener(e -> openMoveSelectionDialog(pokemon));
         card.add(selectBtn);
 
@@ -237,34 +167,28 @@ public class BattleMovesetSelectionView extends JFrame {
             return;
         }
 
-        // Create styled dialog
         JDialog dialog = new JDialog(this, capitalize(pokemon.getName()) + " - Select Moves", true);
-        dialog.setSize(550, 600);
+        dialog.setSize(500, 500);
         dialog.setLocationRelativeTo(this);
-        dialog.getContentPane().setBackground(UIStyleConstants.DARK_BG);
+        dialog.getContentPane().setBackground(Color.WHITE);
         dialog.setLayout(new BorderLayout());
 
         // Header
-        JPanel headerPanel = new JPanel() {
-            @Override
-            protected void paintComponent(Graphics g) {
-                super.paintComponent(g);
-                Graphics2D g2d = (Graphics2D) g;
-                g2d.setColor(UIStyleConstants.POKEMON_BLUE);
-                g2d.fillRect(0, 0, getWidth(), getHeight());
-            }
-        };
-        headerPanel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
-        JLabel headerLabel = new JLabel("SELECT 1-4 MOVES FOR " + capitalize(pokemon.getName()).toUpperCase());
-        headerLabel.setFont(UIStyleConstants.HEADING_FONT);
-        headerLabel.setForeground(UIStyleConstants.TEXT_LIGHT);
+        JPanel headerPanel = new JPanel();
+        headerPanel.setBackground(Color.WHITE);
+        headerPanel.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createMatteBorder(0, 0, 1, 0, new Color(220, 220, 220)),
+            BorderFactory.createEmptyBorder(15, 15, 15, 15)
+        ));
+        JLabel headerLabel = new JLabel("Select 1-4 moves for " + capitalize(pokemon.getName()));
+        headerLabel.setFont(new Font("SansSerif", Font.BOLD, 16));
         headerPanel.add(headerLabel);
         dialog.add(headerPanel, BorderLayout.NORTH);
 
-        // Moves list with checkboxes
+        // Moves list
         JPanel listPanel = new JPanel();
         listPanel.setLayout(new BoxLayout(listPanel, BoxLayout.Y_AXIS));
-        listPanel.setBackground(UIStyleConstants.DARK_BG);
+        listPanel.setBackground(Color.WHITE);
         listPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
         List<JCheckBox> checkBoxes = new ArrayList<>();
@@ -279,20 +203,20 @@ public class BattleMovesetSelectionView extends JFrame {
 
         JScrollPane scrollPane = new JScrollPane(listPanel);
         scrollPane.setBorder(null);
-        scrollPane.getViewport().setBackground(UIStyleConstants.DARK_BG);
+        scrollPane.getViewport().setBackground(Color.WHITE);
         dialog.add(scrollPane, BorderLayout.CENTER);
 
         // Bottom buttons
         JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 15));
-        bottomPanel.setBackground(UIStyleConstants.DARK_BG);
+        bottomPanel.setBackground(Color.WHITE);
 
-        RetroButton cancelBtn = new RetroButton("CANCEL");
-        cancelBtn.setButtonColor(UIStyleConstants.BORDER_DARK);
+        JButton cancelBtn = new JButton("CANCEL");
+        cancelBtn.setFont(new Font("SansSerif", Font.BOLD, 12));
         cancelBtn.addActionListener(e -> dialog.dispose());
         bottomPanel.add(cancelBtn);
 
-        RetroButton saveBtn = new RetroButton("SAVE SELECTION");
-        saveBtn.setButtonColor(UIStyleConstants.HP_HIGH);
+        JButton saveBtn = new JButton("SAVE SELECTION");
+        saveBtn.setFont(new Font("SansSerif", Font.BOLD, 12));
         saveBtn.addActionListener(e -> {
             List<String> selected = new ArrayList<>();
             for (int i = 0; i < checkBoxes.size(); i++) {
@@ -321,33 +245,21 @@ public class BattleMovesetSelectionView extends JFrame {
 
     private JPanel createMoveRow(String moveName, Move moveDetail, List<JCheckBox> checkBoxes,
                                   List<String> currentSelection, JDialog dialog) {
-        JPanel row = new JPanel() {
-            @Override
-            protected void paintComponent(Graphics g) {
-                super.paintComponent(g);
-                Graphics2D g2d = (Graphics2D) g;
-                int w = getWidth();
-                int h = getHeight();
-
-                g2d.setColor(UIStyleConstants.MENU_BG);
-                g2d.fillRect(0, 0, w, h);
-                g2d.setColor(UIStyleConstants.BORDER_DARK);
-                g2d.drawRect(0, 0, w - 1, h - 1);
-            }
-        };
+        JPanel row = new JPanel();
         row.setLayout(new BoxLayout(row, BoxLayout.Y_AXIS));
-        row.setBorder(BorderFactory.createEmptyBorder(10, 12, 10, 12));
-        row.setMaximumSize(new Dimension(Integer.MAX_VALUE, 90));
+        row.setBackground(new Color(248, 248, 248));
+        row.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(220, 220, 220)),
+            BorderFactory.createEmptyBorder(8, 10, 8, 10)
+        ));
+        row.setMaximumSize(new Dimension(Integer.MAX_VALUE, 70));
 
-        // Checkbox with move name
         JCheckBox cb = new JCheckBox(capitalize(moveName));
-        cb.setFont(UIStyleConstants.BODY_FONT);
-        cb.setForeground(UIStyleConstants.TEXT_PRIMARY);
+        cb.setFont(new Font("SansSerif", Font.BOLD, 13));
         cb.setOpaque(false);
         cb.setSelected(currentSelection.contains(moveName));
         checkBoxes.add(cb);
 
-        // Limit to 4 moves
         cb.addActionListener(e -> {
             long count = checkBoxes.stream().filter(JCheckBox::isSelected).count();
             if (count > 4) {
@@ -359,36 +271,18 @@ public class BattleMovesetSelectionView extends JFrame {
         });
         row.add(cb);
 
-        // Move details
         if (moveDetail != null) {
-            JPanel detailsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 2));
+            JPanel detailsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 2));
             detailsPanel.setOpaque(false);
 
-            // Type label
-            if (moveDetail.getType() != null) {
-                JLabel typeLabel = new JLabel(moveDetail.getType().toUpperCase());
-                typeLabel.setFont(UIStyleConstants.SMALL_FONT);
-                typeLabel.setForeground(Color.WHITE);
-                typeLabel.setOpaque(true);
-                typeLabel.setBackground(UIStyleConstants.getTypeColor(moveDetail.getType()));
-                typeLabel.setBorder(BorderFactory.createEmptyBorder(2, 6, 2, 6));
-                detailsPanel.add(typeLabel);
-            }
-
-            // Stats
             String power = moveDetail.getPower() != null ? String.valueOf(moveDetail.getPower()) : "-";
             String accuracy = moveDetail.getAccuracy() != null ? String.valueOf(moveDetail.getAccuracy()) : "-";
-            JLabel statsLabel = new JLabel("PWR: " + power + " | ACC: " + accuracy);
-            statsLabel.setFont(UIStyleConstants.SMALL_FONT);
-            statsLabel.setForeground(UIStyleConstants.TEXT_SECONDARY);
-            detailsPanel.add(statsLabel);
+            String type = moveDetail.getType() != null ? moveDetail.getType().toUpperCase() : "";
 
-            if (moveDetail.getDamageClass() != null) {
-                JLabel classLabel = new JLabel("(" + moveDetail.getDamageClass() + ")");
-                classLabel.setFont(UIStyleConstants.SMALL_FONT);
-                classLabel.setForeground(UIStyleConstants.TEXT_SECONDARY);
-                detailsPanel.add(classLabel);
-            }
+            JLabel statsLabel = new JLabel(type + " | PWR: " + power + " | ACC: " + accuracy);
+            statsLabel.setFont(new Font("SansSerif", Font.PLAIN, 11));
+            statsLabel.setForeground(new Color(100, 100, 100));
+            detailsPanel.add(statsLabel);
 
             row.add(detailsPanel);
         }
@@ -405,8 +299,7 @@ public class BattleMovesetSelectionView extends JFrame {
 
         for (String moveName : moves) {
             JLabel moveLabel = new JLabel("- " + capitalize(moveName));
-            moveLabel.setFont(UIStyleConstants.SMALL_FONT);
-            moveLabel.setForeground(UIStyleConstants.TEXT_LIGHT);
+            moveLabel.setFont(new Font("SansSerif", Font.PLAIN, 11));
             moveLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
             panel.add(moveLabel);
         }
@@ -429,33 +322,28 @@ public class BattleMovesetSelectionView extends JFrame {
 
     private JPanel createBottomPanel() {
         JPanel panel = new JPanel(new BorderLayout());
-        panel.setBackground(UIStyleConstants.DARK_BG);
+        panel.setBackground(Color.WHITE);
         panel.setBorder(BorderFactory.createEmptyBorder(10, 15, 15, 15));
 
-        // Back button on left
-        RetroButton backBtn = new RetroButton("BACK");
-        backBtn.setButtonColor(UIStyleConstants.BORDER_DARK);
+        JButton backBtn = new JButton("BACK");
+        backBtn.setFont(new Font("SansSerif", Font.BOLD, 12));
         backBtn.addActionListener(e -> {
             dispose();
-            if (onCancel != null) {
-                onCancel.run();
-            }
+            if (onCancel != null) onCancel.run();
         });
 
         JPanel leftPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        leftPanel.setOpaque(false);
+        leftPanel.setBackground(Color.WHITE);
         leftPanel.add(backBtn);
         panel.add(leftPanel, BorderLayout.WEST);
 
-        // Proceed button on right
-        proceedButton = new RetroButton("PROCEED TO BATTLE");
-        proceedButton.setButtonColor(UIStyleConstants.SECONDARY_COLOR);
-        proceedButton.setPreferredSize(new Dimension(200, 50));
+        proceedButton = new JButton("PROCEED TO BATTLE");
+        proceedButton.setFont(new Font("SansSerif", Font.BOLD, 14));
         proceedButton.setEnabled(false);
         proceedButton.addActionListener(e -> proceedToBattle());
 
         JPanel rightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        rightPanel.setOpaque(false);
+        rightPanel.setBackground(Color.WHITE);
         rightPanel.add(proceedButton);
         panel.add(rightPanel, BorderLayout.EAST);
 
@@ -463,7 +351,6 @@ public class BattleMovesetSelectionView extends JFrame {
     }
 
     private void proceedToBattle() {
-        // Update each Pokemon's moves to only contain the selected ones
         for (Pokemon pokemon : battlePokemon) {
             List<String> selected = selectedMoves.get(pokemon);
             if (selected != null && !selected.isEmpty()) {
@@ -472,9 +359,7 @@ public class BattleMovesetSelectionView extends JFrame {
         }
 
         dispose();
-        if (onComplete != null) {
-            onComplete.run();
-        }
+        if (onComplete != null) onComplete.run();
     }
 
     private Move findMoveDetail(String moveName) {
