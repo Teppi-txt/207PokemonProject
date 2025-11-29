@@ -1,5 +1,7 @@
 package entities;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -77,6 +79,35 @@ public class User implements Serializable {
         return null;
     }
 
+    public String toJSONString(){
+        JSONObject json = new JSONObject();
+        json.put("id", id);
+        json.put("name", name);
+        json.put("email", email);
+        json.put("currency", currency);
 
+        JSONArray pokemons = new JSONArray();
+        for (Pokemon pokemon : ownedPokemon){
+            pokemons.put(new JSONObject(pokemon.toJSONString()));
+        }
+        json.put("ownedpokemons", pokemons);
+        return json.toString(2);
+    }
+
+    public static User fromJSON(JSONObject json){
+        int id = json.getInt("id");
+        String name = json.getString("name");
+        String email = json.getString("email");
+        int currency = json.getInt("currency");
+
+        User user = new User(id, name, email, currency);
+        JSONArray pokemons = json.getJSONArray("ownedpokemons");
+        for (int i = 0; i < pokemons.length(); i++){
+            JSONObject pokeJSON = pokemons.getJSONObject(i);
+            Pokemon p = Pokemon.fromJSON(pokeJSON);
+            user.addPokemon(p);
+        }
+        return user;
+    }
 
 }

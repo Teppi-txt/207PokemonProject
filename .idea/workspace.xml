@@ -5,18 +5,20 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="9dec9f17-26e6-4643-bace-3bd84e99933c" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/main/java/use_case/build_deck/BuildDeckInputBoundary.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/use_case/build_deck/BuildDeckInputData.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/use_case/build_deck/BuildDeckInteractor.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/use_case/build_deck/BuildDeckOutputBoundary.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/use_case/build_deck/BuildDeckOutputData.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/use_case/build_deck/BuildDeckUserDataAccessInterface.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/frameworks_and_drivers/JsonUserDataAccess.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/frameworks_and_drivers/PreOpenPackView.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/frameworks_and_drivers/UofTCGApp.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/frameworks_and_drivers/ViewManager.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/frameworks_and_drivers/ViewManagerFrame.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/cards/Deck.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/entities/Deck.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/entities/Pokemon.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/entities/Pokemon.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/entities/User.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/entities/User.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/frameworks_and_drivers/OpenPackView.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/frameworks_and_drivers/OpenPackView.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/interface_adapters/open_pack/OpenPackController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/interface_adapters/open_pack/OpenPackController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/interface_adapters/open_pack/OpenPackPresenter.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/interface_adapters/open_pack/OpenPackPresenter.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/interface_adapters/open_pack/OpenPackState.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/interface_adapters/open_pack/OpenPackState.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/interface_adapters/open_pack/OpenPackViewModel.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/interface_adapters/open_pack/OpenPackViewModel.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/use_case/open_pack/OpenPackInteractor.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/use_case/open_pack/OpenPackInteractor.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -56,16 +58,16 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;build__deck&quot;,
-    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "git-widget-placeholder": "open__pack__whoops",
+    "kotlin-language-version-configured": "true"
   }
-}</component>
+}]]></component>
   <component name="RunManager">
     <configuration default="true" type="JetRunConfigurationType">
       <method v="2">

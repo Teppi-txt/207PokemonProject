@@ -4,58 +4,65 @@ import entities.Pack;
 import entities.Pokemon;
 import entities.User;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class OpenPackInteractor implements OpenPackInputBoundary{
 
-    private static final int PACK_COST = 1000;
     private final OpenPackUserDataAccessInterface userDataAccess;
-    private final OpenPackOutputBoundary openPackPresenter;
+    private final OpenPackOutputBoundary presenter;
     private final Pack pack;
+    private static final int PACK_COST = 1000;
 
     public OpenPackInteractor(OpenPackUserDataAccessInterface userDataAccess,
-                              OpenPackOutputBoundary openPackPresenter,
-                              Pack pack){
+                              OpenPackOutputBoundary presenter,
+                              Pack pack) {
         this.userDataAccess = userDataAccess;
-        this.openPackPresenter = openPackPresenter;
+        this.presenter = presenter;
         this.pack = pack;
     }
 
     @Override
-    public void execute(OpenPackInputData inputData) {
+    public void execute(OpenPackInputData input) {
+        User user = userDataAccess.get();
+        user.addCurrency(5000);
 
-        final User user = userDataAccess.get();
-        if (user == null) {
-            openPackPresenter.prepareFailView("User not found");
+        System.out.println("User currency = " + user.getCurrency());
+        System.out.println("Pack cost = " + PACK_COST);
+        System.out.println("Can afford? " + user.canAffordPack(PACK_COST));
+
+        System.out.println("INTERACTOR: execute() called");
+
+
+        if (!user.canAffordPack(PACK_COST)) {
+            presenter.prepareFailView("Not enough currency!");
             return;
         }
 
-        if (!user.canAffordPack(PACK_COST)){
-            openPackPresenter.prepareFailView("Not enough currency to open pack.");
-            return;
+        List<Pokemon> openedCards = pack.openPack();
+
+        List<Boolean> duplicateFlags = new ArrayList<>();
+        for (Pokemon p : openedCards) {
+            duplicateFlags.add(user.hasDuplicatePokemon(p));
         }
 
         user.buyPack(PACK_COST);
 
-        List<Pokemon> openedCards = pack.openPack();
-
-        for (Pokemon pokemon : openedCards){
-            boolean isDuplicate = user.hasDuplicatePokemon(pokemon);
-            user.addPokemon(pokemon);
-            if(isDuplicate){
-                user.addCurrency(50); // if the pokemon pulled from the packs is a duplicate the user gains 50 currency
-            }
-        }
-
         userDataAccess.save(user);
 
-        OpenPackOutputData outputData =
-                new OpenPackOutputData(openedCards, user.getCurrency());
-        openPackPresenter.prepareSuccessView(outputData);
+        OpenPackOutputData outputData = new OpenPackOutputData(
+                openedCards,
+                duplicateFlags,
+                user.getCurrency()
+        );
+        System.out.println("INTERACTOR: openedCards = " + openedCards.size());
+        for (Pokemon p : openedCards) {
+            System.out.println("CARD BEFORE CHECK = " + p);
+        }
+        System.out.println("INTERACTOR: presenter class = " + presenter.getClass().getName());
 
+        presenter.prepareSuccessView(outputData);
     }
-
-
 
 
 }
