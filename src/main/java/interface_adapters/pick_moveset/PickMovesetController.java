@@ -1,7 +1,6 @@
 package interface_adapters.pick_moveset;
 
 import pokeapi.JSONLoader;
-import pokeapi.PokeAPIFetcher;
 import use_case.pick_moveset.PickMovesetInputBoundary;
 import use_case.pick_moveset.PickMovesetInputData;
 import entities.Pokemon;

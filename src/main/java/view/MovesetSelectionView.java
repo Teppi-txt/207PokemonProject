@@ -305,7 +305,7 @@ public class MovesetSelectionView extends JFrame implements PropertyChangeListen
 
     }
 
-    // test gui
+    // test ui
     public static void main(String[] args) {
         JSONLoader.loadMoves();
         JSONLoader.loadPokemon();
