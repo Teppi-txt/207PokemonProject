@@ -2,7 +2,9 @@ package entities;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class User implements Serializable {
     private static final long serialVersionUID = 1L;
@@ -11,7 +13,7 @@ public class User implements Serializable {
     private String name;
     private int currency;
     private String email; //do we need a password?
-    private List<Deck> decks; //maybe should be hashmap?
+    private final Map<Integer, Deck> decks = new HashMap<>();
 
     private final List<Pokemon> ownedPokemon;
 
@@ -48,10 +50,10 @@ public class User implements Serializable {
         this.ownedPokemon.add(pokemon);
     }
 
-    public List<Deck> getDecks() { return decks; }
+    public Map<Integer, Deck> getDecks() { return decks; }
 
     public void addDeck(Deck deck) {
-        this.decks.add(deck);
+        decks.put(deck.getId(), deck);
     }
 
     //got rid of openPack method because that will be used with the open pack interactor
@@ -84,10 +86,7 @@ public class User implements Serializable {
         return null;
     }
 
-    public Deck getDeckById(int id){
-        for (Deck d : decks){
-            if (d.getId() == id) return d;
-        }
-        return null;
+    public Deck getDeckById(int id) {
+        return decks.get(id);
     }
 }
