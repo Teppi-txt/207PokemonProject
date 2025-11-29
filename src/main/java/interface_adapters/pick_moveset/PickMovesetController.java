@@ -1,11 +1,12 @@
 package interface_adapters.pick_moveset;
 
+import pokeapi.JSONLoader;
 import pokeapi.PokeAPIFetcher;
 import use_case.pick_moveset.PickMovesetInputBoundary;
 import use_case.pick_moveset.PickMovesetInputData;
 import entities.Pokemon;
 import entities.Move;
-import cards.Deck;
+import entities.Deck;
 
 import java.util.List;
 
@@ -27,11 +28,13 @@ public class PickMovesetController {
     }
 
     public Move fetchMoveDetail(String name) {
-        try {
-            return PokeAPIFetcher.getMove(name);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+        for (Move m : JSONLoader.allMoves) {
+            if (m.getName().equalsIgnoreCase(name)) {
+                return m;
+            }
         }
+        return null;
     }
+
 
 }

@@ -8,6 +8,7 @@ import use_case.pick_moveset.PickMovesetOutputData;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class PickMovesetPresenter implements PickMovesetOutputBoundary {
 
@@ -19,21 +20,21 @@ public class PickMovesetPresenter implements PickMovesetOutputBoundary {
 
     @Override
     public void present(PickMovesetOutputData data) {
+
         PickMovesetState newState = new PickMovesetState();
 
         Map<Pokemon, List<String>> uiMap = new HashMap<>();
-        for (var entry : data.getPokemonMoves().entrySet()) {
+        for (Map.Entry<Pokemon, List<Move>> entry : data.getPokemonMoves().entrySet()) {
             Pokemon p = entry.getKey();
-            List<String> names = entry.getValue()
-                    .stream()
+            List<String> names = entry.getValue().stream()
                     .map(Move::getName)
-                    .toList();
+                    .collect(Collectors.toList());
             uiMap.put(p, names);
         }
 
         newState.setAvailableMoves(uiMap);
         viewModel.setState(newState);
-        viewModel.firePropertyChange();
+        viewModel.firePropertyChanged();
     }
 
     @Override
@@ -41,7 +42,7 @@ public class PickMovesetPresenter implements PickMovesetOutputBoundary {
         PickMovesetState newState = new PickMovesetState();
         newState.setError(errorMessage);
         viewModel.setState(newState);
-        viewModel.firePropertyChange();
+        viewModel.firePropertyChanged();
     }
 
     @Override
@@ -49,6 +50,6 @@ public class PickMovesetPresenter implements PickMovesetOutputBoundary {
         PickMovesetState newState = new PickMovesetState();
         newState.setMessage(message);
         viewModel.setState(newState);
-        viewModel.firePropertyChange();
+        viewModel.firePropertyChanged();
     }
 }
