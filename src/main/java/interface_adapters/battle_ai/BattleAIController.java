@@ -413,32 +413,44 @@ public class BattleAIController {
     }
 
     /**
-     * Simplified move execution.
-     * Directly applies damage based on move power.
+     * Move execution using Gen I damage formula.
+     * Calculates damage based on stats, types, and move properties.
      */
     private String executeMoveSimple(Pokemon attacker, Move move, Pokemon defender) {
         if (move == null || defender == null) {
             return "Move failed!";
         }
 
-        // Calculate damage (simplified - real calculation would consider types, stats, etc.)
-        int damage = move.getPower() != null ? move.getPower() : 20;
+        if (attacker == null) {
+            return "No attacker!";
+        }
+
+        // Calculate damage using the Gen I formula
+        int damage = entities.DamageCalculator.calculateDamage(attacker, defender, move);
         int currentHP = defender.getStats().getHp();
         int newHP = Math.max(0, currentHP - damage);
 
-        // Update HP
-        Stats newStats = new Stats(
-                newHP,
-                defender.getStats().getAttack(),
-                defender.getStats().getDefense(),
-                defender.getStats().getSpAttack(),
-                defender.getStats().getSpDefense(),
-                defender.getStats().getSpeed()
-        );
-        defender.setStats(newStats);
+        // Update HP directly on stats (preserves maxHp)
+        defender.getStats().setHp(newHP);
 
-        return attacker.getName() + " used " + move.getName() + "! " +
-                defender.getName() + " took " + damage + " damage! (HP: " + newHP + "/" + currentHP + ")";
+        // Get effectiveness for display
+        String effectiveness = entities.DamageCalculator.getEffectivenessDescription(move, defender);
+
+        // Build result message
+        StringBuilder result = new StringBuilder();
+        result.append(attacker.getName()).append(" used ").append(move.getName()).append("! ");
+
+        if (damage > 0) {
+            result.append(defender.getName()).append(" took ").append(damage).append(" damage");
+            if (!"normal".equals(effectiveness)) {
+                result.append(" (").append(effectiveness).append(")");
+            }
+            result.append("! (HP: ").append(newHP).append("/").append(defender.getStats().getMaxHp()).append(")");
+        } else {
+            result.append("It had no effect on ").append(defender.getName()).append("!");
+        }
+
+        return result.toString();
     }
 
     /**
