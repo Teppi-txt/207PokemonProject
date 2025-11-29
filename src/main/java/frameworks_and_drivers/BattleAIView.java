@@ -40,7 +40,7 @@ public class BattleAIView extends JFrame implements BattleAIViewModel.ViewModelL
 
     // UI Components - Battle Controls
     private JPanel movesPanel;
-    private RetroButton[] moveButtons = new RetroButton[4];
+    private JButton[] moveButtons = new JButton[4];
     private JPanel teamPanel;
     private JTextArea messageArea;
     private JPanel battleEndedPanel;
@@ -398,43 +398,23 @@ public class BattleAIView extends JFrame implements BattleAIViewModel.ViewModelL
     }
 
     private JPanel createMovesPanel() {
-        JPanel outerPanel = new JPanel() {
-            @Override
-            protected void paintComponent(Graphics g) {
-                super.paintComponent(g);
-                Graphics2D g2d = (Graphics2D) g;
-                int w = getWidth();
-                int h = getHeight();
-
-                // Border
-                g2d.setColor(UIStyleConstants.TEXT_LIGHT);
-                g2d.fillRect(0, 0, w, h);
-                g2d.setColor(UIStyleConstants.BORDER_DARK);
-                g2d.fillRect(4, 4, w - 8, h - 8);
-                g2d.setColor(new Color(48, 80, 120));
-                g2d.fillRect(8, 8, w - 16, h - 16);
-            }
-        };
+        JPanel outerPanel = new JPanel();
         outerPanel.setLayout(new BorderLayout());
-        outerPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        outerPanel.setBackground(Color.WHITE);
+        outerPanel.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(200, 200, 200), 2),
+            BorderFactory.createEmptyBorder(10, 10, 10, 10)
+        ));
         outerPanel.setPreferredSize(new Dimension(400, 140));
 
         JPanel grid = new JPanel(new GridLayout(2, 2, 8, 8));
-        grid.setOpaque(false);
-
-        // Create 4 move buttons
-        Color[] moveColors = {
-            UIStyleConstants.PRIMARY_COLOR,
-            UIStyleConstants.POKEMON_BLUE,
-            new Color(120, 200, 80),
-            UIStyleConstants.SECONDARY_COLOR
-        };
+        grid.setBackground(Color.WHITE);
 
         for (int i = 0; i < 4; i++) {
-            moveButtons[i] = new RetroButton("-");
-            moveButtons[i].setButtonColor(moveColors[i]);
-            moveButtons[i].setFont(UIStyleConstants.BODY_FONT);
+            moveButtons[i] = new JButton("-");
+            moveButtons[i].setFont(new Font("SansSerif", Font.BOLD, 12));
             moveButtons[i].setEnabled(false);
+            moveButtons[i].setFocusPainted(false);
             final int moveIndex = i;
             moveButtons[i].addActionListener(e -> executeMove(moveIndex));
             grid.add(moveButtons[i]);
@@ -446,29 +426,17 @@ public class BattleAIView extends JFrame implements BattleAIViewModel.ViewModelL
     }
 
     private JPanel createTeamPanel() {
-        JPanel panel = new JPanel() {
-            @Override
-            protected void paintComponent(Graphics g) {
-                super.paintComponent(g);
-                Graphics2D g2d = (Graphics2D) g;
-                int w = getWidth();
-                int h = getHeight();
-
-                g2d.setColor(UIStyleConstants.TEXT_LIGHT);
-                g2d.fillRect(0, 0, w, h);
-                g2d.setColor(UIStyleConstants.BORDER_DARK);
-                g2d.fillRect(3, 3, w - 6, h - 6);
-                g2d.setColor(new Color(60, 80, 60));
-                g2d.fillRect(6, 6, w - 12, h - 12);
-            }
-        };
+        JPanel panel = new JPanel();
         panel.setLayout(new FlowLayout(FlowLayout.LEFT, 8, 5));
-        panel.setBorder(BorderFactory.createEmptyBorder(12, 12, 12, 12));
-        panel.setPreferredSize(new Dimension(420, 80));
+        panel.setBackground(Color.WHITE);
+        panel.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(200, 200, 200), 2),
+            BorderFactory.createEmptyBorder(10, 10, 10, 10)
+        ));
+        panel.setPreferredSize(new Dimension(420, 70));
 
-        JLabel label = new JLabel("TEAM");
-        label.setFont(UIStyleConstants.BODY_FONT);
-        label.setForeground(UIStyleConstants.TEXT_LIGHT);
+        JLabel label = new JLabel("SWITCH:");
+        label.setFont(new Font("SansSerif", Font.BOLD, 12));
         panel.add(label);
 
         return panel;
@@ -707,13 +675,6 @@ public class BattleAIView extends JFrame implements BattleAIViewModel.ViewModelL
                 String moveName = moves.get(i);
                 moveButtons[i].setText(moveName.toUpperCase());
                 moveButtons[i].setEnabled(true);
-
-                // Set color based on move type
-                Move move = findMove(moveName);
-                if (move != null && move.getType() != null) {
-                    Color typeColor = UIStyleConstants.getTypeColor(move.getType());
-                    moveButtons[i].setButtonColor(typeColor);
-                }
             } else {
                 moveButtons[i].setText("-");
                 moveButtons[i].setEnabled(false);
@@ -724,9 +685,8 @@ public class BattleAIView extends JFrame implements BattleAIViewModel.ViewModelL
     private void updateTeamDisplay(List<Pokemon> team, Pokemon activePokemon) {
         teamPanel.removeAll();
 
-        JLabel label = new JLabel("SWITCH: ");
-        label.setFont(UIStyleConstants.BODY_FONT);
-        label.setForeground(UIStyleConstants.TEXT_LIGHT);
+        JLabel label = new JLabel("SWITCH:");
+        label.setFont(new Font("SansSerif", Font.BOLD, 12));
         teamPanel.add(label);
 
         if (team == null || team.isEmpty()) {
@@ -743,9 +703,6 @@ public class BattleAIView extends JFrame implements BattleAIViewModel.ViewModelL
                 pokemonName = "PKM" + pokemon.getId();
             }
 
-            // Debug: print Pokemon info
-            System.out.println("Team button: " + pokemonName + " (ID: " + pokemon.getId() + ", Fainted: " + pokemon.isFainted() + ")");
-
             String btnText = pokemonName;
             boolean isActive = (activePokemon != null && pokemon.getId() == activePokemon.getId());
             boolean isFainted = pokemon.isFainted();
@@ -756,33 +713,15 @@ public class BattleAIView extends JFrame implements BattleAIViewModel.ViewModelL
                 btnText += " X";
             }
 
-            // Use simple JButton with proper Mac-compatible styling
             JButton pokemonBtn = new JButton(btnText);
-            pokemonBtn.setFont(new Font("Courier New", Font.BOLD, 10));
-            pokemonBtn.setPreferredSize(new Dimension(95, 35));
+            pokemonBtn.setFont(new Font("SansSerif", Font.PLAIN, 11));
             pokemonBtn.setFocusPainted(false);
-            pokemonBtn.setCursor(new Cursor(Cursor.HAND_CURSOR));
-            // Required for Mac to show custom colors
-            pokemonBtn.setOpaque(true);
-            pokemonBtn.setBorderPainted(true);
 
-            if (isActive) {
-                pokemonBtn.setBackground(new Color(100, 180, 100));
-                pokemonBtn.setForeground(Color.BLACK);
-                pokemonBtn.setEnabled(false);
-            } else if (isFainted) {
-                pokemonBtn.setBackground(Color.LIGHT_GRAY);
-                pokemonBtn.setForeground(Color.DARK_GRAY);
+            if (isActive || isFainted) {
                 pokemonBtn.setEnabled(false);
             } else {
-                pokemonBtn.setBackground(new Color(70, 130, 180));
-                pokemonBtn.setForeground(Color.BLACK);
-                pokemonBtn.setEnabled(true);
                 final Pokemon switchTarget = pokemon;
-                pokemonBtn.addActionListener(e -> {
-                    System.out.println("Switch clicked: " + switchTarget.getName());
-                    executeSwitch(switchTarget);
-                });
+                pokemonBtn.addActionListener(e -> executeSwitch(switchTarget));
             }
 
             teamPanel.add(pokemonBtn);

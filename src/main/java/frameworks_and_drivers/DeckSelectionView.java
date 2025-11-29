@@ -255,8 +255,11 @@ public class DeckSelectionView extends JFrame {
         row.add(Box.createHorizontalGlue());
 
         JButton removeBtn = new JButton("X");
-        removeBtn.setFont(new Font("SansSerif", Font.BOLD, 10));
-        removeBtn.setMargin(new Insets(0, 4, 0, 4));
+        removeBtn.setFont(new Font("SansSerif", Font.BOLD, 9));
+        removeBtn.setMargin(new Insets(0, 0, 0, 0));
+        removeBtn.setPreferredSize(new Dimension(22, 20));
+        removeBtn.setMinimumSize(new Dimension(22, 20));
+        removeBtn.setMaximumSize(new Dimension(22, 20));
         removeBtn.setFocusPainted(false);
         removeBtn.addActionListener(e -> {
             selectedDeck.remove(index);
