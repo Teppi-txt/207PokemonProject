@@ -6,6 +6,7 @@ import interface_adapters.collection.ViewCollectionController;
 import interface_adapters.collection.ViewCollectionState;
 import interface_adapters.collection.ViewCollectionViewModel;
 import org.jetbrains.annotations.NotNull;
+import pokeapi.JSONLoader;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
