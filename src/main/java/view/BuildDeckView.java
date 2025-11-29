@@ -388,17 +388,24 @@ public class BuildDeckView extends JPanel implements PropertyChangeListener {
             JPanel statsPanel = new JPanel();
             statsPanel.setLayout(new BoxLayout(statsPanel, BoxLayout.Y_AXIS));
             statsPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
+            statsPanel.setOpaque(true);   // make background visible
+
+            // match the slot background color
+            statsPanel.setBackground(new Color(200, 255, 200));
 
             Map<String, Integer> stats = pokemon.getStats().getStatMap();
 
-            for (String s : Stats.STAT_NAMES) {
-                JLabel statLabel = new JLabel(s + ": " + stats.get(s));
-                statLabel.setFont(new Font("Arial", Font.PLAIN, 14));
+            for (String stat : Stats.STAT_NAMES) {
+                JLabel statLabel = new JLabel(stat + ": " + stats.get(stat));
+                statLabel.setFont(new Font("Arial", Font.BOLD, 14));   // bold + consistent size
+                statLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+                statLabel.setOpaque(false);  // text only, no separate box
                 statsPanel.add(statLabel);
             }
-
+            statsPanel.setBorder(BorderFactory.createEmptyBorder(5, 0, 5, 0));
             return statsPanel;
         }
+
     }
 
     /**
