@@ -1,7 +1,10 @@
 package app;
 
+import entities.Pack;
 import entities.Pokemon;
 import entities.User;
+import frameworks_and_drivers.BattlePlayerDataAccessObject;
+import frameworks_and_drivers.ViewManagerFrame;
 import interface_adapters.NavigationController;
 import interface_adapters.ViewManagerModel;
 import interface_adapters.battle_ai.BattleAIController;
@@ -14,11 +17,16 @@ import interface_adapters.battle_player.BattlePlayerViewModel;
 import interface_adapters.collection.ViewCollectionController;
 import interface_adapters.collection.ViewCollectionPresenter;
 import interface_adapters.collection.ViewCollectionViewModel;
-import frameworks_and_drivers.BattlePlayerDataAccessObject;
+import interface_adapters.open_pack.OpenPackController;
+import interface_adapters.open_pack.OpenPackPresenter;
+import interface_adapters.open_pack.OpenPackViewModel;
 import pokeapi.JSONLoader;
 import use_case.battle_ai.BattleAIInteractor;
 import use_case.battle_player.BattlePlayerInteractor;
 import use_case.collection.ViewCollectionInteractor;
+import use_case.open_pack.OpenPackInputBoundary;
+import use_case.open_pack.OpenPackInteractor;
+import use_case.open_pack.OpenPackOutputBoundary;
 import view.CollectionView;
 import view.MainMenuView;
 import view.ViewManager;
@@ -75,7 +83,7 @@ public class AppBuilder {
      * Creates a default user with starter Pokemon and currency.
      */
     public AppBuilder createDefaultUser() {
-        user = new User(1, "Trainer", "trainer@pokemon.com", 10000);
+        user = new User(1, "Trainer", "trainer@pokemon.com", 5000);
 
         // Add starter Pokemon from the loaded data
         int starterCount = Math.min(6, JSONLoader.allPokemon.size());
@@ -125,12 +133,8 @@ public class AppBuilder {
             openBattlePlayerFlow();
         });
 
-        // Open Pack is disabled for now (placeholder)
         mainMenuView.setOnOpenPackClick(() -> {
-            JOptionPane.showMessageDialog(cardPanel,
-                "Open Pack feature coming soon!",
-                "Coming Soon",
-                JOptionPane.INFORMATION_MESSAGE);
+            openOpenPackFlow();
         });
 
         cardPanel.add(mainMenuView, MainMenuView.VIEW_NAME);
@@ -233,6 +237,53 @@ public class AppBuilder {
         frameworks_and_drivers.BattleSetupViewIntegrated setupView =
             new frameworks_and_drivers.BattleSetupViewIntegrated(user, returnToMenu);
         setupView.setVisible(true);
+    }
+
+    /**
+     * Opens the Open Pack flow in a separate window.
+     */
+    private void openOpenPackFlow() {
+        if (user == null) {
+            JOptionPane.showMessageDialog(cardPanel,
+                "No user found!",
+                "Error",
+                JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        if (user.getCurrency() < 1000) {
+            JOptionPane.showMessageDialog(cardPanel,
+                "Not enough currency! You need 1000 to open a pack.\nWin battles to earn more currency!",
+                "Insufficient Currency",
+                JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        // Create the pack with the card pool
+        Pack pack = new Pack(1, "Pokemon Pack", JSONLoader.allPokemon);
+
+        // Create data access with shared user
+        InMemoryOpenPackDataAccess dataAccess = new InMemoryOpenPackDataAccess(user);
+
+        // Create view model
+        OpenPackViewModel viewModel = new OpenPackViewModel();
+        viewModel.getState().setRemainingCurrency(user.getCurrency());
+
+        // Create callback to refresh main menu when pack window closes
+        Runnable onClose = () -> {
+            mainMenuView.refreshUserInfo();
+        };
+
+        // Create the frame with callback support
+        ViewManagerFrame frame = new ViewManagerFrame(viewModel, (OpenPackController) null, onClose);
+
+        // Create presenter and interactor
+        OpenPackOutputBoundary presenter = new OpenPackPresenter(viewModel, frame);
+        OpenPackInputBoundary interactor = new OpenPackInteractor(dataAccess, presenter, pack);
+        OpenPackController controller = new OpenPackController(interactor);
+
+        // Wire the controller
+        frame.setController(controller);
     }
 
     /**

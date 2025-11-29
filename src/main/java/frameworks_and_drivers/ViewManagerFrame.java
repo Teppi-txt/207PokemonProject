@@ -4,17 +4,35 @@ import interface_adapters.open_pack.OpenPackController;
 import interface_adapters.open_pack.OpenPackViewModel;
 
 import javax.swing.*;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
 public class ViewManagerFrame extends JFrame implements ViewManager {
 
     private final PreOpenPackView preView;
     private final OpenPackView openView;
+    private final Runnable onCloseCallback;
 
     public ViewManagerFrame(OpenPackViewModel vm, OpenPackController controller) {
+        this(vm, controller, null);
+    }
 
-        setTitle("UofTCG");
+    public ViewManagerFrame(OpenPackViewModel vm, OpenPackController controller, Runnable onCloseCallback) {
+        this.onCloseCallback = onCloseCallback;
+
+        setTitle("Open Pack");
         setSize(900, 650);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+
+        // Add window closing listener to trigger callback
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosed(WindowEvent e) {
+                if (onCloseCallback != null) {
+                    onCloseCallback.run();
+                }
+            }
+        });
 
         // Create PreOpenPackView
         preView = new PreOpenPackView(vm, this);
@@ -46,5 +64,10 @@ public class ViewManagerFrame extends JFrame implements ViewManager {
         setContentPane(openView);
         revalidate();
         repaint();
+    }
+
+    @Override
+    public void closeWindow() {
+        dispose();
     }
 }

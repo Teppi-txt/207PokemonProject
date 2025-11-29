@@ -201,11 +201,10 @@ public class MainMenuView extends JPanel implements PropertyChangeListener {
         menuBox.add(Box.createVerticalStrut(15));
 
         RetroButton openPackBtn = new RetroButton("OPEN PACK");
-        openPackBtn.setButtonColor(Color.GRAY);
+        openPackBtn.setButtonColor(UIStyleConstants.SECONDARY_COLOR);
         openPackBtn.setPreferredSize(new Dimension(280, 55));
         openPackBtn.setMaximumSize(new Dimension(280, 55));
         openPackBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
-        openPackBtn.setEnabled(false);
         openPackBtn.addActionListener(e -> {
             if (onOpenPackClick != null) onOpenPackClick.run();
         });

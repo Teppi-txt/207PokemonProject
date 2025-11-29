@@ -15,31 +15,9 @@ public class OpenPackPresenter implements OpenPackOutputBoundary {
 
     @Override
     public void prepareSuccessView(OpenPackOutputData outputData) {
-
-        System.out.println("PRESENTER: METHOD ENTERED");
-
-        if (outputData == null) {
-            System.out.println("PRESENTER: outputData is NULL");
+        if (outputData == null || outputData.getOpenedCards() == null || outputData.getDuplicateFlags() == null) {
             return;
         }
-
-        System.out.println("PRESENTER: openedCards = " + outputData.getOpenedCards());
-        if (outputData.getOpenedCards() == null) {
-            System.out.println("PRESENTER: openedCards is NULL");
-            return;
-        }
-
-        if (outputData.getDuplicateFlags() == null) {
-            System.out.println("PRESENTER: duplicateFlags is NULL");
-            return;
-        }
-
-        if (outputData.getOpenedCards().isEmpty()) {
-            System.out.println("PRESENTER: openedCards EMPTY");
-        }
-
-        System.out.println("PRESENTER: preparing success view");
-        System.out.println("PRESENTER: openedCards = " + outputData.getOpenedCards().size());
 
         OpenPackState newState = new OpenPackState();
 
@@ -55,13 +33,10 @@ public class OpenPackPresenter implements OpenPackOutputBoundary {
         viewModel.setState(newState);
 
         viewManager.showOpenPack();
-
     }
 
     @Override
     public void prepareFailView(String errorMessage) {
-        System.out.println("hi");
-
         OpenPackState newState = new OpenPackState();
         newState.setErrorMessage(errorMessage);
         newState.setRevealMode(false);
