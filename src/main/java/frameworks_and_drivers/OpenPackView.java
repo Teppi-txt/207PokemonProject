@@ -105,7 +105,6 @@ public class OpenPackView extends JPanel {
 
         List<Pokemon> opened = state.getOpenedCards();
 
-        // ========== REVEAL MODE ==========
         if (state.isRevealMode()) {
             nextButton.setVisible(true);
             addCollectionButton.setVisible(false);
@@ -118,12 +117,10 @@ public class OpenPackView extends JPanel {
             boolean isDup = state.getDuplicateFlags().get(idx);
             messageLabel.setText(isDup ? "Duplicate!" : "NEW card!");
 
-            // ⭐ FIX: Always allow next button to be clicked
             nextButton.setEnabled(true);
             openPackButton.setEnabled(false);
 
         } else {
-            // ========== SUMMARY MODE ==========
             for (Pokemon p : opened) {
                 cardsPanel.add(makeCardPanel(p));
             }
