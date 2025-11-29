@@ -329,30 +329,56 @@ public class BuildDeckView extends JPanel implements PropertyChangeListener {
                     Pokemon p = pokemons.get(i);
                     fillSlotWithPokemon(slot, p);
                 } else {
-                    JPanel empty = createEmptySlotPanel(i);
-                    slot.add(empty.getComponent(1));
-                }
+                    slot.removeAll();
+                    slot.setBackground(new Color(240, 240, 240)); // reset to default
+                    slot.setLayout(new BoxLayout(slot, BoxLayout.Y_AXIS));
 
+                    JLabel emptyLabel = new JLabel("[Empty Slot " + (i + 1) + "]", SwingConstants.CENTER);
+                    emptyLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+                    slot.add(Box.createVerticalGlue());
+                    slot.add(emptyLabel);
+                    slot.add(Box.createVerticalGlue());
+                }
                 slot.revalidate();
                 slot.repaint();
             }
         }
 
         private void fillSlotWithPokemon(JPanel slot, Pokemon p) {
-            slot.setBackground(new Color(200, 255, 200));
+            Color slotColor = new Color(200, 255, 200);
+            slot.setBackground(slotColor);
             slot.putClientProperty("pokemon", p);
 
+            // Create components
             JLabel sprite = createSpriteLabel(p);
             JLabel name = createNameLabel(p);
             JPanel statsPanel = createStatsPanel(p);
 
-            slot.add(Box.createVerticalStrut(5));
-            slot.add(sprite);
-            slot.add(name);
-            slot.add(statsPanel);
-            slot.add(Box.createVerticalGlue());
+            // Build a vertically centered container
+            JPanel centerPanel = new JPanel();
+            centerPanel.setLayout(new BoxLayout(centerPanel, BoxLayout.Y_AXIS));
+            centerPanel.setOpaque(false);
+            centerPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-            // Click anywhere on the slot to remove
+            // Ensure horizontal centering
+            sprite.setAlignmentX(Component.CENTER_ALIGNMENT);
+            name.setAlignmentX(Component.CENTER_ALIGNMENT);
+            statsPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+            centerPanel.add(sprite);
+            centerPanel.add(name);
+            centerPanel.add(statsPanel);
+
+            // Clear slot and rebuild
+            slot.removeAll();
+            slot.setLayout(new BoxLayout(slot, BoxLayout.Y_AXIS));
+
+            slot.add(Box.createVerticalGlue());  // push down
+            slot.add(centerPanel);               // centered contents
+            slot.add(Box.createVerticalGlue());  // push up
+
+            // Add click behavior
             slot.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mouseClicked(MouseEvent e) {
