@@ -1,10 +1,12 @@
 package interface_adapters.collection;
 
+import interface_adapters.ViewModel;
 import use_case.collection.ViewCollectionOutputBoundary;
 import use_case.collection.ViewCollectionOutputData;
 
 public class ViewCollectionPresenter implements ViewCollectionOutputBoundary {
     private final ViewCollectionViewModel viewCollectionViewModel;
+    private final ViewModel homeViewModel = null;
 
     public ViewCollectionPresenter(ViewCollectionViewModel viewCollectionViewModel) {
         this.viewCollectionViewModel = viewCollectionViewModel;
@@ -26,5 +28,11 @@ public class ViewCollectionPresenter implements ViewCollectionOutputBoundary {
         viewCollectionState.setPokemonOnPage(null);
         viewCollectionState.setOwnedPokemon(null);
         this.viewCollectionViewModel.firePropertyChanged();
+    }
+
+    @Override
+    public void switchToHomeView() {
+        viewCollectionViewModel.setState((ViewCollectionState) homeViewModel.getState());
+        viewCollectionViewModel.firePropertyChanged();
     }
 }

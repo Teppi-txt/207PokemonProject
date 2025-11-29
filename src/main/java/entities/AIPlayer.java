@@ -3,6 +3,7 @@ package entities;
 import ai.graph.BattleDecisionState;
 import ai.graph.Decision;
 import ai.graph.DecisionGraph;
+import entities.Deck;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;

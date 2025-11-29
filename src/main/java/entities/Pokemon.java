@@ -132,10 +132,6 @@ public class Pokemon implements Serializable {
         return shiny ? getShinySpriteURL() : getRegularSpriteURL();
     }
 
-    public ArrayList<String> getTypes() {
-        return this.types;
-    }
-
     public void setTypes(ArrayList<String> types) {
         this.types = types;
     }
