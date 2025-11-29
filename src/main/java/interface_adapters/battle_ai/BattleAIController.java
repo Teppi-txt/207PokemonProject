@@ -175,19 +175,28 @@ public class BattleAIController {
             return;
         }
 
-        if (!playerTeam.contains(pokemon)) {
+        // Find the Pokemon in our team by ID (reference equality may fail)
+        Pokemon targetPokemon = null;
+        for (Pokemon p : playerTeam) {
+            if (p.getId() == pokemon.getId()) {
+                targetPokemon = p;
+                break;
+            }
+        }
+
+        if (targetPokemon == null) {
             presenter.prepareFailView("This Pokemon is not in your team!");
             return;
         }
 
-        if (pokemon.isFainted()) {
+        if (targetPokemon.isFainted()) {
             presenter.prepareFailView("This Pokemon has fainted!");
             return;
         }
 
         // Switch Pokemon
-        this.playerActivePokemon = pokemon;
-        System.out.println("You switched to " + pokemon.getName());
+        this.playerActivePokemon = targetPokemon;
+        System.out.println("You switched to " + targetPokemon.getName());
 
         // Update presenter
         presenter.updateTeams(playerTeam, aiPlayer);

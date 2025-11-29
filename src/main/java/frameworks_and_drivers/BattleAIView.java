@@ -17,10 +17,6 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import pokeapi.JSONLoader;
 
-/**
- * Retro Pokemon-styled battle view for AI opponent battles.
- * Features classic Pokemon battle UI with proper move buttons and HP bars.
- */
 public class BattleAIView extends JFrame implements BattleAIViewModel.ViewModelListener {
     private final BattleAIController controller;
     private BattleAIViewModel viewModel;
@@ -461,9 +457,9 @@ public class BattleAIView extends JFrame implements BattleAIViewModel.ViewModelL
                 g2d.fillRect(6, 6, w - 12, h - 12);
             }
         };
-        panel.setLayout(new FlowLayout(FlowLayout.LEFT, 8, 8));
-        panel.setBorder(BorderFactory.createEmptyBorder(10, 12, 10, 12));
-        panel.setPreferredSize(new Dimension(400, 75));
+        panel.setLayout(new FlowLayout(FlowLayout.LEFT, 8, 5));
+        panel.setBorder(BorderFactory.createEmptyBorder(12, 12, 12, 12));
+        panel.setPreferredSize(new Dimension(420, 80));
 
         JLabel label = new JLabel("TEAM");
         label.setFont(UIStyleConstants.BODY_FONT);
@@ -638,6 +634,7 @@ public class BattleAIView extends JFrame implements BattleAIViewModel.ViewModelL
     }
 
     private void updatePlayerPokemon(Pokemon pokemon) {
+        System.out.println("=== updatePlayerPokemon called with: " + pokemon.getName() + " (ID: " + pokemon.getId() + ") ===");
         playerPokemonNameLabel.setText(pokemon.getName().toUpperCase());
         loadPokemonImage(playerPokemonImageLabel, pokemon, true);
 
@@ -711,31 +708,51 @@ public class BattleAIView extends JFrame implements BattleAIViewModel.ViewModelL
         }
 
         for (Pokemon pokemon : team) {
-            String btnText = pokemon.getName();
-            if (pokemon == activePokemon) {
+            if (pokemon == null) continue;
+
+            String pokemonName = pokemon.getName();
+            if (pokemonName == null || pokemonName.isEmpty()) {
+                pokemonName = "PKM" + pokemon.getId();
+            }
+
+            // Debug: print Pokemon info
+            System.out.println("Team button: " + pokemonName + " (ID: " + pokemon.getId() + ", Fainted: " + pokemon.isFainted() + ")");
+
+            String btnText = pokemonName;
+            boolean isActive = (activePokemon != null && pokemon.getId() == activePokemon.getId());
+            boolean isFainted = pokemon.isFainted();
+
+            if (isActive) {
                 btnText += " *";
-            } else if (pokemon.isFainted()) {
+            } else if (isFainted) {
                 btnText += " X";
             }
 
-            RetroButton pokemonBtn = new RetroButton(btnText);
+            // Use simple JButton with proper Mac-compatible styling
+            JButton pokemonBtn = new JButton(btnText);
             pokemonBtn.setFont(new Font("Courier New", Font.BOLD, 10));
-            pokemonBtn.setPreferredSize(new Dimension(100, 38));
-            pokemonBtn.setMinimumSize(new Dimension(100, 38));
-            pokemonBtn.setMaximumSize(new Dimension(100, 38));
+            pokemonBtn.setPreferredSize(new Dimension(95, 35));
+            pokemonBtn.setFocusPainted(false);
+            pokemonBtn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+            // Required for Mac to show custom colors
+            pokemonBtn.setOpaque(true);
+            pokemonBtn.setBorderPainted(true);
 
-            if (pokemon == activePokemon) {
-                pokemonBtn.setButtonColor(UIStyleConstants.HP_HIGH);
+            if (isActive) {
+                pokemonBtn.setBackground(new Color(100, 180, 100));
+                pokemonBtn.setForeground(Color.BLACK);
                 pokemonBtn.setEnabled(false);
-            } else if (pokemon.isFainted()) {
-                pokemonBtn.setButtonColor(Color.GRAY);
+            } else if (isFainted) {
+                pokemonBtn.setBackground(Color.LIGHT_GRAY);
+                pokemonBtn.setForeground(Color.DARK_GRAY);
                 pokemonBtn.setEnabled(false);
             } else {
-                pokemonBtn.setButtonColor(UIStyleConstants.POKEMON_BLUE);
+                pokemonBtn.setBackground(new Color(70, 130, 180));
+                pokemonBtn.setForeground(Color.BLACK);
                 pokemonBtn.setEnabled(true);
                 final Pokemon switchTarget = pokemon;
                 pokemonBtn.addActionListener(e -> {
-                    System.out.println("Switch button clicked for: " + switchTarget.getName());
+                    System.out.println("Switch clicked: " + switchTarget.getName());
                     executeSwitch(switchTarget);
                 });
             }
@@ -778,7 +795,15 @@ public class BattleAIView extends JFrame implements BattleAIViewModel.ViewModelL
     }
 
     private void executeSwitch(Pokemon pokemon) {
+        System.out.println("=== EXECUTING SWITCH ===");
         controller.executePlayerSwitch(pokemon);
+        // Force UI refresh after switch (with small delay to let AI turn complete)
+        javax.swing.Timer refreshTimer = new javax.swing.Timer(800, e -> {
+            System.out.println("=== REFRESH TIMER FIRED - Calling updateDisplay ===");
+            updateDisplay();
+        });
+        refreshTimer.setRepeats(false);
+        refreshTimer.start();
     }
 
     private void displayBattleEnded(Battle battle) {
