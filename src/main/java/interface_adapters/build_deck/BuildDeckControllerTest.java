@@ -40,13 +40,13 @@ public class BuildDeckControllerTest {
         BuildDeckUserDataAccessInterface dataAccess = new BuildDeckUserDataAccessInterface() {
             private final Map<Integer, Deck> decks = new HashMap<>();
             {
-                Deck initialDeck = new Deck(100, "New Deck");
-                if (user.getOwnedPokemon().size() >= 3) {
-                    initialDeck.addPokemon(user.getOwnedPokemon().get(0));
-                    initialDeck.addPokemon(user.getOwnedPokemon().get(1));
-                    initialDeck.addPokemon(user.getOwnedPokemon().get(2));
-                }
-                decks.put(initialDeck.getId(), initialDeck);
+//                Deck initialDeck = new Deck(100, "New Deck");
+//                if (user.getOwnedPokemon().size() >= 3) {
+//                    initialDeck.addPokemon(user.getOwnedPokemon().get(0));
+//                    initialDeck.addPokemon(user.getOwnedPokemon().get(1));
+//                    initialDeck.addPokemon(user.getOwnedPokemon().get(2));
+//                }
+//                decks.put(initialDeck.getId(), initialDeck);
             }
 
             @Override
