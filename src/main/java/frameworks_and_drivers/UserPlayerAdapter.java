@@ -1,6 +1,5 @@
 package frameworks_and_drivers;
 
-import cards.Deck;
 import entities.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -16,7 +15,10 @@ public class UserPlayerAdapter implements Player {
     
     public UserPlayerAdapter(User user) {
         this.user = user;
-        this.deck = new Deck();
+        String deckName = (user.getName() == null || user.getName().isEmpty())
+            ? "User Deck"
+            : user.getName() + " Deck";
+        this.deck = new Deck(user.getId(), deckName);
         // Set first available Pokemon as active
         if (user.getOwnedPokemon() != null && !user.getOwnedPokemon().isEmpty()) {
             for (Pokemon pokemon : user.getOwnedPokemon()) {
@@ -97,4 +99,3 @@ public class UserPlayerAdapter implements Player {
         return user;
     }
 }
-

@@ -1,6 +1,6 @@
 package use_case.pick_moveset;
 
-import cards.Deck;
+import entities.Deck;
 import entities.Move;
 import entities.Pokemon;
 

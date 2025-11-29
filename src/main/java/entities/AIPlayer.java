@@ -3,13 +3,13 @@ package entities;
 import ai.graph.BattleDecisionState;
 import ai.graph.Decision;
 import ai.graph.DecisionGraph;
-import cards.Deck;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 public class AIPlayer implements Player, Serializable {
     private static final long serialVersionUID = 1L;
+    private static final int DEFAULT_DECK_ID = -1;
     private String name;
     private Deck deck;
     private List<Pokemon> team;
@@ -21,39 +21,15 @@ public class AIPlayer implements Player, Serializable {
     private transient DecisionGraph decisionGraph;
 
     public AIPlayer() {
-        this.name = "AI Player";
-        this.deck = new Deck();
-        this.team = new ArrayList<>();
-        this.activePokemon = null;
-        this.difficulty = "medium";
-        this.wins = 0;
-        this.losses = 0;
-        this.battleHistory = new ArrayList<>();
-        this.decisionGraph = null;
+        this("AI Player");
     }
 
     public AIPlayer(String name) {
-        this.name = name;
-        this.deck = new Deck();
-        this.team = new ArrayList<>();
-        this.activePokemon = null;
-        this.difficulty = "medium";
-        this.wins = 0;
-        this.losses = 0;
-        this.battleHistory = new ArrayList<>();
-        this.decisionGraph = null;
+        this(name, "medium");
     }
 
     public AIPlayer(String name, String difficulty) {
-        this.name = name;
-        this.deck = new Deck();
-        this.team = new ArrayList<>();
-        this.activePokemon = null;
-        this.difficulty = difficulty;
-        this.wins = 0;
-        this.losses = 0;
-        this.battleHistory = new ArrayList<>();
-        this.decisionGraph = null;
+        this(name, createDefaultDeck(name), difficulty);
     }
 
     public AIPlayer(String name, Deck deck, String difficulty) {
@@ -297,5 +273,10 @@ public class AIPlayer implements Player, Serializable {
      */
     public List<Turn> getBattleHistory() {
         return battleHistory;
+    }
+
+    private static Deck createDefaultDeck(String ownerName) {
+        String deckName = (ownerName == null || ownerName.isEmpty()) ? "AI Deck" : ownerName + " Deck";
+        return new Deck(DEFAULT_DECK_ID, deckName);
     }
 }
