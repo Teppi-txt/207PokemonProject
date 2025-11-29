@@ -22,11 +22,12 @@ public class ViewCollectionPresenter implements ViewCollectionOutputBoundary {
     }
 
     @Override
-    public void prepareFailView(String errorMessage) {
+    public void prepareFailView(String errorMessage, ViewCollectionOutputData outputData) {
         final ViewCollectionState viewCollectionState = viewCollectionViewModel.getState();
         viewCollectionState.setSelectedPokemon(null);
         viewCollectionState.setPokemonOnPage(null);
-        viewCollectionState.setOwnedPokemon(null);
+        viewCollectionState.setOwnedPokemon(outputData.getOwnedPokemon());
+        viewCollectionState.setErrorMessage(errorMessage);
         this.viewCollectionViewModel.firePropertyChanged();
     }
 

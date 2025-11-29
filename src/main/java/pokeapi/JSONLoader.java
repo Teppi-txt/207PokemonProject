@@ -17,6 +17,7 @@ import java.util.ArrayList;
 public class JSONLoader {
     public static final ArrayList<Pokemon> allPokemon = new ArrayList<>();
     public static final ArrayList<Move> allMoves = new ArrayList<>();
+    private static final String DIRECTORY = "src/assets/data/";
 
     static String readFile(String path, Charset encoding) throws IOException {
         byte[] encoded = Files.readAllBytes(Paths.get(path));
@@ -32,20 +33,22 @@ public class JSONLoader {
                 allPokemon.add(Pokemon.fromJSON(pokemonJSONArray.getJSONObject(i)));
             }
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            JSONSaver.savePokemonData();
+            loadPokemon();
         }
     }
 
     public static void loadMoves() {
         try {
-            String jsonContent = readFile("src/assets/data/moves.json", StandardCharsets.UTF_8);
+            String jsonContent = readFile(DIRECTORY + "moves.json", StandardCharsets.UTF_8);
             JSONArray moveJSONArray = new JSONArray(jsonContent);
 
             for (int i = 0; i < moveJSONArray.length(); i++) {
                 allMoves.add(Move.fromJSON(moveJSONArray.getJSONObject(i)));
             }
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            JSONSaver.saveMoveData();
+            loadMoves();
         }
     }
 

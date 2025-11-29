@@ -8,7 +8,6 @@ import interface_adapters.collection.ViewCollectionViewModel;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
-import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -26,7 +25,6 @@ public class CollectionView extends JPanel implements PropertyChangeListener {
     private final ViewCollectionViewModel collectionViewModel;
     private ViewCollectionController controller;
 
-
     private List<Pokemon> pokemonOnPage;
     private List<Pokemon> ownedPokemon;
     private String filter = "all";
@@ -38,32 +36,41 @@ public class CollectionView extends JPanel implements PropertyChangeListener {
 
         this.setMinimumSize(new Dimension(1000, 700));
 
-        this.setBorder(new EmptyBorder(10, 10, 10, 10));
+        this.setBorder(CollectionViewStaticElements.paddingBorder(10));
 
         final JLabel title = new JLabel("My Collection");
         title.setFont(new Font(title.getFont().getFontName(), Font.BOLD, 46));
         title.setAlignmentX(Component.CENTER_ALIGNMENT);
-        title.setBorder(new EmptyBorder(10, 10, 10, 10));
+        title.setBorder(CollectionViewStaticElements.paddingBorder(10));
 
         final JButton returnButton = new JButton("Back to menu:");
         returnButton.setFont(new Font(title.getFont().getFontName(), Font.PLAIN, 18));
         returnButton.setAlignmentX(Component.CENTER_ALIGNMENT);
-        returnButton.setBorder(new EmptyBorder(10, 10, 10, 10));
+        returnButton.setBorder(CollectionViewStaticElements.paddingBorder(10));
 
         final JPanel body = new JPanel();
-        body.setLayout(new BoxLayout(body, BoxLayout.X_AXIS));
-        body.setBorder(new EmptyBorder(10, 10, 10, 10));
+        body.setLayout(new GridBagLayout());
+        body.setBorder(CollectionViewStaticElements.paddingBorder(10));
+
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.fill = GridBagConstraints.BOTH;
+        gbc.weighty = 1;
 
         pokemonInfoPanel = new PokemonInfoPanel();
         pokemonCollectionPanel = new PokemonCollectionPanel();
-        pokemonCollectionPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
+        pokemonCollectionPanel.setBorder(CollectionViewStaticElements.paddingBorder(10));
 
         this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         this.add(title);
         this.add(returnButton);
 
-        body.add(pokemonInfoPanel);
-        body.add(pokemonCollectionPanel);
+        gbc.gridx = 0;
+        gbc.weightx = 1;   // 1/3 of space
+        body.add(pokemonInfoPanel, gbc);
+
+        gbc.gridx = 1;
+        gbc.weightx = 6;   // 2/3 of space
+        body.add(pokemonCollectionPanel, gbc);
         this.add(body);
     }
 
@@ -83,8 +90,14 @@ public class CollectionView extends JPanel implements PropertyChangeListener {
     }
 
     private void updatePanel(ViewCollectionState state) {
-        this.pokemonInfoPanel.setPokemon(state.getSelectedPokemon());
-        this.pokemonCollectionPanel.loadPage(state.getPokemonOnPage(), state.getOwnedPokemon());
+        System.out.println(0);
+        if (state.getPokemonOnPage() != null) {
+            this.pokemonCollectionPanel.loadPage(state.getPokemonOnPage(), state.getOwnedPokemon());
+            this.pokemonInfoPanel.setPokemon(state.getSelectedPokemon());
+        } else {
+            this.pokemonCollectionPanel.loadEmptyPage(state.getErrorMessage());
+            this.pokemonInfoPanel.setPokemonAsNull();
+        }
     }
 
     public ViewCollectionController getController() {
@@ -122,6 +135,18 @@ public class CollectionView extends JPanel implements PropertyChangeListener {
             this.repaint();
         }
 
+        public void setPokemonAsNull() {
+            JLabel spriteLabel = getSpriteLabel(new ImageIcon("src/assets/sprites/no_image_icon.png"));
+            JLabel nameLabel = getNameLabel("No Pokemon :(");
+            this.removeAll();
+            add(Box.createVerticalStrut(10));
+            add(spriteLabel);
+            add(nameLabel);
+            add(Box.createVerticalGlue());
+            this.revalidate();
+            this.repaint();
+        }
+
         public JLabel getNameLabel(String name) {
             JLabel nameLabel = new JLabel(capitaliseFirstLetter(name));
             nameLabel.setFont(new Font("Arial", Font.BOLD, 32));
@@ -140,7 +165,20 @@ public class CollectionView extends JPanel implements PropertyChangeListener {
                 spriteLabel.setMaximumSize(new Dimension(300, 100));
                 return spriteLabel;
             } catch (Exception e) {
-                return new  JLabel();
+                return new JLabel();
+            }
+        }
+
+        public JLabel getSpriteLabel(ImageIcon sprite) {
+            try {
+                sprite.setImage(sprite.getImage().getScaledInstance(300, 300, Image.SCALE_SMOOTH));
+
+                JLabel spriteLabel = new JLabel(sprite);
+                spriteLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+                spriteLabel.setMaximumSize(new Dimension(300, 100));
+                return spriteLabel;
+            } catch (Exception e) {
+                return new JLabel();
             }
         }
 
@@ -243,7 +281,6 @@ public class CollectionView extends JPanel implements PropertyChangeListener {
             return button;
         }
 
-
         private void updatePageNumbers() {
             backButton.setEnabled(currentPage != 0);
             pageLabel.setText(String.valueOf(currentPage));
@@ -283,6 +320,15 @@ public class CollectionView extends JPanel implements PropertyChangeListener {
             button.setHorizontalTextPosition(SwingConstants.CENTER);
             button.addActionListener(CollectionView.this::onPokemonSelection);
             return button;
+        }
+
+        public void loadEmptyPage(String errorMessage) {
+            this.remove(pageButtonPanel);
+            pokemonPanel.removeAll();
+            pokemonPanel.setLayout(new BoxLayout(pokemonPanel, BoxLayout.Y_AXIS));
+            JLabel label = new JLabel(errorMessage);
+            label.setFont(new Font(label.getFont().getName(), Font.ITALIC, 30));
+            pokemonPanel.add(label);
         }
     }
 
