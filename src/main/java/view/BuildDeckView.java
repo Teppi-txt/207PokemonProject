@@ -18,8 +18,6 @@ import java.net.URL;
 import java.util.List;
 
 public class BuildDeckView extends JPanel implements PropertyChangeListener {
-    public final String viewName = "build deck";
-
     private final BuildDeckViewModel viewModel;
     private BuildDeckController controller;
 
@@ -33,7 +31,7 @@ public class BuildDeckView extends JPanel implements PropertyChangeListener {
 
     // Local state for the view
     private Deck currentDeck;
-    private List<Pokemon> ownedPokemon;
+    private final List<Pokemon> ownedPokemon;
     private final ActionListener deckSelectListener = this::onDeckSelected;
 
 
@@ -70,32 +68,31 @@ public class BuildDeckView extends JPanel implements PropertyChangeListener {
         controlsPanel.setLayout(new BoxLayout(controlsPanel, BoxLayout.X_AXIS));
         controlsPanel.setBorder(new EmptyBorder(10, 20, 10, 20));
 
-        JPanel nameIdPanel = new JPanel(new FlowLayout(FlowLayout.LEFT)); // Combines Name and ID
+        JPanel nameIdPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         nameIdPanel.add(new JLabel("Deck Name: "));
         nameIdPanel.add(deckNameField);
         nameIdPanel.add(Box.createHorizontalStrut(15));
-        nameIdPanel.add(deckIdLabel); // <--- Add ID label
+        nameIdPanel.add(deckIdLabel); // < Add ID label
 
         // Deck Management Panel
         JPanel deckManagementPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         deckManagementPanel.add(new JLabel("Select/New Deck:"));
-        deckManagementPanel.add(deckSelector); // <--- Add selector
+        deckManagementPanel.add(deckSelector); // < Add selector
 
         // Action Buttons Panel
         JButton saveButton = new JButton("Save Deck");
         saveButton.addActionListener(this::onSaveDeck);
 
-        JButton newDeckButton = new JButton("New Deck"); // <--- NEW Button
+        JButton newDeckButton = new JButton("New Deck");
         newDeckButton.addActionListener(this::onNewDeck);
 
         JButton randomButton = new JButton("Randomize Deck");
         randomButton.addActionListener(this::onRandomizeDeck);
 
         JPanel actionPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        actionPanel.add(newDeckButton); // <--- Add new deck button
+        actionPanel.add(newDeckButton); // < Add new deck button
         actionPanel.add(randomButton);
         actionPanel.add(saveButton);
-
 
         controlsPanel.add(deckManagementPanel); // Add Deck Selector/New
         controlsPanel.add(nameIdPanel); // Add Name/ID
@@ -118,7 +115,7 @@ public class BuildDeckView extends JPanel implements PropertyChangeListener {
         this.add(controlsPanel);
         this.add(contentPanel);
 
-        // --- Initial Load ---
+        //  Initial Load 
         Deck initialDeck = viewModel.getState().getDeck();
         if (initialDeck == null) {
             // Mock initial deck if the state is empty
@@ -127,15 +124,12 @@ public class BuildDeckView extends JPanel implements PropertyChangeListener {
         updateView(initialDeck, viewModel.getState().getAllDecks(), null);
     }
 
-    // --- Controller Setter ---
+    //  Controller Setter 
     public void setController(BuildDeckController controller) {
         this.controller = controller;
     }
 
-    // --- Action Listeners ---
-
-    // Inside BuildDeckView.java
-
+    // Action Listeners
     private void onSaveDeck(ActionEvent e) {
         // Collect current deck info
         // Use the ID of the currently loaded deck (which is an existing ID)
@@ -150,7 +144,7 @@ public class BuildDeckView extends JPanel implements PropertyChangeListener {
 
     private void onNewDeck(ActionEvent e) {
         // Clear the current state and trigger a new deck creation in the interactor
-        // Use sentinel deckId = -1 and null name/pokemons
+        // Use sentinel deckId = -1 and null name/pokémon
         controller.buildDeck(-1, null, null, false);
     }
 
@@ -163,32 +157,22 @@ public class BuildDeckView extends JPanel implements PropertyChangeListener {
     }
 
     private void onDeckSelected(ActionEvent e) {
-        // 1. Get the selected item and cast it back to a Deck object.
+        // Get the selected item and cast it back to a Deck object
         Deck selectedDeck = (Deck) deckSelector.getSelectedItem();
-
-        // 2. Prevent triggering unnecessary loads if the selection didn't actually change
-        // or if the deck is null/unselectable.
+        // Prevent triggering unnecessary loads if the selection didn't actually change
+        // or if the deck is null/unselectable
         if (selectedDeck != null && (currentDeck == null || selectedDeck.getId() != currentDeck.getId())) {
-
-            // 3. Trigger the controller to load the deck.
-            // deckId = selectedDeck.getId()
-            // deckName = selectedDeck.getName()
-            // pokemon = null (signifying we are loading/retrieving, not saving/modifying)
-            // isRandom = false
-
+            // Trigger the controller to load the deck.
             System.out.println("Loading deck ID: " + selectedDeck.getId() + " - " + selectedDeck.getName());
-
             // Execute the controller call
             controller.buildDeck(selectedDeck.getId(), selectedDeck.getName(), null, false);
         }
     }
 
-    // Inside BuildDeckView
     public void onPokemonSelection(ActionEvent e) {
         // Determine the source of the click (JButton from selection panel or JLabel from deck slot)
         Component source = (Component)e.getSource();
         Pokemon selected;
-
         // Use a conditional check to safely get the client property from the correct component type
         if (source instanceof JButton button) {
             selected = (Pokemon) button.getClientProperty("pokemon");
@@ -198,13 +182,11 @@ public class BuildDeckView extends JPanel implements PropertyChangeListener {
             // If the source is neither, ignore the action
             return;
         }
-
-        // Ensure a Pokemon was actually retrieved before proceeding
+        // Ensure a Pokémon was actually retrieved before proceeding
         if (selected == null) {
             return;
         }
-
-        // --- Deck Modification Logic ---
+        // Deck modification logic
         if (currentDeck.getPokemons().contains(selected)) {
             // Remove from deck if it's already there
             currentDeck.removePokemon(selected);
@@ -214,13 +196,12 @@ public class BuildDeckView extends JPanel implements PropertyChangeListener {
             System.out.println("Deck size after attempt to add: " + currentDeck.getPokemons().size());
             System.out.println("Pokemon list contents: " + currentDeck.getPokemons());
         }
-
-        // NO controller call here: Only update the view state locally and allow the Save button to persist the change.
-        // We call updateView directly with the locally modified deck
+        // NO controller call here: only update the view state locally and allow the Save button to persist the change.
+        // call updateView directly with the locally modified deck
         updateView(currentDeck, viewModel.getState().getAllDecks(), null);
     }
 
-    // --- PropertyChangeListener Implementation ---
+    // PropertyChangeListener implementation
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
@@ -231,17 +212,15 @@ public class BuildDeckView extends JPanel implements PropertyChangeListener {
     private void updateView(Deck deck, List<Deck> allDecks, String errorMessage) {
         this.currentDeck = deck;
 
-        // 1. Update Error Message
+        // Update Error Message
         if (errorMessage != null) {
             errorMessageLabel.setText("Error: " + errorMessage);
         } else {
             errorMessageLabel.setText("");
         }
-
-        // 2. Update Deck Selector
+        // Update Deck Selector
         updateDeckSelector(allDecks, deck);
-
-        // 3. Update Deck Name Field and ID Label
+        // Update Deck Name Field and ID Label
         if (deck != null) {
             deckNameField.setText(deck.getName()); // <-- Autofill Name
             deckIdLabel.setText("ID: " + deck.getId()); // <-- Update ID
@@ -249,13 +228,10 @@ public class BuildDeckView extends JPanel implements PropertyChangeListener {
             deckNameField.setText("New Deck");
             deckIdLabel.setText("ID: --");
         }
-
-        // 4. Update Deck Display Panel (shows slots)
+        // Update Deck Display Panel (shows slots)
         deckDisplayPanel.updateDeck(deck);
-
-        // 5. Update Selection Panel (highlights owned Pokemon)
+        // Update Selection Panel (highlights owned Pokémon)
         selectionPanel.updateSelectionStatus(deck);
-
         this.revalidate();
         this.repaint();
     }
@@ -264,21 +240,17 @@ public class BuildDeckView extends JPanel implements PropertyChangeListener {
         // Temporarily remove listener to avoid triggering onDeckSelected during population
         deckSelector.removeActionListener(deckSelectListener);
         deckSelector.removeAllItems();
-
         if (allDecks != null) {
             for (Deck d : allDecks) {
                 deckSelector.addItem(d);
             }
         }
-
         // Select the current working deck
         if (currentDeck != null) {
-            boolean found = false;
             // Iterate over items to find a match by ID (since they are Deck objects, equals/hashCode would be better, but this is a simple check)
             for (int i = 0; i < deckSelector.getItemCount(); i++) {
                 if (deckSelector.getItemAt(i).getId() == currentDeck.getId()) {
                     deckSelector.setSelectedIndex(i);
-                    found = true;
                     break;
                 }
             }
@@ -286,15 +258,8 @@ public class BuildDeckView extends JPanel implements PropertyChangeListener {
         }
         deckSelector.addActionListener(deckSelectListener);
     }
-
-    // DeckDisplayPanel and OwnedPokemonSelectionPanel remain functionally the same,
-    // but the `onPokemonSelection` call is updated:
-    // **NOTE**: The logic inside `DeckDisplayPanel.updateDeck` and `OwnedPokemonSelectionPanel.updateSelectionStatus`
-    // will now receive the `currentDeck` and render based on its state, which is updated locally in
-    // `BuildDeckView.onPokemonSelection` and refreshed in `updateView`.
-
-
-    // --- Inner Classes for Components ---
+    
+    // Components
 
     /**
      * Panel to display the 5 slots for the currently building deck.
@@ -302,7 +267,7 @@ public class BuildDeckView extends JPanel implements PropertyChangeListener {
     public class DeckDisplayPanel extends JPanel {
 
         private final JLabel[] slotLabels;
-        private static final int DECK_LIMIT = 5; // Matches entities.Deck
+        private static final int DECK_LIMIT = entities.Deck.DECK_LIMIT;
 
         public DeckDisplayPanel() {
             this.setLayout(new GridLayout(1, DECK_LIMIT, 10, 0)); // 1 row, 5 columns
@@ -320,38 +285,31 @@ public class BuildDeckView extends JPanel implements PropertyChangeListener {
             }
         }
 
-        // Inside BuildDeckView.DeckDisplayPanel
         public void updateDeck(Deck deck) {
             List<Pokemon> pokemons = deck.getPokemons();
             final int DECK_LIMIT = 5;
 
             for (int i = 0; i < DECK_LIMIT; i++) {
                 JLabel slot = slotLabels[i];
-
-                // 1. Remove MouseListeners (Correctly implemented in previous fix)
                 for(java.awt.event.MouseListener ml : slot.getListeners(java.awt.event.MouseListener.class)) {
                     slot.removeMouseListener(ml);
                 }
-
                 if (i < pokemons.size()) {
-                    // ✅ FIX: Re-insert the rendering logic here!
                     Pokemon p = pokemons.get(i);
-                    slot.setText(p.getName()); // <-- Set text first
+                    slot.setText(p.getName()); // set text first
                     try {
-                        // Fetch and scale the sprite image
+                        // fetch and scale the sprite image
                         ImageIcon sprite = getScaledSprite(p.getSpriteUrl(), 60, 60);
                         slot.setIcon(sprite);
                     } catch (Exception e) {
-                        // Handle image loading failure gracefully
+                        // handle image loading failure
                         slot.setIcon(null);
                     }
-
                     slot.setToolTipText(p.getName() + " (Click to remove)");
                     slot.setOpaque(true);
-                    slot.setBackground(new Color(200, 255, 200)); // Light green for filled slot
-                    slot.putClientProperty("pokemon", p); // Store Pokemon for removal logic
+                    slot.setBackground(new Color(200, 255, 200)); // light green for filled slot
+                    slot.putClientProperty("pokemon", p); // store Pokémon for removal logic
 
-                    // 2. Add MouseListener (Correctly implemented in previous fix)
                     slot.addMouseListener(new java.awt.event.MouseAdapter() {
                         @Override
                         public void mouseClicked(java.awt.event.MouseEvent e) {
@@ -364,7 +322,7 @@ public class BuildDeckView extends JPanel implements PropertyChangeListener {
                     });
 
                 } else {
-                    // Empty slot logic (No changes needed here)
+                    // empty slot logic
                     slot.setIcon(null);
                     slot.setText("[Empty Slot " + (i + 1) + "]");
                     slot.setToolTipText(null);
@@ -396,10 +354,9 @@ public class BuildDeckView extends JPanel implements PropertyChangeListener {
                 pokemonGrid.add(createPokemonButton(pokemon));
             }
 
-            // ✅ FIX 2: Wrap the grid in a JScrollPane to fix visibility/scrolling
             JScrollPane scrollPane = new JScrollPane(pokemonGrid);
-            scrollPane.setPreferredSize(new Dimension(350, 300)); // Set reasonable size
-            scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER); // Prevent horizontal scrolling
+            scrollPane.setPreferredSize(new Dimension(350, 300));
+            scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 
             this.add(scrollPane);
         }
@@ -410,16 +367,14 @@ public class BuildDeckView extends JPanel implements PropertyChangeListener {
             button.setHorizontalTextPosition(SwingConstants.CENTER);
             button.putClientProperty("pokemon", pokemon);
             button.addActionListener(BuildDeckView.this::onPokemonSelection);
-            // Ensure button is opaque so background colors show up
             button.setOpaque(true);
 
             try {
                 ImageIcon sprite = getScaledSprite(pokemon.getSpriteUrl(), 50, 50);
                 button.setIcon(sprite);
             } catch (Exception e) {
-                // If sprite fails to load, text remains
+                // if sprite fails to load, text remains
             }
-
             return button;
         }
 
@@ -428,26 +383,23 @@ public class BuildDeckView extends JPanel implements PropertyChangeListener {
                 if (component instanceof JButton button) {
                     Pokemon pokemon = (Pokemon) button.getClientProperty("pokemon");
                     if (deck.getPokemons().contains(pokemon)) {
-                        // Highlight button if in deck
+                        // highlight pokémon button if in deck
                         button.setBorder(BorderFactory.createLineBorder(Color.BLUE, 3));
                         button.setBackground(new Color(170, 200, 255));
                         button.setToolTipText("In Deck - Click to Remove");
                     } else {
-                        // Normal appearance if not in deck
+                        // normal appearance if not in deck
                         button.setBorder(UIManager.getBorder("Button.border"));
-                        // Reset background to default
+                        // reset background to default
                         button.setBackground(UIManager.getColor("Button.background"));
                         button.setToolTipText("Not In Deck - Click to Add");
                     }
                 }
             }
-            // ✅ FIX 3: Revalidate and repaint the grid to show the updated button appearance
             pokemonGrid.revalidate();
             pokemonGrid.repaint();
         }
     }
-
-    // --- Utility Method ---
 
     private ImageIcon getScaledSprite(String urlString, int width, int height) throws MalformedURLException {
         ImageIcon sprite = new ImageIcon(new URL(urlString));

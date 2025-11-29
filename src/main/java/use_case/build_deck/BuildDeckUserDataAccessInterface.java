@@ -14,9 +14,7 @@ public interface BuildDeckUserDataAccessInterface {
      * Gets all decks for the user.
      * @return a list of the user's decks
      */
-    List<Deck> getDecks(); // <--- NEW: Get all decks
-
-    // Deck getDeck(); // <--- REMOVED: No longer needed
+    List<Deck> getDecks();
 
     /**
      * Saves the user.
@@ -37,5 +35,5 @@ public interface BuildDeckUserDataAccessInterface {
      * @param id the ID of the deck
      * @return the Deck or null if not found
      */
-    Deck getDeckById(int id); // <--- NEW: To fetch a deck for editing
+    Deck getDeckById(int id);
 }

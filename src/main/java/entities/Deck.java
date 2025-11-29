@@ -3,7 +3,7 @@ package entities;
 import java.util.ArrayList;
 
 public class Deck {
-    private static final int DECK_LIMIT = 5; //idk tbh we can change as needed
+    public static final int DECK_LIMIT = 5; //idk tbh we can change as needed
 
     private int id;
     private String name;

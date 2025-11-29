@@ -8,7 +8,6 @@ import java.util.List;
 /*
 The Controller for the Build Deck Use Case
  */
-
 public class BuildDeckController {
     private final BuildDeckInputBoundary buildDeckUseCaseInteractor;
 

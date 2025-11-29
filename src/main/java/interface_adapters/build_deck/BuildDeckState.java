@@ -9,7 +9,7 @@ import java.util.List;
 
 public class BuildDeckState {
     private Deck deck;
-    private List<Deck> allDecks; // <--- NEW
+    private List<Deck> allDecks;
     private String errorMessage;
 
     public Deck getDeck() {
@@ -17,7 +17,7 @@ public class BuildDeckState {
     }
     public void setDeck(Deck deck) { this.deck = deck; }
 
-    public List<Deck> getAllDecks() { return allDecks; } // <--- NEW
+    public List<Deck> getAllDecks() { return allDecks; }
     public void setAllDecks(List<Deck> allDecks) { this.allDecks = allDecks; }
 
     public String getErrorMessage() { return errorMessage; }

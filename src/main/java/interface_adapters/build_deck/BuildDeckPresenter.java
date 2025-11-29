@@ -19,18 +19,17 @@ public class BuildDeckPresenter implements BuildDeckOutputBoundary{
     public void prepareSuccessView(BuildDeckOutputData outputData) {
         BuildDeckState buildDeckState = new BuildDeckState();
         buildDeckState.setDeck(outputData.getDeck());
-        buildDeckState.setAllDecks(outputData.getAllDecks()); // <--- NEW
+        buildDeckState.setAllDecks(outputData.getAllDecks());
         buildDeckState.setErrorMessage(null);
         this.viewModel.setState(buildDeckState);
         this.viewModel.firePropertyChanged();
     }
 
-    // prepareFailView remains the same, except it should ensure allDecks is set to an empty list or fetched separately if a failure occurs on load.
     @Override
     public void prepareFailView(String errorMessage) {
         BuildDeckState state = new BuildDeckState();
         state.setDeck(null);
-        state.setAllDecks(new ArrayList<>()); // Ensure allDecks is not null
+        state.setAllDecks(new ArrayList<>());
         state.setErrorMessage(errorMessage);
         viewModel.setState(state);
         this.viewModel.firePropertyChanged();

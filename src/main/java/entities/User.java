@@ -11,7 +11,7 @@ public class User implements Serializable {
     private String name;
     private int currency;
     private String email; //do we need a password?
-    private List<Deck> decks;
+    private List<Deck> decks; //maybe should be hashmap?
 
     private final List<Pokemon> ownedPokemon;
 
