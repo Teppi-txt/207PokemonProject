@@ -65,6 +65,10 @@ public class Pokemon implements Serializable {
         return this.moves;
     }
 
+    public ArrayList<String> getTypes() {
+        return this.types;
+    }
+
     public void setMoves(ArrayList<String> moves) {
         this.moves = moves;
     }

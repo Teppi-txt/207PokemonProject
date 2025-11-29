@@ -98,7 +98,7 @@ public class BattlePlayerView extends JFrame implements PropertyChangeListener {
     // build the gui
     private void initializeGUI() {
         setTitle("Pokemon Battle");
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLayout(new BorderLayout());
         
         // Create main panel

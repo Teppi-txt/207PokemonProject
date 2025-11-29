@@ -20,6 +20,7 @@ import pokeapi.JSONLoader;
 public class BattleAIView extends JFrame implements BattleAIViewModel.ViewModelListener {
     private final BattleAIController controller;
     private BattleAIViewModel viewModel;
+    private Runnable returnCallback;
 
     // UI Components - Status
     private JLabel battleStatusLabel;
@@ -57,7 +58,12 @@ public class BattleAIView extends JFrame implements BattleAIViewModel.ViewModelL
     private Map<Pokemon, Integer> maxHPMap = new HashMap<>();
 
     public BattleAIView(BattleAIController controller) {
+        this(controller, null);
+    }
+
+    public BattleAIView(BattleAIController controller, Runnable returnCallback) {
         this.controller = controller;
+        this.returnCallback = returnCallback;
         initializeGUI();
     }
 
@@ -76,7 +82,7 @@ public class BattleAIView extends JFrame implements BattleAIViewModel.ViewModelL
 
     private void initializeGUI() {
         setTitle("Pokemon Battle - AI Opponent");
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLayout(new BorderLayout());
 
         // Create main panel
@@ -398,10 +404,15 @@ public class BattleAIView extends JFrame implements BattleAIViewModel.ViewModelL
 
         panel.add(Box.createVerticalStrut(10));
 
-        JButton closeButton = new JButton("Close");
-        closeButton.setAlignmentX(Component.CENTER_ALIGNMENT);
-        closeButton.addActionListener(e -> dispose());
-        panel.add(closeButton);
+        JButton backToMenuButton = new JButton("Back to Menu");
+        backToMenuButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+        backToMenuButton.addActionListener(e -> {
+            dispose();
+            if (returnCallback != null) {
+                returnCallback.run();
+            }
+        });
+        panel.add(backToMenuButton);
 
         return panel;
     }

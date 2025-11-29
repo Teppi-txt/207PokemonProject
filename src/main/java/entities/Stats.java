@@ -9,6 +9,7 @@ import java.util.Map;
 public class Stats implements Serializable {
     private static final long serialVersionUID = 1L;
     private int hp;
+    private int maxHp; // Track max HP for reset after battles
     private int attack;
     private int defense;
     private int spAttack;
@@ -41,6 +42,7 @@ public class Stats implements Serializable {
 
     public Stats(int hp, int attack, int defense, int spAttack, int spDefense, int speed) {
         this.hp = hp;
+        this.maxHp = hp; // Track max HP
         this.attack = attack;
         this.defense = defense;
         this.spAttack = spAttack;
@@ -51,6 +53,7 @@ public class Stats implements Serializable {
     public static Stats fromJSON(JSONObject stats) {
         Stats statsObj = new Stats();
         statsObj.hp = stats.getInt("hp");
+        statsObj.maxHp = stats.getInt("hp"); // Track max HP
         statsObj.attack = stats.getInt("attack");
         statsObj.defense = stats.getInt("defense");
         statsObj.spAttack = stats.getInt("sp_attack");
@@ -96,7 +99,24 @@ public class Stats implements Serializable {
 
 
     public Stats copy() {
-        return new Stats(hp, attack, defense, spAttack, spDefense, speed);
+        Stats copied = new Stats(hp, attack, defense, spAttack, spDefense, speed);
+        copied.maxHp = this.maxHp;
+        return copied;
+    }
+
+    /**
+     * Resets HP to the maximum value. Used after battles.
+     */
+    public void resetHp() {
+        this.hp = this.maxHp;
+    }
+
+    public int getMaxHp() {
+        return maxHp;
+    }
+
+    public void setMaxHp(int maxHp) {
+        this.maxHp = maxHp;
     }
 
     public void add(Stats other) {

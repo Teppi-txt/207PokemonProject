@@ -22,15 +22,21 @@ public class DeckSelectionView extends JFrame {
     private final JPanel selectedPanel;
     private final JButton startButton;
     private final JComboBox<String> difficultyCombo;
+    private Runnable returnCallback;
 
     public DeckSelectionView(BattleAIController controller, User user) {
+        this(controller, user, null);
+    }
+
+    public DeckSelectionView(BattleAIController controller, User user, Runnable returnCallback) {
         this.controller = controller;
         this.user = user;
         this.selectedDeck = new ArrayList<>();
+        this.returnCallback = returnCallback;
 
         setTitle("Select Your Battle Team");
         setSize(900, 600);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLayout(new BorderLayout());
 
         // Title Panel
@@ -51,15 +57,26 @@ public class DeckSelectionView extends JFrame {
 
         add(splitPane, BorderLayout.CENTER);
 
-        // Bottom Panel - Difficulty and Start Button
+        // Bottom Panel - Back, Difficulty and Start Button
         JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 10));
         bottomPanel.setBackground(UIStyleConstants.BACKGROUND);
+
+        // Back to Menu button
+        StyledButton backButton = new StyledButton("Back to Menu");
+        backButton.setPreferredSize(new Dimension(150, 40));
+        backButton.addActionListener(e -> {
+            dispose();
+            if (returnCallback != null) {
+                returnCallback.run();
+            }
+        });
+        bottomPanel.add(backButton);
 
         bottomPanel.add(new JLabel("Difficulty:"));
         difficultyCombo = new JComboBox<>(new String[]{"Easy", "Medium", "Hard"});
         bottomPanel.add(difficultyCombo);
 
-        startButton = new StyledButton("⚔ START BATTLE", UIStyleConstants.SECONDARY_COLOR);
+        startButton = new StyledButton("START BATTLE", UIStyleConstants.SECONDARY_COLOR);
         startButton.setPreferredSize(new Dimension(200, 50));
         startButton.setEnabled(false);
         startButton.addActionListener(e -> startBattle());
@@ -214,8 +231,8 @@ public class DeckSelectionView extends JFrame {
         String difficulty = ((String) difficultyCombo.getSelectedItem()).toLowerCase();
         controller.startBattle(user, selectedDeck, difficulty);
 
-        // Open battle view
-        BattleAIView battleView = new BattleAIView(controller);
+        // Open battle view with return callback
+        BattleAIView battleView = new BattleAIView(controller, returnCallback);
         battleView.setViewModel(controller.getViewModel());
         battleView.setVisible(true);
         dispose();

@@ -19,6 +19,17 @@ public class BattleAIFactory {
      * @return Configured DeckSelectionView
      */
     public static DeckSelectionView create(User user) {
+        return createWithCallback(user, null);
+    }
+
+    /**
+     * Creates a fully-wired DeckSelectionView with a callback for returning to menu.
+     *
+     * @param user The user who will be battling
+     * @param returnCallback Callback to execute when returning to menu
+     * @return Configured DeckSelectionView
+     */
+    public static DeckSelectionView createWithCallback(User user, Runnable returnCallback) {
         // Data Access Layer
         BattleAIDataAccessObject dataAccess = new BattleAIDataAccessObject();
 
@@ -34,8 +45,8 @@ public class BattleAIFactory {
         BattleAIController controller = new BattleAIController(
                 playerInteractor, aiInteractor, dataAccess, presenter, viewModel);
 
-        // View
-        DeckSelectionView view = new DeckSelectionView(controller, user);
+        // View with return callback
+        DeckSelectionView view = new DeckSelectionView(controller, user, returnCallback);
 
         return view;
     }
