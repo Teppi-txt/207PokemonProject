@@ -1,4 +1,4 @@
-package ai.graph.nodes;
+/*package ai.graph.nodes;
 
 import ai.config.DifficultyConfig;
 import ai.fallback.RuleBasedDecisionMaker;
@@ -19,7 +19,7 @@ import java.util.Map;
 /**
  * LangGraph4j node that calls the Groq LLM to make battle decisions.
  * Includes fallback logic for API failures.
- */
+ *//*
 public class LLMDecisionNode implements NodeAction<BattleDecisionState> {
 
     private final GroqAPIClient groqClient;
@@ -93,7 +93,7 @@ public class LLMDecisionNode implements NodeAction<BattleDecisionState> {
 
     /**
      * Build messages for LLM
-     */
+     *//*
     private List<Message> buildMessages(String difficulty, String context, boolean isSwitch) {
         List<Message> messages = new ArrayList<>();
 
@@ -115,9 +115,9 @@ public class LLMDecisionNode implements NodeAction<BattleDecisionState> {
 
     /**
      * Make fallback decision using rule-based logic
-     */
+     *//*
     private Decision makeFallbackDecision(BattleDecisionState state) {
         boolean isSwitch = "switch".equals(state.getMetadata().get("decisionType"));
         return RuleBasedDecisionMaker.makeDecision(state, isSwitch);
     }
-}
+}*/

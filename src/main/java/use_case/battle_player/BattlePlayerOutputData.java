@@ -1,4 +1,4 @@
-package use_case.battle_player;
+/*package use_case.battle_player;
 
 import entities.Battle;
 import entities.Turn;
@@ -37,5 +37,5 @@ public class BattlePlayerOutputData {
     public String getBattleStatus() {
         return battleStatus;
     }
-}
+}*/
 

@@ -1,3 +1,4 @@
+/*
 package ai.serializers;
 
 import ai.config.DifficultyConfig;
@@ -11,11 +12,12 @@ import java.util.stream.Collectors;
 /**
  * Converts battle state into LLM-friendly text format.
  */
+/*
 public class BattleContextSerializer {
 
     /**
      * Serialize battle state for LLM consumption
-     */
+     *//*
     public static String serializeForLLM(BattleDecisionState state) {
         StringBuilder context = new StringBuilder();
 
@@ -76,7 +78,7 @@ public class BattleContextSerializer {
 
     /**
      * Format detailed Pokemon information with moves
-     */
+     *//*
     private static String formatPokemonInfo(Pokemon pokemon, boolean includeMoves) {
         StringBuilder info = new StringBuilder();
 
@@ -114,7 +116,7 @@ public class BattleContextSerializer {
 
     /**
      * Format Pokemon summary (for bench display)
-     */
+     *//*q
     private static String formatPokemonSummary(Pokemon pokemon) {
         StringBuilder summary = new StringBuilder();
         summary.append(pokemon.getName());
@@ -136,7 +138,7 @@ public class BattleContextSerializer {
 
     /**
      * Format turn history
-     */
+     *//*
     private static String formatTurnHistory(List<Turn> history, int limit) {
         if (history == null || history.isEmpty()) {
             return "  No recent turns\n";
@@ -155,9 +157,10 @@ public class BattleContextSerializer {
 
     /**
      * Format move information (for detailed analysis)
-     */
+     *//*
     public static String formatMoveInfo(String moveName) {
         // Simplified for now - would query move database in full implementation
         return String.format("Move: %s", moveName);
     }
 }
+*/

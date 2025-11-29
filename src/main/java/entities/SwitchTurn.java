@@ -1,4 +1,4 @@
-package entities;
+/*package entities;
 
 public class SwitchTurn extends Turn {
     private Pokemon previousPokemon;
@@ -45,4 +45,4 @@ public class SwitchTurn extends Turn {
     public void setNewPokemon(Pokemon newPokemon) {
         this.newPokemon = newPokemon;
     }
-}
+}*/

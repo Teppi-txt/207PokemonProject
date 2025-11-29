@@ -1,4 +1,4 @@
-package ai.fallback;
+/*package ai.fallback;
 
 import ai.graph.BattleDecisionState;
 import ai.graph.Decision;
@@ -12,13 +12,13 @@ import java.util.stream.Collectors;
 /**
  * Rule-based fallback decision maker for when LLM is unavailable or fails.
  * Uses simple heuristics based on difficulty level.
- */
+ *//*
 public class RuleBasedDecisionMaker {
     private static final Random random = new Random();
 
     /**
      * Make a move decision using rule-based logic
-     */
+     *//*
     public static Decision decideMoveEasy(BattleDecisionState state) {
         Pokemon activePokemon = state.getAiPlayer().getActivePokemon();
         if (activePokemon == null || activePokemon.getMoves() == null || activePokemon.getMoves().isEmpty()) {
@@ -35,7 +35,7 @@ public class RuleBasedDecisionMaker {
 
     /**
      * Make a medium difficulty move decision
-     */
+     *//*
     public static Decision decideMoveMedium(BattleDecisionState state) {
         Pokemon activePokemon = state.getAiPlayer().getActivePokemon();
         Pokemon opponentPokemon = state.getOpponent().getActivePokemon();
@@ -65,7 +65,7 @@ public class RuleBasedDecisionMaker {
 
     /**
      * Make a hard difficulty move decision
-     */
+     *//*
     public static Decision decideMoveHard(BattleDecisionState state) {
         Pokemon activePokemon = state.getAiPlayer().getActivePokemon();
         Pokemon opponentPokemon = state.getOpponent().getActivePokemon();
@@ -98,7 +98,7 @@ public class RuleBasedDecisionMaker {
 
     /**
      * Make a switch decision
-     */
+     *//*
     public static Decision decideSwitch(BattleDecisionState state) {
         List<Pokemon> team = state.getAiPlayer().getTeam();
         Pokemon current = state.getAiPlayer().getActivePokemon();
@@ -126,7 +126,7 @@ public class RuleBasedDecisionMaker {
 
     /**
      * Make a decision based on difficulty level
-     */
+     *//*
     public static Decision makeDecision(BattleDecisionState state, boolean isSwitch) {
         if (isSwitch) {
             return decideSwitch(state);
@@ -148,3 +148,4 @@ public class RuleBasedDecisionMaker {
         }
     }
 }
+*/

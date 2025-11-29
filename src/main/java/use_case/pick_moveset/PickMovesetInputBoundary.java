@@ -1,4 +1,4 @@
-package use_case.pick_moveset;
+/*package use_case.pick_moveset;
 
 import entities.Pokemon;
 import entities.Move;
@@ -12,4 +12,4 @@ public interface PickMovesetInputBoundary {
 
     // Save selected 1–4 moves (NOT modifying Pokémon entity)
     void saveMoves(Pokemon pokemon, List<Move> chosenMoves);
-}
+}*/

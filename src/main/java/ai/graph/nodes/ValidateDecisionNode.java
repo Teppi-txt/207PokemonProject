@@ -1,4 +1,4 @@
-package ai.graph.nodes;
+/*package ai.graph.nodes;
 
 import ai.fallback.RuleBasedDecisionMaker;
 import ai.graph.BattleDecisionState;
@@ -13,7 +13,7 @@ import java.util.Map;
 /**
  * LangGraph4j node that validates decisions are legal and executable.
  * If invalid, invokes fallback decision maker.
- */
+ *//*
 public class ValidateDecisionNode implements NodeAction<BattleDecisionState> {
 
     @Override
@@ -63,7 +63,7 @@ public class ValidateDecisionNode implements NodeAction<BattleDecisionState> {
 
     /**
      * Validate move decision
-     */
+     *//*
     private boolean validateMoveDecision(Decision decision, BattleDecisionState state) {
         if (decision.getSelectedMove() == null) {
             return false;
@@ -96,7 +96,7 @@ public class ValidateDecisionNode implements NodeAction<BattleDecisionState> {
 
     /**
      * Validate switch decision
-     */
+     *//*
     private boolean validateSwitchDecision(Decision decision, BattleDecisionState state) {
         if (decision.getSwitchTarget() == null) {
             return false;
@@ -123,4 +123,4 @@ public class ValidateDecisionNode implements NodeAction<BattleDecisionState> {
 
         return true;
     }
-}
+}*/

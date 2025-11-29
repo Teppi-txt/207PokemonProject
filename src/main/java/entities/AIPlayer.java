@@ -1,4 +1,4 @@
-package entities;
+/*package entities;
 
 import ai.graph.BattleDecisionState;
 import ai.graph.Decision;
@@ -112,7 +112,7 @@ public class AIPlayer implements Player, Serializable {
 
     /**
      * Get the opponent player from the battle
-     */
+     *//*
     private Player getOpponent(Battle battle) {
         // This is a placeholder - actual implementation would extract opponent from Battle
         // For now, return null to avoid errors
@@ -232,7 +232,7 @@ public class AIPlayer implements Player, Serializable {
 
     /**
      * Decide which Pokemon to switch to using AI logic.
-     */
+     *//*
     public Pokemon decideSwitch(Battle battle) {
         // Initialize decision graph if needed
         if (decisionGraph == null) {
@@ -275,7 +275,7 @@ public class AIPlayer implements Player, Serializable {
 
     /**
      * Record a turn in the battle history for context.
-     */
+     *//*
     public void recordTurn(Turn turn) {
         if (battleHistory == null) {
             battleHistory = new ArrayList<>();
@@ -285,7 +285,7 @@ public class AIPlayer implements Player, Serializable {
 
     /**
      * Clear the battle history (for new battles).
-     */
+     *//*
     public void clearHistory() {
         if (battleHistory != null) {
             battleHistory.clear();
@@ -294,8 +294,8 @@ public class AIPlayer implements Player, Serializable {
 
     /**
      * Get the battle history.
-     */
+     *//*
     public List<Turn> getBattleHistory() {
         return battleHistory;
     }
-}
+}*/

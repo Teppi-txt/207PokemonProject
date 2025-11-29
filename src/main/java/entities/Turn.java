@@ -1,3 +1,4 @@
+/*
 package entities;
 
 import java.io.Serializable;
@@ -55,3 +56,5 @@ public abstract class Turn implements Serializable {
         this.result = result;
     }
 }
+*/
+

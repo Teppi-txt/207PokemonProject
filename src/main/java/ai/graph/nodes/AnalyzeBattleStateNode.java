@@ -1,4 +1,4 @@
-package ai.graph.nodes;
+/*package ai.graph.nodes;
 
 import ai.graph.BattleDecisionState;
 import entities.Pokemon;
@@ -11,7 +11,7 @@ import java.util.Map;
 /**
  * LangGraph4j node that analyzes the battle state and enriches context.
  * Calculates type effectiveness, stat comparisons, and available options.
- */
+ *//*
 public class AnalyzeBattleStateNode implements NodeAction<BattleDecisionState> {
 
     @Override
@@ -53,7 +53,7 @@ public class AnalyzeBattleStateNode implements NodeAction<BattleDecisionState> {
 
     /**
      * Analyze type matchup between Pokemon
-     */
+     *//*
     private String analyzeTypeMatchup(Pokemon aiPokemon, Pokemon opponentPokemon) {
         StringBuilder analysis = new StringBuilder();
 
@@ -81,7 +81,7 @@ public class AnalyzeBattleStateNode implements NodeAction<BattleDecisionState> {
 
     /**
      * Simple type advantage check (placeholder for full type chart)
-     */
+     *//*
     private boolean hasTypeAdvantage(List<String> attackerTypes, List<String> defenderTypes) {
         // Simplified type effectiveness - would use full type chart in production
         // This is a placeholder that returns false to avoid incorrect assumptions
@@ -100,7 +100,7 @@ public class AnalyzeBattleStateNode implements NodeAction<BattleDecisionState> {
 
     /**
      * Compare stats between Pokemon
-     */
+     *//*
     private String compareStats(Pokemon aiPokemon, Pokemon opponentPokemon) {
         if (aiPokemon.getStats() == null || opponentPokemon.getStats() == null) {
             return "  Stats: Unable to compare";
@@ -134,7 +134,7 @@ public class AnalyzeBattleStateNode implements NodeAction<BattleDecisionState> {
 
     /**
      * Analyze HP status
-     */
+     *//*
     private String analyzeHP(Pokemon aiPokemon, Pokemon opponentPokemon) {
         if (aiPokemon.getStats() == null || opponentPokemon.getStats() == null) {
             return "  HP: Unable to analyze";
@@ -160,4 +160,4 @@ public class AnalyzeBattleStateNode implements NodeAction<BattleDecisionState> {
 
         return analysis.toString();
     }
-}
+}*/

@@ -4,9 +4,6 @@ import entities.Pokemon;
 import use_case.open_pack.OpenPackOutputBoundary;
 import use_case.open_pack.OpenPackOutputData;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class OpenPackPresenter implements OpenPackOutputBoundary {
     private final OpenPackViewModel viewModel;
 

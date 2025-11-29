@@ -1,4 +1,4 @@
-package use_case.battle_player;
+/*package use_case.battle_player;
 
 import entities.Battle;
 import entities.Pokemon;
@@ -115,7 +115,7 @@ public class BattlePlayerInteractor implements BattlePlayerInputBoundary {
             }
             battleDataAccess.saveUser(loser);
             */
-
+/*
            User loser = battle.getPlayer1().equals(winner) ? battle.getPlayer2() : battle.getPlayer1();
            loser.addCurrency(100);
            battleDataAccess.saveUser(loser);
@@ -149,5 +149,5 @@ public class BattlePlayerInteractor implements BattlePlayerInputBoundary {
         }
         return false;
     }
-}
+}*/
 

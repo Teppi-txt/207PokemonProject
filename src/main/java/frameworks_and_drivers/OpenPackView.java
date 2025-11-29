@@ -4,22 +4,20 @@ import entities.Pokemon;
 import interface_adapters.open_pack.OpenPackController;
 import interface_adapters.open_pack.OpenPackState;
 import interface_adapters.open_pack.OpenPackViewModel;
-import use_case.open_pack.OpenPackInputBoundary;
-import use_case.open_pack.OpenPackInputData;
-
 import javax.swing.*;
-import javax.swing.border.Border;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.List;
 
 public class OpenPackView extends JPanel implements ActionListener{
 
     private final OpenPackController controller;
     private final OpenPackViewModel viewModel;
+
+    private boolean packOpened = false;
+    private boolean addedToCollection = true;
 
     // Panels
     private final JPanel topPanel = new JPanel(new FlowLayout());
@@ -30,7 +28,7 @@ public class OpenPackView extends JPanel implements ActionListener{
     private final JLabel currencyLabel = new JLabel("Currency: 0");
     private final JButton openPackButton = new JButton("Open Pack");
     private final JLabel messageLabel = new JLabel("");
-    private final JLabel addCollection = new JLabel("Add to Collection!");
+    private final JButton addCollectionButton = new JButton("Add to Collection");
     private final JButton backButton = new JButton("Back");
 
     public OpenPackView(OpenPackController controller, OpenPackViewModel viewModel) {
@@ -39,23 +37,26 @@ public class OpenPackView extends JPanel implements ActionListener{
 
         setLayout(new BorderLayout());
 
-        // ===== TOP: currency + button =====
+        this.viewModel.addPropertyChangeListener(evt -> {
+            if ("state".equals(evt.getPropertyName())) {
+                updateView((OpenPackState) evt.getNewValue());
+            }
+        });
+
+        // currency and open pack and back
         topPanel.add(currencyLabel);
         topPanel.add(openPackButton);
+        topPanel.add(backButton);
 
-        // ===== CENTER: cards =====
-        // cardsPanel already set to 1x5 grid
-
-        // ===== BOTTOM: message =====
+        //cards
         messageLabel.setForeground(Color.RED);
         bottomPanel.add(messageLabel);
+        bottomPanel.add(addCollectionButton);
 
-        // ===== Assemble =====
+
         add(topPanel, BorderLayout.NORTH);
         add(cardsPanel, BorderLayout.CENTER);
         add(bottomPanel, BorderLayout.SOUTH);
-
-
 
         // Button listener
         openPackButton.addActionListener(this);
@@ -110,7 +111,6 @@ public class OpenPackView extends JPanel implements ActionListener{
         JLabel spriteLabel;
 
         try {
-            // Uses your methods in Pokemon:
             // getRegularSpriteURL(), getShinySpriteURL(), getSpriteUrl()
             String spriteUrl = pokemon.getSpriteUrl();
             ImageIcon icon = new ImageIcon(new URL(spriteUrl));
@@ -121,9 +121,9 @@ public class OpenPackView extends JPanel implements ActionListener{
             spriteLabel = new JLabel("[no sprite]", SwingConstants.CENTER);
         }
 
-        String labelText = pokemon.toString();
+        String labelText = pokemon.getName();
         if (pokemon.isShiny()) {
-            labelText = "Shiny " + labelText;
+            labelText = "⭐ Shiny " + labelText;
         }
 
         JLabel nameLabel = new JLabel(labelText, SwingConstants.CENTER);
@@ -134,65 +134,7 @@ public class OpenPackView extends JPanel implements ActionListener{
 
         return cardPanel;
 
-
     }
-
-    public static void main(String[] args) {
-        // 1. Fake use case (so controller has something to call)
-        OpenPackInputBoundary fakeUseCase = new OpenPackInputBoundary() {
-            @Override
-            public void execute(OpenPackInputData inputData) {
-                System.out.println("Fake OpenPack use case called.");
-            }
-        };
-
-        OpenPackController fakeController = new OpenPackController(fakeUseCase);
-
-        // 2. Fake ViewModel + State
-        OpenPackViewModel fakeVM = new OpenPackViewModel();
-        OpenPackState testState = new OpenPackState();
-
-        List<Pokemon> fakeCards = new ArrayList<>();
-        fakeCards.add(makeFakePokemon(1, "bulbasaur", false));
-        fakeCards.add(makeFakePokemon(4, "charmander", true));
-        fakeCards.add(makeFakePokemon(7, "squirtle", false));
-        fakeCards.add(makeFakePokemon(25, "pikachu", true));
-        fakeCards.add(makeFakePokemon(133, "eevee", false));
-
-        testState.setOpenedCards(fakeCards);
-        testState.setRemainingCurrency(2500);
-        testState.setErrorMessage(null);
-
-        fakeVM.setState(testState);
-
-        // 3. Build and show the UI
-        SwingUtilities.invokeLater(() -> {
-            OpenPackView view = new OpenPackView(fakeController, fakeVM);
-            view.updateView(fakeVM.getState());
-
-            JFrame frame = new JFrame("Open Pack View TEST");
-            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-            frame.setContentPane(view);
-            frame.pack();
-            frame.setLocationRelativeTo(null);
-            frame.setVisible(true);
-        });
-    }
-
-    /** Helper: build minimal fake Pokémon without touching your real data layer. */
-    private static Pokemon makeFakePokemon(int id, String name, boolean shiny) {
-        // Use whichever constructor you actually have
-        Pokemon p = new Pokemon(
-                name,
-                id,
-                new ArrayList<>(), // empty types
-                null,              // or a dummy Stats object if required
-                new ArrayList<>()  // empty moves
-        );
-        p.setShiny(shiny);
-        return p;
-    }
-
 
 
 }

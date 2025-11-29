@@ -1,3 +1,4 @@
+/*
 package entities;
 
 import cards.Deck;
@@ -22,3 +23,4 @@ public interface Player {
 
     boolean isDefeated();
 }
+*/

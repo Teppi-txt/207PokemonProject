@@ -1,3 +1,4 @@
+/*
 package ai.graph;
 
 import entities.Battle;
@@ -16,6 +17,7 @@ import java.util.Map;
  * Extends AgentState to work with LangGraph4j's state management.
  * Holds all battle context, analysis data, and decision outputs.
  */
+/*
 public class BattleDecisionState extends AgentState {
 
     // Define the state schema for LangGraph4j
@@ -179,6 +181,7 @@ public class BattleDecisionState extends AgentState {
     /**
      * Creates a copy of this state for immutable updates.
      */
+/*
     public BattleDecisionState copy() {
         BattleDecisionState copy = new BattleDecisionState();
         copy.battle = this.battle;
@@ -203,3 +206,4 @@ public class BattleDecisionState extends AgentState {
                 '}';
     }
 }
+*/

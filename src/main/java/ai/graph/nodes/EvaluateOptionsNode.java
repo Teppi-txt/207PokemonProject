@@ -1,3 +1,4 @@
+/*
 package ai.graph.nodes;
 
 import ai.graph.BattleDecisionState;
@@ -11,6 +12,7 @@ import java.util.Map;
  * LangGraph4j node that determines what type of decision is needed.
  * Decides between forced switch (Pokemon fainted) or tactical decision (move or strategic switch).
  */
+/*
 public class EvaluateOptionsNode implements NodeAction<BattleDecisionState> {
 
     @Override
@@ -51,3 +53,4 @@ public class EvaluateOptionsNode implements NodeAction<BattleDecisionState> {
         return updates;
     }
 }
+*/

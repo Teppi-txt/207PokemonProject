@@ -1,4 +1,4 @@
-package use_case.pick_moveset;
+/*package use_case.pick_moveset;
 
 import cards.Deck;
 
@@ -13,4 +13,4 @@ public class PickMovesetInputData {
     public Deck getDeck() {
         return deck;
     }
-}
+}*/

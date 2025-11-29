@@ -1,3 +1,4 @@
+/*
 package use_case.battle_player;
 
 import entities.Turn;
@@ -13,4 +14,4 @@ public class BattlePlayerInputData {
         return turn;
     }
 }
-
+*/

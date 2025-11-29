@@ -1,4 +1,4 @@
-package ai.parsers;
+/*package ai.parsers;
 
 import ai.graph.BattleDecisionState;
 import ai.graph.Decision;
@@ -11,7 +11,7 @@ import java.util.regex.Pattern;
 
 /**
  * Parses LLM text responses into structured Decision objects.
- */
+ *//*
 public class LLMResponseParser {
 
     // Patterns for extracting decisions
@@ -21,7 +21,7 @@ public class LLMResponseParser {
 
     /**
      * Parse LLM response into a Decision
-     */
+     *//*
     public static Decision parseDecision(String llmResponse, BattleDecisionState state) {
         if (llmResponse == null || llmResponse.trim().isEmpty()) {
             return null;
@@ -48,7 +48,7 @@ public class LLMResponseParser {
 
     /**
      * Parse move decision from response
-     */
+     *//*
     private static Decision parseMoveDecision(String response, BattleDecisionState state,
                                               String reasoning, double confidence) {
         int moveIndex = extractMoveIndex(response);
@@ -74,7 +74,7 @@ public class LLMResponseParser {
 
     /**
      * Parse switch decision from response
-     */
+     *//*
     private static Decision parseSwitchDecision(String response, BattleDecisionState state,
                                                 String reasoning, double confidence) {
         String pokemonName = extractPokemonName(response);
@@ -105,7 +105,7 @@ public class LLMResponseParser {
 
     /**
      * Extract move index from response
-     */
+     *//*
     public static int extractMoveIndex(String response) {
         if (response == null) {
             return -1;
@@ -139,7 +139,7 @@ public class LLMResponseParser {
 
     /**
      * Extract Pokemon name from response
-     */
+     *//*
     public static String extractPokemonName(String response) {
         if (response == null) {
             return null;
@@ -162,7 +162,7 @@ public class LLMResponseParser {
 
     /**
      * Extract reasoning from response
-     */
+     *//*
     public static String extractReasoning(String response) {
         if (response == null) {
             return "No reasoning provided";
@@ -182,4 +182,4 @@ public class LLMResponseParser {
 
         return cleaned;
     }
-}
+}*/

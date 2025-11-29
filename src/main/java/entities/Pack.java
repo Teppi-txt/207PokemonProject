@@ -18,7 +18,7 @@ public class Pack {
     public Pack(int id, String type, List<Pokemon> cardPool) {
         this.id = id;
         this.type = type;
-        this.cardPool = List.copyOf(cardPool); // copy to keep original data safe :)
+        this.cardPool = Collections.unmodifiableList(new ArrayList<>(cardPool)); // copy to keep original data safe :)
     }
 
     public int getId() { return id; }

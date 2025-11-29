@@ -1,4 +1,4 @@
-package ai.graph;
+/*package ai.graph;
 
 import ai.graph.nodes.*;
 import org.bsc.langgraph4j.CompiledGraph;
@@ -12,6 +12,7 @@ import static org.bsc.langgraph4j.action.AsyncNodeAction.node_async;
  * Decision engine using LangGraph4j StateGraph to orchestrate AI decision-making.
  * Builds a graph with nodes for analysis, evaluation, LLM decision, and validation.
  */
+/*
 public class DecisionGraph {
 
     private CompiledGraph<BattleDecisionState> compiledGraph;
@@ -23,6 +24,7 @@ public class DecisionGraph {
     /**
      * Build the LangGraph4j StateGraph with all decision nodes.
      */
+/*
     private CompiledGraph<BattleDecisionState> buildStateGraph() {
         try {
             // Create node instances
@@ -56,6 +58,7 @@ public class DecisionGraph {
     /**
      * Execute the decision graph using LangGraph4j and return the final decision.
      */
+/*
     public Decision execute(BattleDecisionState initialState) throws Exception {
         // Convert state to initial data map for LangGraph4j
         java.util.Map<String, Object> initialData = stateToMap(initialState);
@@ -81,6 +84,7 @@ public class DecisionGraph {
     /**
      * Convert BattleDecisionState to Map for LangGraph4j processing.
      */
+/*
     private java.util.Map<String, Object> stateToMap(BattleDecisionState state) {
         java.util.Map<String, Object> map = new java.util.HashMap<>();
         map.put("battle", state.getBattle());
@@ -95,9 +99,11 @@ public class DecisionGraph {
     /**
      * Build a decision graph for the specified difficulty level.
      */
+/*
     public static DecisionGraph buildGraph(String difficulty) {
         // For now, all difficulty levels use the same graph structure
         // The difficulty affects behavior within the nodes (prompts, fallback probability, etc.)
         return new DecisionGraph();
     }
 }
+*/

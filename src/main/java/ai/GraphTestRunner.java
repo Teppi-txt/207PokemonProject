@@ -1,4 +1,4 @@
-package ai;
+/*package ai;
 
 import ai.graph.BattleDecisionState;
 import ai.graph.Decision;
@@ -13,7 +13,7 @@ import java.util.List;
 /**
  * Test runner to verify DecisionGraph functionality.
  * Run this class directly to test the graph execution.
- */
+ *//*
 public class GraphTestRunner {
 
     public static void main(String[] args) {
@@ -40,7 +40,7 @@ public class GraphTestRunner {
 
     /**
      * Test 1: Verify graph can be created without errors
-     */
+     *//*
     private static void testGraphCreation() {
         System.out.println("Test 1: Graph Creation");
         System.out.println("----------------------");
@@ -62,7 +62,7 @@ public class GraphTestRunner {
 
     /**
      * Test 2: Execute graph with mock battle data
-     */
+     *//*
     private static void testGraphExecution() throws Exception {
         System.out.println("Test 2: Graph Execution");
         System.out.println("-----------------------");
@@ -136,7 +136,7 @@ public class GraphTestRunner {
 
     /**
      * Test 3: Verify different difficulty levels work
-     */
+     *//*
     private static void testDifficultyLevels() throws Exception {
         System.out.println("Test 3: Difficulty Levels");
         System.out.println("-------------------------");
@@ -180,14 +180,14 @@ public class GraphTestRunner {
 
     /**
      * Create a mock opponent player (serializable)
-     */
+     *//*
     private static Player createMockOpponent(Pokemon activePokemon) {
         return new MockPlayer(activePokemon);
     }
 
     /**
      * Serializable mock player implementation
-     */
+     *//*
     private static class MockPlayer implements Player, java.io.Serializable {
         private static final long serialVersionUID = 1L;
         private Pokemon active;
@@ -245,8 +245,8 @@ public class GraphTestRunner {
 
     /**
      * Create a mock user
-     */
+     *//*
     private static User createMockUser(String username) {
         return new User(1, username, "test@example.com", 1000);
     }
-}
+}*/
