@@ -39,6 +39,8 @@ public class ViewCollectionInteractor implements ViewCollectionInputBoundary {
             outputData.setOwnedPokemon(user.getOwnedPokemon());
             outputData.setSelectedPokemon(outputData.getPokemonOnPage().get(0));
             viewCollectionPresenter.prepareSuccessView(outputData);
+        } else {
+            viewCollectionPresenter.prepareFailView("You do not have any " + filter + " pokemon.", outputData);
         }
     }
 

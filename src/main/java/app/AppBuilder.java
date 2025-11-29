@@ -31,15 +31,6 @@ public class AppBuilder {
     private ViewCollectionViewModel collectionViewModel;
 
     public AppBuilder() {
-        for (int i = 0; i < 150; i++) {
-            if (JSONLoader.allPokemon.get(i).getTypes().contains("water")) {
-                Pokemon pok = JSONLoader.allPokemon.get(i).copy();
-                if (i % 2 == 0) {
-                    pok.setShiny(true);
-                }
-                user.addPokemon(pok);
-            }
-        }
         cardPanel.setLayout(cardLayout);
     }
 
