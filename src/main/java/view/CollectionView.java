@@ -157,7 +157,7 @@ public class CollectionView extends JPanel implements PropertyChangeListener {
 
         public JLabel getSpriteLabel(Pokemon pokemon) {
             try {
-                ImageIcon sprite = new ImageIcon(new URL(pokemon.getSpriteUrl()));
+                ImageIcon sprite = new ImageIcon(new URL(pokemon.getFrontGIF()));
                 sprite.setImage(sprite.getImage().getScaledInstance(300, 300, Image.SCALE_SMOOTH));
 
                 JLabel spriteLabel = new JLabel(sprite);
@@ -294,7 +294,7 @@ public class CollectionView extends JPanel implements PropertyChangeListener {
             for (int i = 0; i < pokemons.size(); i++) {
                 ImageIcon pokeIcon;
                 try {
-                    pokeIcon = new ImageIcon(new URL(pokemons.get(i).getFrontGIF()));
+                    pokeIcon = new ImageIcon(new URL(pokemons.get(i).getSpriteUrl()));
                     if (!pokemonIsInList(pokemons.get(i), ownedPokemon)) {
                         pokeIcon.setImage(GrayFilter.createDisabledImage(pokeIcon.getImage()));
                     }
