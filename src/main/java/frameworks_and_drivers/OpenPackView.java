@@ -29,7 +29,7 @@ public class OpenPackView extends JPanel implements ActionListener{
     private final JButton openPackButton = new JButton("Open Pack");
     private final JLabel messageLabel = new JLabel("");
     private final JButton addCollectionButton = new JButton("Add to Collection");
-    private final JButton backButton = new JButton("Back");
+
 
     public OpenPackView(OpenPackController controller, OpenPackViewModel viewModel) {
         this.controller = controller;
@@ -46,11 +46,13 @@ public class OpenPackView extends JPanel implements ActionListener{
         // currency and open pack and back
         topPanel.add(currencyLabel);
         topPanel.add(openPackButton);
+        JButton backButton = new JButton("Back");
         topPanel.add(backButton);
 
         //cards
         messageLabel.setForeground(Color.RED);
         bottomPanel.add(messageLabel);
+        JButton addCollectionButton = new JButton("Add to Collection");
         bottomPanel.add(addCollectionButton);
 
 
@@ -60,6 +62,9 @@ public class OpenPackView extends JPanel implements ActionListener{
 
         // Button listener
         openPackButton.addActionListener(this);
+
+        addCollectionButton.addActionListener(e -> addToCollection());
+        addCollectionButton.setEnabled(false); // disabled until pack opened
 
     }
 
@@ -71,8 +76,33 @@ public class OpenPackView extends JPanel implements ActionListener{
     }
 
     private void openPack(){
+        if (!addedToCollection) {
+            messageLabel.setText("Please add cards to your collection first!");
+            return;
+        }
+        addedToCollection = false;
+        packOpened = true;
         controller.openPack();
     }
+
+    private void addToCollection(){
+        if (!packOpened) {
+            messageLabel.setText("No cards to add.");
+        }
+        // TODO: need to add this call:
+        // controller.addToCollection(viewModel.getState().getOpenedCards());
+
+        messageLabel.setText("Cards added to your collection!");
+
+        // now the user can open another pack
+        packOpened = false;
+        addedToCollection = true;
+
+        // disable the button again until next pack
+        addCollectionButton.setEnabled(false);
+    }
+
+
 
     public void updateView(OpenPackState state){
         if (state == null){
@@ -84,10 +114,12 @@ public class OpenPackView extends JPanel implements ActionListener{
         cardsPanel.removeAll();
 
         List<Pokemon> opened = state.getOpenedCards();
-        if (opened != null){
+        if (opened != null && !opened.isEmpty()){
             for (Pokemon pokemon : opened){
                 cardsPanel.add(makeCardPanel(pokemon));
             }
+            addCollectionButton.setEnabled(true);
+            messageLabel.setText("You opened a pack!");
         }
 
         cardsPanel.revalidate();
@@ -100,7 +132,6 @@ public class OpenPackView extends JPanel implements ActionListener{
         } else {
             messageLabel.setText("");
         }
-
     }
 
     private JPanel makeCardPanel(Pokemon pokemon){
