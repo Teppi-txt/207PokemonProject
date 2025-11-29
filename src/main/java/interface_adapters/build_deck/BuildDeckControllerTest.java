@@ -63,6 +63,12 @@ public class BuildDeckControllerTest {
             }
 
             @Override
+            public void deleteDeck(int id) {
+                decks.remove(id);
+                System.out.println("--- Deck DELETED: ID=" + id + " ---");
+            }
+
+            @Override
             public List<Deck> getDecks() {
                 return new ArrayList<>(decks.values());
             }
@@ -95,7 +101,7 @@ public class BuildDeckControllerTest {
         buildDeckView.setController(controller);
 
         System.out.println("Triggering initial load...");
-        controller.buildDeck(-1, null, null, false);
+        controller.buildDeck(-1, null, null, false, false);
 
         JFrame frame = new JFrame("Deck Builder Test");
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);

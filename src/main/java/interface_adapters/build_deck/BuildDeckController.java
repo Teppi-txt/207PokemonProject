@@ -21,9 +21,14 @@ public class BuildDeckController {
      * @param deckName the name of the deck
      * @param pokemon the list of Pokémon in the deck
      * @param isRandom whether the deck is randomly generated
+     * @param delete whether the deck is to be deleted
      */
-    public void buildDeck(int deckId, String deckName, List<Pokemon> pokemon, boolean isRandom) { // <--- MODIFIED
-        BuildDeckInputData buildDeckInputData = new BuildDeckInputData(deckId, deckName, pokemon, isRandom);
+    public void buildDeck(int deckId, String deckName, List<Pokemon> pokemon, boolean isRandom, boolean delete) { // <--- MODIFIED
+        BuildDeckInputData buildDeckInputData = new BuildDeckInputData(deckId, deckName, pokemon, isRandom, delete);
         buildDeckUseCaseInteractor.execute(buildDeckInputData);
+    }
+    public void deleteDeck(int deckId) {
+        BuildDeckInputData inputData = new BuildDeckInputData(deckId, null, null, false, true);
+        buildDeckUseCaseInteractor.execute(inputData);
     }
 }

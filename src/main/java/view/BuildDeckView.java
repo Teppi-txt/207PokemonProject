@@ -83,6 +83,9 @@ public class BuildDeckView extends JPanel implements PropertyChangeListener {
         JButton saveButton = new JButton("Save Deck");
         saveButton.addActionListener(this::onSaveDeck);
 
+        JButton deleteButton = new JButton("Delete Deck");
+        deleteButton.addActionListener(e -> onDeleteDeck());
+
         JButton newDeckButton = new JButton("New Deck");
         newDeckButton.addActionListener(this::onNewDeck);
 
@@ -93,6 +96,7 @@ public class BuildDeckView extends JPanel implements PropertyChangeListener {
         actionPanel.add(newDeckButton); // < Add new deck button
         actionPanel.add(randomButton);
         actionPanel.add(saveButton);
+        actionPanel.add(deleteButton);
 
         controlsPanel.add(deckManagementPanel); // Add Deck Selector/New
         controlsPanel.add(nameIdPanel); // Add Name/ID
@@ -138,14 +142,30 @@ public class BuildDeckView extends JPanel implements PropertyChangeListener {
         List<Pokemon> pokemons = currentDeck.getPokemons();
 
         // Execute controller call to save/update the current deck (not random)
-        controller.buildDeck(deckId, deckName, pokemons, false);
+        controller.buildDeck(deckId, deckName, pokemons, false, false);
         // If deckId is 101, the interactor saves Deck 101, it does not call getNextDeckId().
+    }
+
+    private void onDeleteDeck() {
+        if (currentDeck == null || currentDeck.getId() == -1) {
+            errorMessageLabel.setText("Cannot delete an unsaved deck.");
+            return;
+        }
+        int confirm = JOptionPane.showConfirmDialog(
+                this,
+                "Are you sure you want to delete this deck?",
+                "Confirm Delete",
+                JOptionPane.YES_NO_OPTION
+        );
+        if (confirm == JOptionPane.YES_OPTION) {
+            controller.deleteDeck(currentDeck.getId());
+        }
     }
 
     private void onNewDeck(ActionEvent e) {
         // Clear the current state and trigger a new deck creation in the interactor
         // Use sentinel deckId = -1 and null name/pokémon
-        controller.buildDeck(-1, null, null, false);
+        controller.buildDeck(-1, null, null, false, false);
     }
 
     private void onRandomizeDeck(ActionEvent e) {
@@ -153,7 +173,7 @@ public class BuildDeckView extends JPanel implements PropertyChangeListener {
         int deckId = (currentDeck == null) ? -1 : currentDeck.getId();
         String currentName = deckNameField.getText();
         // Pass null for Pokémon list and set isRandom = true
-        controller.buildDeck(deckId, currentName, null, true);
+        controller.buildDeck(deckId, currentName, null, true, false);
     }
 
     private void onDeckSelected(ActionEvent e) {
@@ -165,7 +185,7 @@ public class BuildDeckView extends JPanel implements PropertyChangeListener {
             // Trigger the controller to load the deck.
             System.out.println("Loading deck ID: " + selectedDeck.getId() + " - " + selectedDeck.getName());
             // Execute the controller call
-            controller.buildDeck(selectedDeck.getId(), selectedDeck.getName(), null, false);
+            controller.buildDeck(selectedDeck.getId(), selectedDeck.getName(), null, false, false);
         }
     }
 

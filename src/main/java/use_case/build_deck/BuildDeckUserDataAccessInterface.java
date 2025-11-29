@@ -11,6 +11,13 @@ public interface BuildDeckUserDataAccessInterface {
     void saveDeck(Deck deck);
 
     /**
+     * deletes the deck.
+     * @param deckId the deck to delete
+     */
+    void deleteDeck(int deckId);
+
+
+    /**
      * Gets all decks for the user.
      * @return a list of the user's decks
      */

@@ -47,6 +47,33 @@ public class BuildDeckInteractor implements BuildDeckInputBoundary {
 
     @Override
     public void execute(BuildDeckInputData inputData) {
+        // delete deck functionality
+        if (inputData.isDelete()) {
+            if (inputData.getDeckId() == -1) {
+                presenter.prepareFailView("Cannot delete an unsaved deck.");
+                return;
+            }
+            dataAccess.deleteDeck(inputData.getDeckId());
+            // after deleting, load all decks and create a fresh empty deck
+            List<Deck> allDecks = dataAccess.getDecks();
+            Deck newEmptyDeck;
+            if (allDecks.isEmpty()) {
+                // no decks left, return a brand new empty deck
+                int id = dataAccess.getNextDeckId();
+                newEmptyDeck = new Deck(id, "New Deck");
+                dataAccess.saveDeck(newEmptyDeck);
+                allDecks.add(newEmptyDeck);
+            } else {
+                // load the first remaining deck
+                Deck first = allDecks.get(0);
+                newEmptyDeck = new Deck(first);
+            }
+            presenter.prepareSuccessView(
+                    new BuildDeckOutputData(newEmptyDeck, allDecks)
+            );
+            return;
+        }
+
         User user = dataAccess.getUser();
         if (user == null) {
             presenter.prepareFailView("User not found.");
