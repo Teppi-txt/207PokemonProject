@@ -143,7 +143,7 @@ public class BuildDeckView extends JPanel implements PropertyChangeListener {
 
         // Execute controller call to save/update the current deck (not random)
         controller.buildDeck(deckId, deckName, pokemons, false, false);
-        // If deckId is 101, the interactor saves Deck 101, it does not call getNextDeckId().
+        // If deckId is 1, the interactor saves Deck 1, it does not call getNextDeckId().
     }
 
     private void onDeleteDeck() {
@@ -325,6 +325,13 @@ public class BuildDeckView extends JPanel implements PropertyChangeListener {
                         // handle image loading failure
                         slot.setIcon(null);
                     }
+                    // make icon appear above the name
+                    slot.setHorizontalTextPosition(SwingConstants.CENTER);
+                    slot.setVerticalTextPosition(SwingConstants.BOTTOM);
+                    // center the whole label
+                    slot.setHorizontalAlignment(SwingConstants.CENTER);
+                    slot.setVerticalAlignment(SwingConstants.CENTER);
+
                     slot.setToolTipText(p.getName() + " (Click to remove)");
                     slot.setOpaque(true);
                     slot.setBackground(new Color(200, 255, 200)); // light green for filled slot
