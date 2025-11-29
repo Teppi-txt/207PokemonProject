@@ -1,6 +1,7 @@
 package use_case.build_deck;
 import entities.Deck;
 import entities.User;
+import java.util.List;
 
 public interface BuildDeckUserDataAccessInterface {
     /**
@@ -10,10 +11,12 @@ public interface BuildDeckUserDataAccessInterface {
     void saveDeck(Deck deck);
 
     /**
-     * Gets the deck.
-     * @return the deck
+     * Gets all decks for the user.
+     * @return a list of the user's decks
      */
-    Deck getDeck();
+    List<Deck> getDecks(); // <--- NEW: Get all decks
+
+    // Deck getDeck(); // <--- REMOVED: No longer needed
 
     /**
      * Saves the user.
@@ -28,4 +31,11 @@ public interface BuildDeckUserDataAccessInterface {
     User getUser();
 
     int getNextDeckId();
+
+    /**
+     * Finds a deck by its ID.
+     * @param id the ID of the deck
+     * @return the Deck or null if not found
+     */
+    Deck getDeckById(int id); // <--- NEW: To fetch a deck for editing
 }

@@ -11,6 +11,7 @@ public class User implements Serializable {
     private String name;
     private int currency;
     private String email; //do we need a password?
+    private List<Deck> decks;
 
     private final List<Pokemon> ownedPokemon;
 
@@ -47,6 +48,12 @@ public class User implements Serializable {
         this.ownedPokemon.add(pokemon);
     }
 
+    public List<Deck> getDecks() { return decks; }
+
+    public void addDeck(Deck deck) {
+        this.decks.add(deck);
+    }
+
     //got rid of openPack method because that will be used with the open pack interactor
 
     public boolean canAffordPack(int amount){
@@ -77,6 +84,10 @@ public class User implements Serializable {
         return null;
     }
 
-
-
+    public Deck getDeckById(int id){
+        for (Deck d : decks){
+            if (d.getId() == id) return d;
+        }
+        return null;
+    }
 }
