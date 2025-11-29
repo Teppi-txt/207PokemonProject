@@ -10,6 +10,7 @@ import pokeapi.PokeAPIFetcher;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.GradientPaint;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.IOException;
@@ -111,112 +112,185 @@ public class BattlePlayerView extends JFrame implements PropertyChangeListener {
     }
 
     private JPanel createArenaPanel() {
-        JPanel panel = new JPanel(new GridLayout(1, 2, 40, 0));
-        panel.setBackground(Color.WHITE);
-        panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        // Create info boxes for both players
+        JPanel player1InfoBox = createPokemonInfoBox(true);
+        JPanel player2InfoBox = createPokemonInfoBox(false);
 
-        // Player 1 side
-        JPanel player1Panel = createPokemonPanel(true);
-        panel.add(player1Panel);
+        player1PokemonImageLabel = new JLabel();
+        player1PokemonImageLabel.setHorizontalAlignment(SwingConstants.CENTER);
 
-        // Player 2 side
-        JPanel player2Panel = createPokemonPanel(false);
-        panel.add(player2Panel);
+        player2PokemonImageLabel = new JLabel();
+        player2PokemonImageLabel.setHorizontalAlignment(SwingConstants.CENTER);
 
-        return panel;
-    }
-
-    private JPanel createPokemonPanel(boolean isPlayer1) {
-        JPanel panel = new JPanel();
-        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-        panel.setBackground(Color.WHITE);
-        panel.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(new Color(230, 230, 230)),
-            BorderFactory.createEmptyBorder(20, 20, 20, 20)
-        ));
-
-        // Player label
-        JLabel playerLabel = new JLabel(isPlayer1 ? "PLAYER 1" : "PLAYER 2");
-        playerLabel.setFont(new Font("SansSerif", Font.BOLD, 16));
-        playerLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-        panel.add(playerLabel);
-
-        panel.add(Box.createVerticalStrut(10));
-
-        // Pokemon name
-        JLabel nameLabel = new JLabel("---");
-        nameLabel.setFont(new Font("SansSerif", Font.BOLD, 18));
-        nameLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-        if (isPlayer1) player1PokemonNameLabel = nameLabel;
-        else player2PokemonNameLabel = nameLabel;
-        panel.add(nameLabel);
-
-        panel.add(Box.createVerticalStrut(15));
-
-        // Pokemon image with circle
-        JLabel imageLabel = new JLabel();
-        imageLabel.setPreferredSize(new Dimension(150, 150));
-        imageLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        imageLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-        if (isPlayer1) player1PokemonImageLabel = imageLabel;
-        else player2PokemonImageLabel = imageLabel;
-        panel.add(imageLabel);
-
-        // Circle below Pokemon
-        JPanel circlePanel = new JPanel() {
+        JPanel panel = new JPanel() {
             @Override
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
                 Graphics2D g2d = (Graphics2D) g;
-                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                g2d.setColor(new Color(200, 200, 200));
                 int w = getWidth();
-                g2d.fillOval(w/2 - 60, 0, 120, 25);
+                int h = getHeight();
+
+                // Draw battle background gradient (sky)
+                GradientPaint skyGradient = new GradientPaint(
+                    0, 0, new Color(135, 206, 235),
+                    0, h / 2, new Color(176, 224, 230)
+                );
+                g2d.setPaint(skyGradient);
+                g2d.fillRect(0, 0, w, h / 2);
+
+                // Draw ground
+                GradientPaint groundGradient = new GradientPaint(
+                    0, h / 2, new Color(144, 238, 144),
+                    0, h, new Color(34, 139, 34)
+                );
+                g2d.setPaint(groundGradient);
+                g2d.fillRect(0, h / 2, w, h / 2);
+
+                // Player 1 platform (bottom left)
+                int player1PlatformX = (int)(w * 0.08);
+                int player1PlatformY = h - 70;
+                int player1PlatformW = 220;
+                int player1PlatformH = 55;
+
+                g2d.setColor(new Color(139, 90, 43));
+                g2d.fillOval(player1PlatformX, player1PlatformY, player1PlatformW, player1PlatformH);
+                g2d.setColor(new Color(160, 120, 80));
+                g2d.fillOval(player1PlatformX + 5, player1PlatformY + 5, player1PlatformW - 10, player1PlatformH - 10);
+
+                // Player 2 platform (top right)
+                int player2PlatformX = (int)(w * 0.65);
+                int player2PlatformY = (int)(h * 0.42);
+                int player2PlatformW = 180;
+                int player2PlatformH = 45;
+
+                g2d.setColor(new Color(139, 90, 43));
+                g2d.fillOval(player2PlatformX, player2PlatformY, player2PlatformW, player2PlatformH);
+                g2d.setColor(new Color(160, 120, 80));
+                g2d.fillOval(player2PlatformX + 5, player2PlatformY + 5, player2PlatformW - 10, player2PlatformH - 10);
+            }
+
+            @Override
+            public void doLayout() {
+                super.doLayout();
+                int w = getWidth();
+                int h = getHeight();
+
+                // Position Player 2 info box (top left - opponent)
+                player2InfoBox.setBounds(15, 10, 260, 75);
+
+                // Position Player 2 Pokemon (above Player 2 platform - opponent)
+                int player2PlatformX = (int)(w * 0.65);
+                int player2PlatformY = (int)(h * 0.42);
+                player2PokemonImageLabel.setBounds(player2PlatformX + 15, player2PlatformY - 130, 150, 150);
+
+                // Position Player 1 info box (bottom right)
+                player1InfoBox.setBounds(w - 275, h - 95, 260, 75);
+
+                // Position Player 1 Pokemon (above Player 1 platform)
+                int player1PlatformX = (int)(w * 0.08);
+                int player1PlatformY = h - 70;
+                player1PokemonImageLabel.setBounds(player1PlatformX + 10, player1PlatformY - 180, 200, 200);
             }
         };
-        circlePanel.setPreferredSize(new Dimension(150, 30));
-        circlePanel.setMaximumSize(new Dimension(150, 30));
-        circlePanel.setOpaque(false);
-        circlePanel.setAlignmentX(Component.CENTER_ALIGNMENT);
-        panel.add(circlePanel);
+        panel.setLayout(null);
+        panel.setPreferredSize(new Dimension(880, 300));
 
-        panel.add(Box.createVerticalStrut(15));
+        panel.add(player1PokemonImageLabel);
+        panel.add(player1InfoBox);
+        panel.add(player2PokemonImageLabel);
+        panel.add(player2InfoBox);
+
+        return panel;
+    }
+
+    private JPanel createPokemonInfoBox(boolean isPlayer1) {
+        JPanel box = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                Graphics2D g2d = (Graphics2D) g;
+                int w = getWidth();
+                int h = getHeight();
+
+                // Outer border
+                g2d.setColor(new Color(64, 64, 64));
+                g2d.fillRect(0, 0, w, h);
+
+                // Inner background
+                g2d.setColor(new Color(248, 248, 248));
+                g2d.fillRect(4, 4, w - 8, h - 8);
+
+                // 3D effect
+                g2d.setColor(Color.WHITE);
+                g2d.drawLine(4, 4, w - 4, 4);
+                g2d.drawLine(4, 4, 4, h - 4);
+                g2d.setColor(new Color(180, 180, 180));
+                g2d.drawLine(w - 4, 4, w - 4, h - 4);
+                g2d.drawLine(4, h - 4, w - 4, h - 4);
+            }
+        };
+        box.setLayout(new BoxLayout(box, BoxLayout.Y_AXIS));
+        box.setBorder(BorderFactory.createEmptyBorder(10, 15, 10, 15));
+        box.setOpaque(false);
+
+        // Pokemon name with player indicator
+        JLabel nameLabel = new JLabel(isPlayer1 ? "PLAYER 1" : "PLAYER 2");
+        nameLabel.setFont(new Font("SansSerif", Font.BOLD, 14));
+        nameLabel.setForeground(Color.BLACK);
+        nameLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        box.add(nameLabel);
+
+        if (isPlayer1) {
+            player1PokemonNameLabel = nameLabel;
+        } else {
+            player2PokemonNameLabel = nameLabel;
+        }
+
+        box.add(Box.createVerticalStrut(5));
+
+        // HP label row
+        JPanel hpRow = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
+        hpRow.setOpaque(false);
+        hpRow.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JLabel hpText = new JLabel("HP:");
+        hpText.setFont(new Font("SansSerif", Font.PLAIN, 12));
+        hpText.setForeground(Color.BLACK);
+        hpRow.add(hpText);
 
         // HP Bar
-        JPanel hpPanel = new JPanel();
-        hpPanel.setLayout(new BoxLayout(hpPanel, BoxLayout.Y_AXIS));
-        hpPanel.setBackground(Color.WHITE);
-        hpPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
-        hpPanel.setMaximumSize(new Dimension(200, 50));
-
-        JLabel hpText = new JLabel("HP");
-        hpText.setFont(new Font("SansSerif", Font.PLAIN, 12));
-        hpText.setAlignmentX(Component.CENTER_ALIGNMENT);
-        hpPanel.add(hpText);
-
         JProgressBar hpBar = new JProgressBar(0, 100);
         hpBar.setValue(100);
         hpBar.setStringPainted(false);
-        hpBar.setPreferredSize(new Dimension(180, 12));
-        hpBar.setMaximumSize(new Dimension(180, 12));
+        hpBar.setPreferredSize(new Dimension(150, 14));
         hpBar.setForeground(new Color(76, 175, 80));
-        hpBar.setBackground(new Color(230, 230, 230));
-        hpBar.setAlignmentX(Component.CENTER_ALIGNMENT);
-        if (isPlayer1) player1HPBar = hpBar;
-        else player2HPBar = hpBar;
-        hpPanel.add(hpBar);
+        hpBar.setBackground(new Color(48, 48, 48));
+        hpRow.add(hpBar);
 
+        if (isPlayer1) {
+            player1HPBar = hpBar;
+        } else {
+            player2HPBar = hpBar;
+        }
+
+        box.add(hpRow);
+
+        box.add(Box.createVerticalStrut(3));
+
+        // HP numbers
         JLabel hpLabel = new JLabel("100 / 100");
         hpLabel.setFont(new Font("SansSerif", Font.PLAIN, 11));
         hpLabel.setForeground(Color.GRAY);
-        hpLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-        if (isPlayer1) player1HPLabel = hpLabel;
-        else player2HPLabel = hpLabel;
-        hpPanel.add(hpLabel);
+        hpLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        box.add(hpLabel);
 
-        panel.add(hpPanel);
+        if (isPlayer1) {
+            player1HPLabel = hpLabel;
+        } else {
+            player2HPLabel = hpLabel;
+        }
 
-        return panel;
+        return box;
     }
 
     private JPanel createControlsPanel() {
@@ -251,10 +325,10 @@ public class BattlePlayerView extends JFrame implements PropertyChangeListener {
     private JPanel createPlayerControlsPanel(boolean isPlayer1) {
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-        panel.setBackground(new Color(250, 250, 250));
+        panel.setBackground(Color.WHITE);
         panel.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(new Color(220, 220, 220)),
-            BorderFactory.createEmptyBorder(15, 15, 15, 15)
+            BorderFactory.createLineBorder(new Color(200, 200, 200), 2),
+            BorderFactory.createEmptyBorder(12, 12, 12, 12)
         ));
 
         JLabel label = new JLabel(isPlayer1 ? "PLAYER 1 MOVES" : "PLAYER 2 MOVES");
@@ -266,7 +340,7 @@ public class BattlePlayerView extends JFrame implements PropertyChangeListener {
 
         // Moves grid
         JPanel movesPanel = new JPanel(new GridLayout(2, 2, 8, 8));
-        movesPanel.setOpaque(false);
+        movesPanel.setBackground(Color.WHITE);
 
         JButton[] buttons = new JButton[4];
         for (int i = 0; i < 4; i++) {
@@ -292,9 +366,9 @@ public class BattlePlayerView extends JFrame implements PropertyChangeListener {
 
         // Team panel
         JPanel teamPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 0));
-        teamPanel.setOpaque(false);
+        teamPanel.setBackground(Color.WHITE);
         JLabel teamLabel = new JLabel("Team:");
-        teamLabel.setFont(new Font("SansSerif", Font.PLAIN, 11));
+        teamLabel.setFont(new Font("SansSerif", Font.BOLD, 11));
         teamPanel.add(teamLabel);
 
         if (isPlayer1) player1TeamPanel = teamPanel;
@@ -591,24 +665,26 @@ public class BattlePlayerView extends JFrame implements PropertyChangeListener {
         teamPanel.removeAll();
 
         JLabel label = new JLabel("Team:");
-        label.setFont(new Font("SansSerif", Font.PLAIN, 11));
+        label.setFont(new Font("SansSerif", Font.BOLD, 11));
         teamPanel.add(label);
 
         if (team != null) {
             boolean canAct = isPlayer1 == player1Turn && currentBattle != null && "IN_PROGRESS".equals(currentBattle.getBattleStatus());
 
             for (Pokemon pokemon : team) {
-                JButton btn = new JButton(pokemon.getName());
+                String btnText = pokemon.getName();
+                if (pokemon == activePokemon) {
+                    btnText += " *";
+                } else if (pokemon.isFainted()) {
+                    btnText += " X";
+                }
+
+                JButton btn = new JButton(btnText);
                 btn.setFont(new Font("SansSerif", Font.PLAIN, 10));
-                btn.setMargin(new Insets(2, 6, 2, 6));
                 btn.setFocusPainted(false);
 
-                if (pokemon == activePokemon) {
+                if (pokemon == activePokemon || pokemon.isFainted()) {
                     btn.setEnabled(false);
-                    btn.setBackground(new Color(200, 230, 200));
-                } else if (pokemon.isFainted()) {
-                    btn.setEnabled(false);
-                    btn.setBackground(Color.LIGHT_GRAY);
                 } else {
                     btn.setEnabled(canAct);
                     btn.addActionListener(e -> executeSwitchForPlayer(isPlayer1, pokemon));

@@ -25,18 +25,14 @@ public class BattleAIView extends JFrame implements BattleAIViewModel.ViewModelL
     // UI Components - Player
     private JLabel playerPokemonNameLabel;
     private JLabel playerPokemonImageLabel;
-    private JPanel playerHPBarPanel;
+    private JProgressBar playerHPBar;
     private JLabel playerHPLabel;
-    private int playerCurrentHP = 100;
-    private int playerMaxHP = 100;
 
     // UI Components - AI
     private JLabel aiPokemonNameLabel;
     private JLabel aiPokemonImageLabel;
-    private JPanel aiHPBarPanel;
+    private JProgressBar aiHPBar;
     private JLabel aiHPLabel;
-    private int aiCurrentHP = 100;
-    private int aiMaxHP = 100;
 
     // UI Components - Battle Controls
     private JPanel movesPanel;
@@ -206,18 +202,18 @@ public class BattleAIView extends JFrame implements BattleAIViewModel.ViewModelL
                 int h = getHeight();
 
                 // Outer border
-                g2d.setColor(UIStyleConstants.BORDER_DARK);
+                g2d.setColor(new Color(64, 64, 64));
                 g2d.fillRect(0, 0, w, h);
 
                 // Inner background
-                g2d.setColor(UIStyleConstants.MENU_BG);
+                g2d.setColor(new Color(248, 248, 248));
                 g2d.fillRect(4, 4, w - 8, h - 8);
 
                 // 3D effect
                 g2d.setColor(Color.WHITE);
                 g2d.drawLine(4, 4, w - 4, 4);
                 g2d.drawLine(4, 4, 4, h - 4);
-                g2d.setColor(UIStyleConstants.SHADOW_COLOR);
+                g2d.setColor(new Color(180, 180, 180));
                 g2d.drawLine(w - 4, 4, w - 4, h - 4);
                 g2d.drawLine(4, h - 4, w - 4, h - 4);
             }
@@ -228,8 +224,8 @@ public class BattleAIView extends JFrame implements BattleAIViewModel.ViewModelL
 
         // Pokemon name
         JLabel nameLabel = new JLabel(isPlayer ? "Your Pokemon" : "Enemy Pokemon");
-        nameLabel.setFont(UIStyleConstants.HEADING_FONT);
-        nameLabel.setForeground(UIStyleConstants.TEXT_PRIMARY);
+        nameLabel.setFont(new Font("SansSerif", Font.BOLD, 14));
+        nameLabel.setForeground(Color.BLACK);
         nameLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
         box.add(nameLabel);
 
@@ -241,61 +237,29 @@ public class BattleAIView extends JFrame implements BattleAIViewModel.ViewModelL
 
         box.add(Box.createVerticalStrut(5));
 
-        // HP label
+        // HP label row
         JPanel hpRow = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
         hpRow.setOpaque(false);
         hpRow.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         JLabel hpText = new JLabel("HP:");
-        hpText.setFont(UIStyleConstants.BODY_FONT);
-        hpText.setForeground(UIStyleConstants.TEXT_PRIMARY);
+        hpText.setFont(new Font("SansSerif", Font.PLAIN, 12));
+        hpText.setForeground(Color.BLACK);
         hpRow.add(hpText);
 
-        // HP Bar container
-        JPanel hpBarContainer = new JPanel() {
-            @Override
-            protected void paintComponent(Graphics g) {
-                super.paintComponent(g);
-                Graphics2D g2d = (Graphics2D) g;
-                int w = getWidth();
-                int h = getHeight();
-
-                // HP bar background
-                g2d.setColor(UIStyleConstants.BORDER_DARK);
-                g2d.fillRect(0, 0, w, h);
-                g2d.setColor(new Color(48, 48, 48));
-                g2d.fillRect(2, 2, w - 4, h - 4);
-            }
-        };
-        hpBarContainer.setPreferredSize(new Dimension(150, 16));
-        hpBarContainer.setLayout(new BorderLayout());
-
-        JPanel hpBar = new JPanel() {
-            @Override
-            protected void paintComponent(Graphics g) {
-                super.paintComponent(g);
-                Graphics2D g2d = (Graphics2D) g;
-
-                int currentHP = isPlayer ? playerCurrentHP : aiCurrentHP;
-                int maxHP = isPlayer ? playerMaxHP : aiMaxHP;
-                float hpPercent = maxHP > 0 ? (float) currentHP / maxHP : 0;
-
-                int barWidth = (int) ((getWidth() - 4) * hpPercent);
-
-                // HP color
-                Color hpColor = UIStyleConstants.getHPColor(hpPercent);
-                g2d.setColor(hpColor);
-                g2d.fillRect(2, 2, barWidth, getHeight() - 4);
-            }
-        };
-        hpBar.setOpaque(false);
-        hpBarContainer.add(hpBar, BorderLayout.CENTER);
-        hpRow.add(hpBarContainer);
+        // HP Bar
+        JProgressBar hpBar = new JProgressBar(0, 100);
+        hpBar.setValue(100);
+        hpBar.setStringPainted(false);
+        hpBar.setPreferredSize(new Dimension(150, 14));
+        hpBar.setForeground(new Color(76, 175, 80));
+        hpBar.setBackground(new Color(48, 48, 48));
+        hpRow.add(hpBar);
 
         if (isPlayer) {
-            playerHPBarPanel = hpBar;
+            playerHPBar = hpBar;
         } else {
-            aiHPBarPanel = hpBar;
+            aiHPBar = hpBar;
         }
 
         box.add(hpRow);
@@ -304,8 +268,8 @@ public class BattleAIView extends JFrame implements BattleAIViewModel.ViewModelL
 
         // HP numbers
         JLabel hpNumLabel = new JLabel("100 / 100");
-        hpNumLabel.setFont(UIStyleConstants.SMALL_FONT);
-        hpNumLabel.setForeground(UIStyleConstants.TEXT_SECONDARY);
+        hpNumLabel.setFont(new Font("SansSerif", Font.PLAIN, 11));
+        hpNumLabel.setForeground(Color.GRAY);
         hpNumLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
         box.add(hpNumLabel);
 
@@ -641,10 +605,18 @@ public class BattleAIView extends JFrame implements BattleAIViewModel.ViewModelL
             maxHPMap.put(pokemon, maxHP);
         }
 
-        playerCurrentHP = currentHP;
-        playerMaxHP = maxHP;
         playerHPLabel.setText(currentHP + " / " + maxHP);
-        playerHPBarPanel.repaint();
+        int hpPercent = maxHP > 0 ? (currentHP * 100 / maxHP) : 0;
+        playerHPBar.setValue(hpPercent);
+
+        // Update HP bar color based on percentage
+        if (hpPercent > 50) {
+            playerHPBar.setForeground(new Color(76, 175, 80)); // Green
+        } else if (hpPercent > 25) {
+            playerHPBar.setForeground(new Color(255, 193, 7)); // Yellow
+        } else {
+            playerHPBar.setForeground(new Color(244, 67, 54)); // Red
+        }
 
         // Update moves
         updateMovesDisplay(pokemon);
@@ -661,10 +633,18 @@ public class BattleAIView extends JFrame implements BattleAIViewModel.ViewModelL
             maxHPMap.put(pokemon, maxHP);
         }
 
-        aiCurrentHP = currentHP;
-        aiMaxHP = maxHP;
         aiHPLabel.setText(currentHP + " / " + maxHP);
-        aiHPBarPanel.repaint();
+        int hpPercent = maxHP > 0 ? (currentHP * 100 / maxHP) : 0;
+        aiHPBar.setValue(hpPercent);
+
+        // Update HP bar color based on percentage
+        if (hpPercent > 50) {
+            aiHPBar.setForeground(new Color(76, 175, 80)); // Green
+        } else if (hpPercent > 25) {
+            aiHPBar.setForeground(new Color(255, 193, 7)); // Yellow
+        } else {
+            aiHPBar.setForeground(new Color(244, 67, 54)); // Red
+        }
     }
 
     private void updateMovesDisplay(Pokemon pokemon) {
