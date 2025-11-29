@@ -1,6 +1,6 @@
 package use_case.pick_moveset;
 
-import cards.Deck;
+import entities.Deck;
 
 public class PickMovesetInputData {
 

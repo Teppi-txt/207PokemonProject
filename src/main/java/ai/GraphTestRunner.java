@@ -205,7 +205,7 @@ public class GraphTestRunner {
 
         @Override
         public Deck getDeck() {
-            return new Deck();
+            return new Deck(0, "Mock Deck");
         }
 
         @Override
