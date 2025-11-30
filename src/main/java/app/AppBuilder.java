@@ -4,9 +4,7 @@ import entities.Deck;
 import entities.Pack;
 import entities.Pokemon;
 import entities.User;
-import frameworks_and_drivers.BattlePlayerDataAccessObject;
-import frameworks_and_drivers.JsonUserDataAccess;
-import frameworks_and_drivers.ViewManagerFrame;
+import frameworks_and_drivers.*;
 import interface_adapters.NavigationController;
 import interface_adapters.ViewManagerModel;
 import interface_adapters.battle_ai.BattleAIController;
@@ -58,18 +56,22 @@ public class AppBuilder {
     private MainMenuView mainMenuView;
     private CollectionView collectionView;
     private BuildDeckView buildDeckView;
+    private PreOpenPackView preOpenPackView;
+    private OpenPackView openPackView;
 
     // ViewModels
     private ViewCollectionViewModel collectionViewModel;
     private BattleAIViewModel battleAIViewModel;
     private BattlePlayerViewModel battlePlayerViewModel;
     private BuildDeckViewModel buildDeckViewModel;
+    private OpenPackViewModel openPackViewModel;
 
     // Controllers
     private ViewCollectionController collectionController;
     private BattleAIController battleAIController;
     private BattlePlayerController battlePlayerController;
     private BuildDeckController buildDeckController;
+    private OpenPackController openPackController;
 
     // Data Access
     private BattleAIDataAccessObject battleAIDataAccess;
@@ -198,6 +200,39 @@ public class AppBuilder {
         return this;
     }
 
+    public AppBuilder addOpenPackView() {
+        if (user == null) createDefaultUser();
+
+        openPackViewModel = new OpenPackViewModel();
+        openPackViewModel.getState().setRemainingCurrency(user.getCurrency());
+
+        InMemoryOpenPackDataAccess dataAccess =
+                new InMemoryOpenPackDataAccess(user, userDA);
+
+        Pack pack = new Pack(1, "Pokemon Pack", JSONLoader.allPokemon);
+
+        OpenPackOutputBoundary presenter =
+                new OpenPackPresenter(openPackViewModel, viewManager);
+
+        OpenPackInputBoundary interactor =
+                new OpenPackInteractor(dataAccess, presenter, pack);
+
+        openPackController = new OpenPackController(interactor);
+
+        preOpenPackView = new PreOpenPackView(openPackViewModel, viewManager);
+        preOpenPackView.setController(openPackController);
+
+        openPackView = new OpenPackView(openPackViewModel, viewManager);
+        openPackView.setController(openPackController);
+
+        cardPanel.add(preOpenPackView, "pre_open_pack");
+        cardPanel.add(openPackView, "open_pack");
+
+        return this;
+    }
+
+
+
     /**
      * Adds the build deck view to the application.
      */
@@ -311,41 +346,16 @@ public class AppBuilder {
      * Opens the Open Pack flow in a separate window.
      */
     private void openOpenPackFlow() {
-        if (user == null) {
-            JOptionPane.showMessageDialog(cardPanel,
-                    "No user found!",
-                    "Error",
-                    JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-
         if (user.getCurrency() < 1000) {
             JOptionPane.showMessageDialog(cardPanel,
-                    "Not enough currency! You need 1000 to open a pack.\nWin battles to earn more currency!",
+                    "Not enough currency! You need 1000 to open a pack.",
                     "Insufficient Currency",
                     JOptionPane.WARNING_MESSAGE);
             return;
         }
 
-        Pack pack = new Pack(1, "Pokemon Pack", JSONLoader.allPokemon);
-
-        InMemoryOpenPackDataAccess dataAccess =
-                new InMemoryOpenPackDataAccess(user, userDA);
-
-        OpenPackViewModel viewModel = new OpenPackViewModel();
-        viewModel.getState().setRemainingCurrency(user.getCurrency());
-
-        Runnable onClose = () -> {
-            mainMenuView.refreshUserInfo();
-        };
-
-        ViewManagerFrame frame = new ViewManagerFrame(viewModel, (OpenPackController) null, onClose);
-
-        OpenPackOutputBoundary presenter = new OpenPackPresenter(viewModel, frame);
-        OpenPackInputBoundary interactor = new OpenPackInteractor(dataAccess, presenter, pack);
-        OpenPackController controller = new OpenPackController(interactor);
-
-        frame.setController(controller);
+        openPackViewModel.getState().setRemainingCurrency(user.getCurrency());
+        viewManager.showPreOpenPack();
     }
 
 
@@ -389,4 +399,5 @@ public class AppBuilder {
     public ViewManagerModel getViewManagerModel() {
         return viewManagerModel;
     }
+
 }

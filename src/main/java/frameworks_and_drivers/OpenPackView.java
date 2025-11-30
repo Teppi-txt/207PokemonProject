@@ -5,6 +5,7 @@ import interface_adapters.open_pack.OpenPackState;
 import interface_adapters.open_pack.OpenPackViewModel;
 import entities.Pokemon;
 import org.jetbrains.annotations.NotNull;
+import view.ViewManager;
 
 import javax.swing.*;
 import java.awt.*;

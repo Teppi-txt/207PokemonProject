@@ -34,6 +34,7 @@ public class Main {
                         .addMainMenuView()
                         .addCollectionView()
                         .addBuildDeckView()
+                        .addOpenPackView()
                         .build();
 
                 application.pack();

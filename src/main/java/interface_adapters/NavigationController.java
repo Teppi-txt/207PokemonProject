@@ -71,4 +71,9 @@ public class NavigationController {
     public void navigateToBuildDeck() {
         navigateTo("build_deck");
     }
+
+    public void navigateToOpenPackPreView() {
+        viewManagerModel.setState("pre_open_pack");
+        viewManagerModel.firePropertyChanged();
+    }
 }
