@@ -23,6 +23,8 @@ public class OpenPackView extends JPanel {
     private final JButton nextButton = new JButton("Next");
     private final JLabel messageLabel = new JLabel("");
     private final JButton addCollectionButton = new JButton("Add to Collection");
+    private final JButton backButton = new JButton("Back");
+
 
     public OpenPackView(OpenPackViewModel viewModel, ViewManager viewManager) {
         this.viewModel = viewModel;
@@ -32,7 +34,6 @@ public class OpenPackView extends JPanel {
 
         // Top
         JPanel topPanel = new JPanel(new FlowLayout());
-        JButton backButton = new JButton("Back");
 
         topPanel.add(openPackButton);
         topPanel.add(backButton);
@@ -105,6 +106,7 @@ public class OpenPackView extends JPanel {
         List<Pokemon> opened = state.getOpenedCards();
 
         if (state.isRevealMode()) {
+            backButton.setVisible(false);
             nextButton.setVisible(true);
             addCollectionButton.setVisible(false);
 
