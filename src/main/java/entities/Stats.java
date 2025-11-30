@@ -214,4 +214,8 @@ public class Stats implements Serializable {
     public Integer[] getStatsArray() {
         return new Integer[]{this.hp, this.attack, this.defense, this.spAttack, this.spDefense, this.speed};
     }
+
+    public int getTotalStats() {
+        return maxHp + attack + defense + spAttack + spDefense + speed;
+    }
 }

@@ -1,5 +1,8 @@
 package entities;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 
@@ -53,5 +56,38 @@ public class Deck implements Serializable {
     @Override
     public String toString() {
         return this.name;
+    }
+
+    public JSONObject toJSONObject() {
+        JSONObject json = new JSONObject();
+        json.put("id", id);
+        json.put("name", name);
+
+        JSONArray pokemonArray = new JSONArray();
+        if (pokemons != null) {
+            for (Pokemon pokemon : pokemons) {
+                pokemonArray.put(new JSONObject(pokemon.toJSONString()));
+            }
+        }
+        json.put("pokemons", pokemonArray);
+
+        return json;
+    }
+
+    public static Deck fromJSON(JSONObject json) {
+        int id = json.getInt("id");
+        String name = json.optString("name", "Team " + id);
+
+        ArrayList<Pokemon> pokemons = new ArrayList<>();
+        if (json.has("pokemons")) {
+            JSONArray pokemonArray = json.getJSONArray("pokemons");
+            for (int i = 0; i < pokemonArray.length(); i++) {
+                JSONObject pokeJSON = pokemonArray.getJSONObject(i);
+                Pokemon pokemon = Pokemon.fromJSON(pokeJSON);
+                pokemons.add(pokemon);
+            }
+        }
+
+        return new Deck(id, name, pokemons);
     }
 }

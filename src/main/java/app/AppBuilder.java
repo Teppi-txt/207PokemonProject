@@ -1,5 +1,6 @@
 package app;
 
+import entities.Deck;
 import entities.Pack;
 import entities.Pokemon;
 import entities.User;
@@ -14,6 +15,9 @@ import interface_adapters.battle_ai.BattleAIViewModel;
 import interface_adapters.battle_player.BattlePlayerController;
 import interface_adapters.battle_player.BattlePlayerPresenter;
 import interface_adapters.battle_player.BattlePlayerViewModel;
+import interface_adapters.build_deck.BuildDeckController;
+import interface_adapters.build_deck.BuildDeckPresenter;
+import interface_adapters.build_deck.BuildDeckViewModel;
 import interface_adapters.collection.ViewCollectionController;
 import interface_adapters.collection.ViewCollectionPresenter;
 import interface_adapters.collection.ViewCollectionViewModel;
@@ -21,12 +25,14 @@ import interface_adapters.open_pack.OpenPackController;
 import interface_adapters.open_pack.OpenPackPresenter;
 import interface_adapters.open_pack.OpenPackViewModel;
 import pokeapi.JSONLoader;
+import use_case.build_deck.BuildDeckInteractor;
 import use_case.battle_ai.BattleAIInteractor;
 import use_case.battle_player.BattlePlayerInteractor;
 import use_case.collection.ViewCollectionInteractor;
 import use_case.open_pack.OpenPackInputBoundary;
 import use_case.open_pack.OpenPackInteractor;
 import use_case.open_pack.OpenPackOutputBoundary;
+import view.BuildDeckView;
 import view.CollectionView;
 import view.MainMenuView;
 import view.ViewManager;
@@ -49,16 +55,19 @@ public class AppBuilder {
     // Views
     private MainMenuView mainMenuView;
     private CollectionView collectionView;
+    private BuildDeckView buildDeckView;
 
     // ViewModels
     private ViewCollectionViewModel collectionViewModel;
     private BattleAIViewModel battleAIViewModel;
     private BattlePlayerViewModel battlePlayerViewModel;
+    private BuildDeckViewModel buildDeckViewModel;
 
     // Controllers
     private ViewCollectionController collectionController;
     private BattleAIController battleAIController;
     private BattlePlayerController battlePlayerController;
+    private BuildDeckController buildDeckController;
 
     // Data Access
     private BattleAIDataAccessObject battleAIDataAccess;
@@ -103,6 +112,14 @@ public class AppBuilder {
             user.addPokemon(pokemon);
         }
 
+        // Create a starter deck with first 5 Pokemon
+        Deck starterDeck = new Deck(1, "Starter Deck");
+        int deckSize = Math.min(5, user.getOwnedPokemon().size());
+        for (int i = 0; i < deckSize; i++) {
+            starterDeck.addPokemon(user.getOwnedPokemon().get(i));
+        }
+        user.addDeck(starterDeck);
+
         return this;
     }
 
@@ -135,6 +152,14 @@ public class AppBuilder {
 
         mainMenuView.setOnOpenPackClick(() -> {
             openOpenPackFlow();
+        });
+
+        mainMenuView.setOnBuildDeckClick(() -> {
+            if (buildDeckController != null) {
+                // Reload decks when entering build deck view
+                buildDeckController.buildDeck(-1, null, null, false, false);
+            }
+            navigationController.navigateToBuildDeck();
         });
 
         cardPanel.add(mainMenuView, MainMenuView.VIEW_NAME);
@@ -170,6 +195,35 @@ public class AppBuilder {
     }
 
     /**
+     * Adds the build deck view to the application.
+     */
+    public AppBuilder addBuildDeckView() {
+        if (user == null) {
+            createDefaultUser();
+        }
+
+        buildDeckViewModel = new BuildDeckViewModel();
+        buildDeckView = new BuildDeckView(buildDeckViewModel, user);
+
+        InMemoryBuildDeckDataAccess dataAccess = new InMemoryBuildDeckDataAccess(user);
+        BuildDeckPresenter presenter = new BuildDeckPresenter(buildDeckViewModel);
+        BuildDeckInteractor interactor = new BuildDeckInteractor(dataAccess, presenter);
+        buildDeckController = new BuildDeckController(interactor);
+
+        buildDeckView.setController(buildDeckController);
+        buildDeckView.setNavigationCallback(() -> {
+            mainMenuView.refreshUserInfo();
+            navigationController.navigateToMainMenu();
+        });
+
+        // Initialize with first deck or create new one
+        buildDeckController.buildDeck(-1, null, null, false, false);
+
+        cardPanel.add(buildDeckView, BuildDeckView.VIEW_NAME);
+        return this;
+    }
+
+    /**
      * Opens the Battle AI flow in a separate window.
      * Uses the DeckSelectionView -> BattleAIView flow.
      */
@@ -200,9 +254,8 @@ public class AppBuilder {
         };
 
         // Use the BattleAIFactory but with our user and callback
-        frameworks_and_drivers.DeckSelectionView deckSelectionView =
-            BattleAIFactory.createWithCallback(user, returnToMenu);
-        deckSelectionView.setVisible(true);
+        javax.swing.JFrame selectionView = BattleAIFactory.createWithCallback(user, returnToMenu);
+        selectionView.setVisible(true);
     }
 
     /**
@@ -233,10 +286,21 @@ public class AppBuilder {
             navigationController.navigateToMainMenu();
         };
 
-        // Open the battle setup view
-        frameworks_and_drivers.BattleSetupViewIntegrated setupView =
-            new frameworks_and_drivers.BattleSetupViewIntegrated(user, returnToMenu);
-        setupView.setVisible(true);
+        // Check if user has any decks with enough Pokemon
+        boolean hasValidDecks = user.getDecks().values().stream()
+                .anyMatch(deck -> deck.getPokemons() != null && deck.getPokemons().size() >= 3);
+
+        if (hasValidDecks) {
+            // Use deck-based selection
+            frameworks_and_drivers.BattleSetupDeckView setupView =
+                new frameworks_and_drivers.BattleSetupDeckView(user, returnToMenu);
+            setupView.setVisible(true);
+        } else {
+            // Fall back to manual selection
+            frameworks_and_drivers.BattleSetupViewIntegrated setupView =
+                new frameworks_and_drivers.BattleSetupViewIntegrated(user, returnToMenu);
+            setupView.setVisible(true);
+        }
     }
 
     /**

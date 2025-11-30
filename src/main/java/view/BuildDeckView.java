@@ -33,6 +33,9 @@ public class BuildDeckView extends JPanel implements PropertyChangeListener {
     private Deck currentDeck;
     private final List<Pokemon> ownedPokemon;
     private final ActionListener deckSelectListener = this::onDeckSelected;
+    private Runnable navigationCallback;
+
+    public static final String VIEW_NAME = "build_deck";
 
 
     public BuildDeckView(BuildDeckViewModel viewModel, User user) {
@@ -56,10 +59,15 @@ public class BuildDeckView extends JPanel implements PropertyChangeListener {
         title.setAlignmentX(Component.CENTER_ALIGNMENT);
         title.setBorder(new EmptyBorder(10, 10, 10, 10));
 
-        final JButton returnButton = new JButton("Back to menu:");
+        final JButton returnButton = new JButton("Back to Menu");
         returnButton.setFont(new Font(title.getFont().getFontName(), Font.PLAIN, 18));
         returnButton.setAlignmentX(Component.CENTER_ALIGNMENT);
         returnButton.setBorder(new EmptyBorder(10, 10, 10, 10));
+        returnButton.addActionListener(e -> {
+            if (navigationCallback != null) {
+                navigationCallback.run();
+            }
+        });
 
         // name and controls panel
         JPanel controlsPanel = new JPanel();
@@ -129,6 +137,10 @@ public class BuildDeckView extends JPanel implements PropertyChangeListener {
         this.controller = controller;
     }
 
+    public void setNavigationCallback(Runnable callback) {
+        this.navigationCallback = callback;
+    }
+
     // action listeners
     private void onSaveDeck(ActionEvent e) {
         int deckId = (currentDeck == null) ? -1 : currentDeck.getId();
@@ -178,11 +190,13 @@ public class BuildDeckView extends JPanel implements PropertyChangeListener {
         Pokemon selected = null;
 
         // Pokémon button in OwnedPokemonSelectionPanel was clicked
-        if (source instanceof JButton button) {
+        if (source instanceof JButton) {
+            JButton button = (JButton) source;
             selected = (Pokemon) button.getClientProperty("pokemon");
         }
         // deck slot was clicked
-        else if (source instanceof JPanel panel) {
+        else if (source instanceof JPanel) {
+            JPanel panel = (JPanel) source;
             selected = (Pokemon) panel.getClientProperty("pokemon");
         }
         if (selected == null) {
@@ -442,7 +456,8 @@ public class BuildDeckView extends JPanel implements PropertyChangeListener {
 
         public void updateSelectionStatus(Deck deck) {
             for (Component component : pokemonGrid.getComponents()) {
-                if (component instanceof JButton button) {
+                if (component instanceof JButton) {
+                    JButton button = (JButton) component;
                     Pokemon pokemon = (Pokemon) button.getClientProperty("pokemon");
                     if (deck.getPokemons().contains(pokemon)) {
                         button.setBorder(BorderFactory.createLineBorder(Color.BLUE, 3));

@@ -26,6 +26,7 @@ public class MainMenuView extends JPanel implements PropertyChangeListener {
     private Runnable onOpenPackClick;
     private Runnable onBattleAIClick;
     private Runnable onBattlePlayerClick;
+    private Runnable onBuildDeckClick;
 
     public MainMenuView(ViewManagerModel viewManagerModel, User user) {
         this.user = user;
@@ -120,6 +121,14 @@ public class MainMenuView extends JPanel implements PropertyChangeListener {
 
         panel.add(Box.createVerticalStrut(10));
 
+        JButton buildDeckBtn = createMenuButton("BUILD DECK");
+        buildDeckBtn.addActionListener(e -> {
+            if (onBuildDeckClick != null) onBuildDeckClick.run();
+        });
+        panel.add(buildDeckBtn);
+
+        panel.add(Box.createVerticalStrut(10));
+
         JButton battleAIBtn = createMenuButton("BATTLE vs AI");
         battleAIBtn.addActionListener(e -> {
             if (onBattleAIClick != null) onBattleAIClick.run();
@@ -173,6 +182,10 @@ public class MainMenuView extends JPanel implements PropertyChangeListener {
 
     public void setOnBattlePlayerClick(Runnable callback) {
         this.onBattlePlayerClick = callback;
+    }
+
+    public void setOnBuildDeckClick(Runnable callback) {
+        this.onBuildDeckClick = callback;
     }
 
     @Override

@@ -64,4 +64,11 @@ public class NavigationController {
     public void navigateToBattlePlayerView() {
         navigateTo("battle_player");
     }
+
+    /**
+     * Navigate to the build deck view.
+     */
+    public void navigateToBuildDeck() {
+        navigateTo("build_deck");
+    }
 }
