@@ -38,6 +38,18 @@ public class BattleAIPresenter implements BattleAIOutputBoundary {
         viewModel.setCurrentTurnDescription(outputData.getTurnResult());
         viewModel.setBattleEnded(outputData.isBattleEnded());
 
+        // Update switch notifications
+        if (outputData.getPlayerSwitchedTo() != null) {
+            viewModel.setPlayerSwitchedToName(outputData.getPlayerSwitchedTo().getName());
+        } else {
+            viewModel.setPlayerSwitchedToName(null);
+        }
+        if (outputData.getAiSwitchedTo() != null) {
+            viewModel.setAiSwitchedToName(outputData.getAiSwitchedTo().getName());
+        } else {
+            viewModel.setAiSwitchedToName(null);
+        }
+
         // If battle ended, set winner
         if (outputData.isBattleEnded() && battle != null && battle.getWinner() != null) {
             viewModel.setWinnerName(battle.getWinner().getName());

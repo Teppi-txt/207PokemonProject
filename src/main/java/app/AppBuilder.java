@@ -101,7 +101,7 @@ public class AppBuilder {
         user = new User(1, "Trainer", "trainer@pokemon.com", 5000);
 
         // Add specific Gen 1 starter Pokémon by ID
-        int[] starterIds = {1, 4, 7, 25, 133};  // Bulbasaur, Charmander, Squirtle, Pikachu, Eevee
+        int[] starterIds = {6, 9, 3};  // Charizard, Blastoise, Venusaur
         for (int id : starterIds) {
             Pokemon pokemon = findPokemonById(id);
             if (pokemon != null) {
@@ -109,7 +109,7 @@ public class AppBuilder {
             }
         }
 
-        // Starter deck with the 5 starters
+        // Starter deck with the 3 starters
         Deck starterDeck = new Deck(1, "Starter Deck");
         for (Pokemon p : user.getOwnedPokemon()) {
             starterDeck.addPokemon(p);

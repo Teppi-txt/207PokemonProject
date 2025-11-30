@@ -32,6 +32,8 @@ public class BattleAIViewModel {
     private String winnerName;
     private int currencyAwarded;
     private boolean battleEnded;
+    private String playerSwitchedToName;
+    private String aiSwitchedToName;
 
     // Listeners for observer pattern
     private final List<ViewModelListener> listeners;
@@ -48,6 +50,8 @@ public class BattleAIViewModel {
         this.winnerName = null;
         this.currencyAwarded = 0;
         this.battleEnded = false;
+        this.playerSwitchedToName = null;
+        this.aiSwitchedToName = null;
         this.listeners = new ArrayList<>();
     }
 
@@ -120,6 +124,14 @@ public class BattleAIViewModel {
         return battleEnded;
     }
 
+    public String getPlayerSwitchedToName() {
+        return playerSwitchedToName;
+    }
+
+    public String getAiSwitchedToName() {
+        return aiSwitchedToName;
+    }
+
     // Setters with notification
     public void setBattleStatus(String battleStatus) {
         this.battleStatus = battleStatus;
@@ -183,6 +195,16 @@ public class BattleAIViewModel {
 
     public void setBattleEnded(boolean battleEnded) {
         this.battleEnded = battleEnded;
+        notifyListeners();
+    }
+
+    public void setPlayerSwitchedToName(String playerSwitchedToName) {
+        this.playerSwitchedToName = playerSwitchedToName;
+        notifyListeners();
+    }
+
+    public void setAiSwitchedToName(String aiSwitchedToName) {
+        this.aiSwitchedToName = aiSwitchedToName;
         notifyListeners();
     }
 

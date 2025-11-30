@@ -13,7 +13,6 @@ import java.util.List;
 /**
  * Data Access Object for Battle AI use cases.
  * Manages current user, battle state, and team data in memory.
- * Only handles storage/retrieval - no business logic.
  */
 public class BattleAIDataAccessObject implements BattleAIUserDataAccessInterface {
 
