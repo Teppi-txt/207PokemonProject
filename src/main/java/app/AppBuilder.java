@@ -330,21 +330,8 @@ public class AppBuilder {
             navigationController.navigateToMainMenu();
         };
 
-        // Check if user has any decks with enough Pokemon
-        boolean hasValidDecks = user.getDecks().values().stream()
-                .anyMatch(deck -> deck.getPokemons() != null && deck.getPokemons().size() >= 3);
-
-        if (hasValidDecks) {
-            // Use deck-based selection
-            frameworks_and_drivers.BattleSetupDeckView setupView =
-                new frameworks_and_drivers.BattleSetupDeckView(user, returnToMenu);
-            setupView.setVisible(true);
-        } else {
-            // Fall back to manual selection
-            frameworks_and_drivers.BattleSetupViewIntegrated setupView =
-                new frameworks_and_drivers.BattleSetupViewIntegrated(user, returnToMenu);
-            setupView.setVisible(true);
-        }
+        javax.swing.JFrame setupView = BattlePlayerFactory.createSetupView(user, returnToMenu);
+        setupView.setVisible(true);
     }
 
     /**

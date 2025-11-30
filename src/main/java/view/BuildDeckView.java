@@ -16,6 +16,8 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -432,10 +434,6 @@ public class BuildDeckView extends JPanel implements PropertyChangeListener {
             pokemonGrid = new JPanel(new GridLayout(0, 4, 8, 8));
             pokemonGrid.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-            for (Pokemon pokemon : ownedPokemon) {
-                pokemonGrid.add(createPokemonButton(pokemon));
-            }
-
             JScrollPane scrollPane = new JScrollPane(pokemonGrid);
             scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
             scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
@@ -462,23 +460,33 @@ public class BuildDeckView extends JPanel implements PropertyChangeListener {
         }
 
         public void updateSelectionStatus(Deck deck) {
-            for (Component component : pokemonGrid.getComponents()) {
-                if (component instanceof JButton) {
-                    JButton button = (JButton) component;
-                    Pokemon pokemon = (Pokemon) button.getClientProperty("pokemon");
-                    if (deck.getPokemons().contains(pokemon)) {
-                        button.setBorder(BorderFactory.createLineBorder(Color.BLUE, 3));
-                        button.setBackground(new Color(170, 200, 255));
-                        button.setToolTipText("In Deck - Click to Remove");
-                    } else {
-                        button.setBorder(UIManager.getBorder("Button.border"));
-                        button.setBackground(UIManager.getColor("Button.background"));
-                        button.setToolTipText("Not In Deck - Click to Add");
-                    }
+            pokemonGrid.removeAll();
+
+            for (Pokemon pokemon : getUniqueOwnedPokemon()) {
+                JButton button = createPokemonButton(pokemon);
+                if (deck != null && deck.getPokemons().contains(pokemon)) {
+                    button.setBorder(BorderFactory.createLineBorder(Color.BLUE, 3));
+                    button.setBackground(new Color(170, 200, 255));
+                    button.setToolTipText("In Deck - Click to Remove");
+                } else {
+                    button.setBorder(UIManager.getBorder("Button.border"));
+                    button.setBackground(UIManager.getColor("Button.background"));
+                    button.setToolTipText("Not In Deck - Click to Add");
                 }
+                pokemonGrid.add(button);
             }
             pokemonGrid.revalidate();
             pokemonGrid.repaint();
+        }
+
+        private List<Pokemon> getUniqueOwnedPokemon() {
+            Map<String, Pokemon> unique = new LinkedHashMap<>();
+            for (Pokemon pokemon : ownedPokemon) {
+                // dedupe by Pokémon ID and shiny status so variants still show separately
+                String key = pokemon.getID() + "-" + pokemon.isShiny();
+                unique.putIfAbsent(key, pokemon);
+            }
+            return new ArrayList<>(unique.values());
         }
     }
 
