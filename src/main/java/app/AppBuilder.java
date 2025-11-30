@@ -32,7 +32,7 @@ import use_case.open_pack.OpenPackInputBoundary;
 import use_case.open_pack.OpenPackInteractor;
 import use_case.open_pack.OpenPackOutputBoundary;
 import view.BuildDeckView;
-import view.CollectionView;
+import view.collection.CollectionView;
 import view.MainMenuView;
 import view.ViewManager;
 

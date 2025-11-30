@@ -2,11 +2,13 @@ package frameworks_and_drivers;
 
 import entities.User;
 import org.json.JSONObject;
+import use_case.open_pack.OpenPackUserDataAccessInterface;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-public class JsonUserDataAccess {
+public class JsonUserDataAccess implements OpenPackUserDataAccessInterface {
 
     private final Path filePath;
 
