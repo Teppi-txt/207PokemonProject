@@ -13,7 +13,7 @@ public interface ViewCollectionOutputBoundary {
      * Prepares the failure view for the View Collection use case
      * @param errorMessage the explanation of the failure
      */
-    void prepareFailView(String errorMessage);
+    void prepareFailView(String errorMessage, ViewCollectionOutputData outputData);
 
     void switchToHomeView();
 }
