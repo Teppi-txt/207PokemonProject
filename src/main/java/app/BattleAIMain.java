@@ -2,7 +2,6 @@ package app;
 
 import entities.Pokemon;
 import entities.User;
-import frameworks_and_drivers.DeckSelectionView;
 import pokeapi.JSONLoader;
 
 import javax.swing.*;
@@ -33,7 +32,7 @@ public class BattleAIMain {
 
         // Build and display the battle GUI
         SwingUtilities.invokeLater(() -> {
-            DeckSelectionView view = BattleAIFactory.create(user);
+            JFrame view = BattleAIFactory.create(user);
             view.setVisible(true);
         });
     }

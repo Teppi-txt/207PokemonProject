@@ -34,7 +34,7 @@ public class PreOpenPackView extends JPanel {
         currencyLabel.setBorder(BorderFactory.createEmptyBorder(10, 15, 10, 10));
 
         JButton backButton = new JButton("Back");
-        backButton.addActionListener(e -> viewManager.showPreOpenPack());
+        backButton.addActionListener(e -> viewManager.closeWindow());
 
         topBar.add(currencyLabel, BorderLayout.WEST);
         topBar.add(backButton, BorderLayout.EAST);

@@ -147,8 +147,8 @@ public class AIPlayer implements Player, Serializable {
         }
 
         @Override
-        public cards.Deck getDeck() {
-            return new cards.Deck();
+        public Deck getDeck() {
+            return new Deck();
         }
 
         @Override

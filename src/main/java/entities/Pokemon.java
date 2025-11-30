@@ -65,6 +65,10 @@ public class Pokemon implements Serializable {
         return this.moves;
     }
 
+    public ArrayList<String> getTypes() {
+        return this.types;
+    }
+
     public void setMoves(ArrayList<String> moves) {
         this.moves = moves;
     }
@@ -154,12 +158,25 @@ public class Pokemon implements Serializable {
     }
 
     public String getBackGIF() {
-        return shiny ? getShinyFrontGIF() : getRegularFrontGIF();
+        return shiny ? getShinyBackGIF() : getRegularBackGIF();
     }
+
+    // Aliases for backward compatibility with existing battle views
+    public String getAnimatedSpriteUrl() {
+        if (id <= 649) {
+            return getFrontGIF();
+        }
+        return getSpriteUrl();
+    }
+
+    public String getAnimatedBackSpriteUrl() {
+        if (id <= 649) {
+            return getBackGIF();
+        }
+        return SPRITE_BASE_URL + "back/" + id + ".png";
+    }
+
     public void setTypes(ArrayList<String> types) {
         this.types = types;
     }
-    public ArrayList<String> getTypes() {return this.types;}
 }
-
-

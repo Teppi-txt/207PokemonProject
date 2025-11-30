@@ -58,6 +58,10 @@ public class User implements Serializable {
         decks.put(deck.getId(), deck);
     }
 
+    public void deleteDeck(int deckId) {
+        decks.remove(deckId);
+    }
+
     //got rid of openPack method because that will be used with the open pack interactor
 
     public boolean canAffordPack(int amount){
@@ -103,6 +107,13 @@ public class User implements Serializable {
             pokemons.put(new JSONObject(pokemon.toJSONString()));
         }
         json.put("ownedpokemons", pokemons);
+
+        JSONArray decksArray = new JSONArray();
+        for (Deck deck : decks.values()) {
+            decksArray.put(deck.toJSONObject());
+        }
+        json.put("decks", decksArray);
+
         return json.toString(2);
     }
 
@@ -119,6 +130,16 @@ public class User implements Serializable {
             Pokemon p = Pokemon.fromJSON(pokeJSON);
             user.addPokemon(p);
         }
+
+        if (json.has("decks")) {
+            JSONArray decksArray = json.getJSONArray("decks");
+            for (int i = 0; i < decksArray.length(); i++) {
+                JSONObject deckJSON = decksArray.getJSONObject(i);
+                Deck deck = Deck.fromJSON(deckJSON);
+                user.addDeck(deck);
+            }
+        }
+
         return user;
     }
 

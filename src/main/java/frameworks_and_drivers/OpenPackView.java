@@ -58,7 +58,7 @@ public class OpenPackView extends JPanel {
 
         nextButton.addActionListener(e -> revealNext());
         addCollectionButton.addActionListener(e -> finishCollection());
-        backButton.addActionListener(e -> viewManager.showPreOpenPack());
+        backButton.addActionListener(e -> viewManager.closeWindow());
 
         viewModel.addPropertyChangeListener(evt -> {
             if ("state".equals(evt.getPropertyName())) {
@@ -96,7 +96,7 @@ public class OpenPackView extends JPanel {
     private void finishCollection() {
         messageLabel.setText("Cards added to your collection!");
         addCollectionButton.setVisible(false);
-        viewManager.showPreOpenPack();
+        viewManager.closeWindow();
     }
 
     public void updateView(OpenPackState state) {
