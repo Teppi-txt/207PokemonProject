@@ -261,7 +261,7 @@ public class BuildDeckView extends JPanel implements PropertyChangeListener {
     // components
 
     /**
-     * Panel to display the 5 slots for the currently building deck.
+     * Panel to display the 3 slots for the currently building deck.
      */
     public class DeckDisplayPanel extends JPanel {
 

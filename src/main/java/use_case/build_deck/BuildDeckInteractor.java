@@ -9,7 +9,7 @@ import java.util.Collections;
 import java.util.List;
 
 public class BuildDeckInteractor implements BuildDeckInputBoundary {
-    private static final int DECK_LIMIT = 5;
+    private static final int DECK_LIMIT = 3;
 
     private final BuildDeckUserDataAccessInterface dataAccess;
     private final BuildDeckOutputBoundary presenter;

@@ -8,7 +8,7 @@ import java.util.ArrayList;
 
 public class Deck implements Serializable {
     private static final long serialVersionUID = 1L;
-    public static final int DECK_LIMIT = 5; //idk tbh we can change as needed
+    public static final int DECK_LIMIT = 3; //idk tbh we can change as needed
 
     private int id;
     private String name;
