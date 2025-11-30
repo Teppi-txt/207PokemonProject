@@ -17,6 +17,8 @@ import java.net.URL;
 import java.util.Enumeration;
 import java.util.List;
 
+import static view.collection.CollectionViewHelpers.*;
+
 public class CollectionView extends JPanel implements PropertyChangeListener {
     private final PokemonInfoPanel pokemonInfoPanel;
     private final PokemonCollectionPanel pokemonCollectionPanel;
@@ -32,43 +34,31 @@ public class CollectionView extends JPanel implements PropertyChangeListener {
         this.collectionViewModel = collectionViewModel;
         this.collectionViewModel.addPropertyChangeListener(this);
 
-        this.setMinimumSize(new Dimension(1000, 700));
+        this.setMinimumSize(COLLECTION_VIEW_WINDOW_SIZE);
 
-        this.setBorder(CollectionViewHelpers.paddingBorder(10));
+        this.setBorder(paddingBorder(10));
 
         final JLabel title = new JLabel("My Collection");
-        title.setFont(new Font(title.getFont().getFontName(), Font.BOLD, 46));
+        title.setFont(TITLE_FONT);
         title.setAlignmentX(Component.CENTER_ALIGNMENT);
-        title.setBorder(CollectionViewHelpers.paddingBorder(10));
+        title.setBorder(paddingBorder(10));
 
         final JButton returnButton = new JButton("Back to menu:");
-        returnButton.setFont(new Font(title.getFont().getFontName(), Font.PLAIN, 18));
+        returnButton.setFont(mainFont(18));
         returnButton.setAlignmentX(Component.CENTER_ALIGNMENT);
-        returnButton.setBorder(CollectionViewHelpers.paddingBorder(10));
+        returnButton.setBorder(paddingBorder(10));
 
         final JPanel body = new JPanel();
-        body.setLayout(new GridBagLayout());
-        body.setBorder(CollectionViewHelpers.paddingBorder(10));
-
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.fill = GridBagConstraints.BOTH;
-        gbc.weighty = 1;
+        body.setLayout(new BoxLayout(body, BoxLayout.Y_AXIS));
+        body.setBorder(paddingBorder(10));
 
         pokemonInfoPanel = new PokemonInfoPanel();
         pokemonCollectionPanel = new PokemonCollectionPanel();
-        pokemonCollectionPanel.setBorder(CollectionViewHelpers.paddingBorder(10));
+        pokemonCollectionPanel.setBorder(paddingBorder(10));
 
         this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         this.add(title);
         this.add(returnButton);
-
-        gbc.gridx = 0;
-        gbc.weightx = 1;   // 1/3 of space
-        body.add(pokemonInfoPanel, gbc);
-
-        gbc.gridx = 1;
-        gbc.weightx = 6;   // 2/3 of space
-        body.add(pokemonCollectionPanel, gbc);
         this.add(body);
     }
 
@@ -158,8 +148,7 @@ public class CollectionView extends JPanel implements PropertyChangeListener {
 
         private void createPanels() {
             pokemonPanel = new JPanel();
-            pokemonPanel.setMinimumSize(new Dimension(600, 1000));
-
+            pokemonPanel.setMinimumSize(POKEMON_PANEL_SIZE);
             filterPanel = new PokemonFilterPanel();
             pageButtonPanel = new JPanel();
         }
