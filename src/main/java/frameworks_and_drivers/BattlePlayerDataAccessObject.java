@@ -7,7 +7,6 @@ import use_case.battle_player.BattlePlayerUserDataAccessInterface;
 /**
  * Data Access Object for Battle Player use case.
  * This is the framework/driver implementation of the data access interface.
- * In a real application, this would persist to a database or file system.
  */
 public class BattlePlayerDataAccessObject implements BattlePlayerUserDataAccessInterface {
     
@@ -36,7 +35,6 @@ public class BattlePlayerDataAccessObject implements BattlePlayerUserDataAccessI
     @Override
     public void saveBattle(Battle battle) {
         this.currentBattle = battle;
-        // In a real implementation, this would save to a database or file
     }
     
     @Override
@@ -47,7 +45,6 @@ public class BattlePlayerDataAccessObject implements BattlePlayerUserDataAccessI
     @Override
     public void saveUser(User user) {
         this.currentUser = user;
-        // In a real implementation, this would save to a database or file
     }
     
     @Override

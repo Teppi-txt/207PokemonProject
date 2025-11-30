@@ -112,6 +112,40 @@ public class BattlePlayerInteractorTest extends TestCase {
         assertTrue(turn.wasExecuted());
     }
 
+    public void testPlayerOneWinsAwardsCurrency() {
+        User player1 = userWithPokemon(
+                "Ash",
+                220,
+                pokemonWithHp("Pikachu", 25),
+                pokemonWithHp("Charizard", 10)
+        );
+        User player2 = userWithPokemon("Gary", 180, pokemonWithHp("Squirtle", 0));
+        Battle battle = battleInProgress(player1, player2);
+
+        RecordingPresenter presenter = new RecordingPresenter();
+        InMemoryBattleGateway gateway = new InMemoryBattleGateway(battle);
+        BattlePlayerInteractor interactor = new BattlePlayerInteractor(gateway, presenter);
+
+        int player1Start = player1.getCurrency();
+        int player2Start = player2.getCurrency();
+        FixedTurn turn = new FixedTurn("player one finishing blow");
+
+        interactor.execute(new BattlePlayerInputData(turn));
+
+        assertNull(presenter.errorMessage);
+        assertNotNull(presenter.outputData);
+        assertTrue(presenter.outputData.isBattleEnded());
+        assertEquals("COMPLETED", presenter.outputData.getBattleStatus());
+        assertSame(player1, battle.getWinner());
+        assertEquals(player1Start + 500, player1.getCurrency());
+        assertEquals(player2Start + 100, player2.getCurrency());
+        assertEquals(2, gateway.savedUsers.size());
+        assertSame(player1, gateway.savedUsers.get(0));
+        assertSame(player2, gateway.savedUsers.get(1));
+        assertSame(battle, gateway.savedBattle);
+        assertTrue(turn.wasExecuted());
+    }
+
     public void testPlayerTwoWinsAwardsCurrency() {
         User player1 = userWithPokemon(
                 "Ash",
@@ -168,6 +202,27 @@ public class BattlePlayerInteractorTest extends TestCase {
         assertNull(battle.getWinner());
         assertEquals(player1Start, player1.getCurrency());
         assertEquals(player2Start, player2.getCurrency());
+        assertTrue(gateway.savedUsers.isEmpty());
+        assertSame(battle, gateway.savedBattle);
+        assertTrue(turn.wasExecuted());
+    }
+
+    public void testDrawWhenPlayersAreNull() {
+        Battle battle = new Battle(77, null, null);
+        battle.startBattle();
+
+        RecordingPresenter presenter = new RecordingPresenter();
+        InMemoryBattleGateway gateway = new InMemoryBattleGateway(battle);
+        BattlePlayerInteractor interactor = new BattlePlayerInteractor(gateway, presenter);
+
+        FixedTurn turn = new FixedTurn("no players");
+        interactor.execute(new BattlePlayerInputData(turn));
+
+        assertNull(presenter.errorMessage);
+        assertNotNull(presenter.outputData);
+        assertTrue(presenter.outputData.isBattleEnded());
+        assertEquals("COMPLETED", presenter.outputData.getBattleStatus());
+        assertNull(battle.getWinner());
         assertTrue(gateway.savedUsers.isEmpty());
         assertSame(battle, gateway.savedBattle);
         assertTrue(turn.wasExecuted());
