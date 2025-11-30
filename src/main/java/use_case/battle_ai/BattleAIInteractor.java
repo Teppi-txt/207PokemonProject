@@ -2,7 +2,6 @@ package use_case.battle_ai;
 
 import entities.*;
 import ai.graph.Decision;
-import frameworks_and_drivers.UserPlayerAdapter;
 
 /**
  * Interactor for the battle AI use case.

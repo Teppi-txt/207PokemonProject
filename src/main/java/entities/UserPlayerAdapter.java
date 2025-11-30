@@ -1,18 +1,21 @@
-package frameworks_and_drivers;
+package entities;
 
-import entities.*;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Adapter that adapts a User to the Player interface.
  * This allows Users to participate in battles as Players.
+ * Implements Serializable for LangGraph4j state management.
  */
-public class UserPlayerAdapter implements Player {
+public class UserPlayerAdapter implements Player, Serializable {
+    private static final long serialVersionUID = 1L;
+
     private final User user;
     private Pokemon activePokemon;
     private Deck deck;
-    
+
     public UserPlayerAdapter(User user) {
         this.user = user;
         String deckName = (user.getName() == null || user.getName().isEmpty())
@@ -29,17 +32,17 @@ public class UserPlayerAdapter implements Player {
             }
         }
     }
-    
+
     @Override
     public String getName() {
         return user.getName();
     }
-    
+
     @Override
     public Deck getDeck() {
         return deck;
     }
-    
+
     @Override
     public Move chooseMove(Battle battle) {
         // Simple implementation - choose first available move from active Pokemon
@@ -52,12 +55,12 @@ public class UserPlayerAdapter implements Player {
         }
         return new Move().setName("Struggle").setType("normal").setPower(50);
     }
-    
+
     @Override
     public Pokemon getActivePokemon() {
         return activePokemon;
     }
-    
+
     @Override
     public void switchPokemon(Pokemon pokemon) {
         // Verify the Pokemon belongs to the user
@@ -65,18 +68,18 @@ public class UserPlayerAdapter implements Player {
             this.activePokemon = pokemon;
         }
     }
-    
+
     @Override
     public List<Pokemon> getTeam() {
         return new ArrayList<>(user.getOwnedPokemon());
     }
-    
+
     @Override
     public void useItem(Item item, Pokemon target) {
         // Implementation for using items
         // This would apply the item's effect to the target Pokemon
     }
-    
+
     @Override
     public boolean hasAvailablePokemon() {
         if (user.getOwnedPokemon() == null || user.getOwnedPokemon().isEmpty()) {
@@ -89,12 +92,12 @@ public class UserPlayerAdapter implements Player {
         }
         return false;
     }
-    
+
     @Override
     public boolean isDefeated() {
         return !hasAvailablePokemon();
     }
-    
+
     public User getUser() {
         return user;
     }
