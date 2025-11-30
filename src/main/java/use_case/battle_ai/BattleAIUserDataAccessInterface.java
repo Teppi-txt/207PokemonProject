@@ -1,9 +1,10 @@
 package use_case.battle_ai;
 
+import entities.AIPlayer;
 import entities.Battle;
+import entities.Move;
 import entities.Pokemon;
 import entities.User;
-import entities.AIPlayer;
 
 import java.util.List;
 
@@ -54,4 +55,11 @@ public interface BattleAIUserDataAccessInterface {
      * Gets the player's active Pokemon.
      */
     Pokemon getPlayerActivePokemon();
+
+    /**
+     * Gets a move by its name.
+     * @param moveName the name of the move to find
+     * @return the Move if found, null otherwise
+     */
+    Move getMoveByName(String moveName);
 }

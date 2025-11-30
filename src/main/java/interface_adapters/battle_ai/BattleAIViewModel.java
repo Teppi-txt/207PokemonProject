@@ -1,7 +1,5 @@
 package interface_adapters.battle_ai;
 
-import entities.Pokemon;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -222,19 +220,6 @@ public class BattleAIViewModel {
         private final String spriteUrl;
         private final String frontGifUrl;
         private final String backGifUrl;
-
-        public PokemonViewModel(Pokemon pokemon) {
-            this.name = pokemon.getName();
-            this.id = pokemon.getId();
-            this.currentHP = pokemon.getStats().getHp();
-            this.maxHP = pokemon.getStats().getMaxHp();
-            this.moveNames = new ArrayList<>(pokemon.getMoves());
-            this.types = new ArrayList<>(pokemon.getTypes());
-            this.isFainted = pokemon.isFainted();
-            this.spriteUrl = pokemon.getSpriteUrl();
-            this.frontGifUrl = pokemon.getFrontGIF();
-            this.backGifUrl = pokemon.getBackGIF();
-        }
 
         public PokemonViewModel(String name, int id, int currentHP, int maxHP,
                                 List<String> moveNames, List<String> types,

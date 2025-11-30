@@ -1,7 +1,6 @@
 package use_case.battle_ai;
 
 import entities.*;
-import pokeapi.JSONLoader;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -223,12 +222,7 @@ public class BattleAIInteractor implements BattleAIInputBoundary {
      * Finds a move by name from the move database.
      */
     private Move findMoveByName(String moveName) {
-        for (Move move : JSONLoader.allMoves) {
-            if (move.getName().equalsIgnoreCase(moveName)) {
-                return move;
-            }
-        }
-        return null;
+        return dataAccess.getMoveByName(moveName);
     }
 
     /**

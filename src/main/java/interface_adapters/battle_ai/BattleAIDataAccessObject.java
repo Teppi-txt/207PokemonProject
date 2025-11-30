@@ -2,6 +2,7 @@ package interface_adapters.battle_ai;
 
 import entities.AIPlayer;
 import entities.Battle;
+import entities.Move;
 import entities.Pokemon;
 import entities.User;
 import pokeapi.JSONLoader;
@@ -83,5 +84,15 @@ public class BattleAIDataAccessObject implements BattleAIUserDataAccessInterface
     @Override
     public Pokemon getPlayerActivePokemon() {
         return playerActivePokemon;
+    }
+
+    @Override
+    public Move getMoveByName(String moveName) {
+        for (Move move : JSONLoader.allMoves) {
+            if (move.getName().equalsIgnoreCase(moveName)) {
+                return move;
+            }
+        }
+        return null;
     }
 }
