@@ -100,32 +100,37 @@ public class AppBuilder {
     public AppBuilder createDefaultUser() {
         user = new User(1, "Trainer", "trainer@pokemon.com", 5000);
 
-        // Add starter Pokémon
-        int starterCount = Math.min(6, JSONLoader.allPokemon.size());
-        for (int i = 0; i < starterCount; i++) {
-            Pokemon pokemon = JSONLoader.allPokemon.get(i).copy();
-            user.addPokemon(pokemon);
+        // Add specific Gen 1 starter Pokémon by ID
+        int[] starterIds = {1, 4, 7, 25, 133};  // Bulbasaur, Charmander, Squirtle, Pikachu, Eevee
+        for (int id : starterIds) {
+            Pokemon pokemon = findPokemonById(id);
+            if (pokemon != null) {
+                user.addPokemon(pokemon.copy());
+            }
         }
 
-        // Add additional Pokémon
-        int additionalCount = Math.min(20, JSONLoader.allPokemon.size());
-        for (int i = 6; i < additionalCount; i++) {
-            Pokemon pokemon = JSONLoader.allPokemon.get(i).copy();
-            if (i % 5 == 0) pokemon.setShiny(true);
-            user.addPokemon(pokemon);
-        }
-
-        // Starter deck
+        // Starter deck with the 5 starters
         Deck starterDeck = new Deck(1, "Starter Deck");
-        int deckSize = Math.min(5, user.getOwnedPokemon().size());
-        for (int i = 0; i < deckSize; i++) {
-            starterDeck.addPokemon(user.getOwnedPokemon().get(i));
+        for (Pokemon p : user.getOwnedPokemon()) {
+            starterDeck.addPokemon(p);
         }
         user.addDeck(starterDeck);
 
         userDA.saveUser(user);
 
         return this;
+    }
+
+    /**
+     * Finds a Pokemon by its ID from the loaded Pokemon list.
+     */
+    private Pokemon findPokemonById(int id) {
+        for (Pokemon p : JSONLoader.allPokemon) {
+            if (p.getID() == id) {
+                return p;
+            }
+        }
+        return null;
     }
 
 
