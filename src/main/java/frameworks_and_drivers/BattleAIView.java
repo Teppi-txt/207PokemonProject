@@ -1,6 +1,7 @@
 package frameworks_and_drivers;
 
 import interface_adapters.battle_ai.BattleAIController;
+import interface_adapters.battle_ai.BattleAIDataAccessObject;
 import interface_adapters.battle_ai.BattleAIViewModel;
 import interface_adapters.ui.RetroButton;
 import interface_adapters.ui.UIStyleConstants;
@@ -19,8 +20,9 @@ import pokeapi.JSONLoader;
 
 public class BattleAIView extends JFrame implements BattleAIViewModel.ViewModelListener {
     private final BattleAIController controller;
-    private BattleAIViewModel viewModel;
-    private Runnable returnCallback;
+    private final BattleAIDataAccessObject dataAccess;
+    private final BattleAIViewModel viewModel;
+    private final Runnable returnCallback;
 
     // UI Components - Player
     private JLabel playerPokemonNameLabel;
@@ -50,22 +52,19 @@ public class BattleAIView extends JFrame implements BattleAIViewModel.ViewModelL
     private int currentAIPokemonId = -1;
     private Map<String, ImageIcon> imageCache = new HashMap<>();
 
-    public BattleAIView(BattleAIController controller) {
-        this(controller, null);
-    }
-
-    public BattleAIView(BattleAIController controller, Runnable returnCallback) {
+    public BattleAIView(BattleAIController controller, BattleAIDataAccessObject dataAccess,
+                        BattleAIViewModel viewModel, Runnable returnCallback) {
         this.controller = controller;
-        this.returnCallback = returnCallback;
-        initializeGUI();
-    }
-
-    public void setViewModel(BattleAIViewModel viewModel) {
+        this.dataAccess = dataAccess;
         this.viewModel = viewModel;
+        this.returnCallback = returnCallback;
+
         if (viewModel != null) {
             viewModel.addListener(this);
-            updateDisplay();
         }
+
+        initializeGUI();
+        updateDisplay();
     }
 
     @Override
@@ -548,19 +547,16 @@ public class BattleAIView extends JFrame implements BattleAIViewModel.ViewModelL
     }
 
     private void updateDisplay() {
-        if (viewModel == null) {
-            return;
-        }
-
-        Battle battle = controller.getCurrentBattle();
+        // Read state from dataAccess (not controller)
+        Battle battle = dataAccess.getBattle();
         if (battle == null) {
             messageArea.setText("Waiting for battle to start...");
             return;
         }
 
-        Pokemon playerPokemon = controller.getPlayerActivePokemon();
-        AIPlayer aiPlayer = controller.getAiPlayer();
-        List<Pokemon> playerTeam = controller.getPlayerTeam();
+        Pokemon playerPokemon = dataAccess.getPlayerActivePokemon();
+        AIPlayer aiPlayer = dataAccess.getAIPlayer();
+        List<Pokemon> playerTeam = dataAccess.getPlayerTeam();
 
         // Update player Pokemon
         if (playerPokemon != null) {
@@ -577,8 +573,8 @@ public class BattleAIView extends JFrame implements BattleAIViewModel.ViewModelL
             updateTeamDisplay(playerTeam, playerPokemon);
         }
 
-        // Update turn result / message
-        String lastTurn = controller.getLastTurnDescription();
+        // Update turn result / message (read from ViewModel)
+        String lastTurn = viewModel != null ? viewModel.getCurrentTurnDescription() : null;
         if (lastTurn != null && !lastTurn.isEmpty()) {
             messageArea.setText(lastTurn);
         }
@@ -594,7 +590,6 @@ public class BattleAIView extends JFrame implements BattleAIViewModel.ViewModelL
     }
 
     private void updatePlayerPokemon(Pokemon pokemon) {
-        System.out.println("=== updatePlayerPokemon called with: " + pokemon.getName() + " (ID: " + pokemon.getId() + ") ===");
         playerPokemonNameLabel.setText(pokemon.getName().toUpperCase());
         loadPokemonImage(playerPokemonImageLabel, pokemon, true);
 
@@ -721,7 +716,7 @@ public class BattleAIView extends JFrame implements BattleAIViewModel.ViewModelL
     }
 
     private void executeMove(int moveIndex) {
-        Pokemon playerPokemon = controller.getPlayerActivePokemon();
+        Pokemon playerPokemon = dataAccess.getPlayerActivePokemon();
         if (playerPokemon == null || playerPokemon.getMoves() == null) {
             return;
         }
@@ -738,19 +733,98 @@ public class BattleAIView extends JFrame implements BattleAIViewModel.ViewModelL
             selectedMove = new Move().setName(moveName).setPower(40);
         }
 
-        controller.executePlayerMove(selectedMove);
+        // Execute player's move directly 
+        Battle battle = dataAccess.getBattle();
+        AIPlayer aiPlayer = dataAccess.getAIPlayer();
+        User currentUser = dataAccess.getUser();
+
+        if (battle == null || aiPlayer == null) return;
+
+        // Create and execute player's move turn
+        Player playerAdapter = new UserPlayerAdapter(currentUser);
+        MoveTurn playerTurn = new MoveTurn(1, playerAdapter, 1, selectedMove, aiPlayer);
+        playerTurn.executeTurn();
+        String result = playerTurn.getResult();
+        messageArea.setText(result);
+
+        // Check if AI Pokemon fainted - need to switch or battle ends
+        if (aiPlayer.getActivePokemon() != null && aiPlayer.getActivePokemon().isFainted()) {
+            // Find next AI Pokemon
+            Pokemon nextAI = null;
+            for (Pokemon p : aiPlayer.getTeam()) {
+                if (!p.isFainted()) {
+                    nextAI = p;
+                    break;
+                }
+            }
+            if (nextAI != null) {
+                aiPlayer.switchPokemon(nextAI);
+            }
+        }
+
+        // Check battle end conditions
+        if (!hasAvailablePokemon(currentUser) || !aiPlayer.hasAvailablePokemon()) {
+            if (!aiPlayer.hasAvailablePokemon()) {
+                battle.endBattle(currentUser);
+            } else {
+                User aiUser = battle.getPlayer2();
+                battle.endBattle(aiUser);
+            }
+            dataAccess.saveBattle(battle);
+            updateDisplay();
+            return;
+        }
+
+        // Execute AI turn using the controller
+        controller.executeAITurn(battle, aiPlayer, false);
+
+        // Check if player Pokemon fainted after AI turn
+        if (playerPokemon.isFainted()) {
+            // Find next player Pokemon
+            Pokemon nextPlayer = null;
+            for (Pokemon p : dataAccess.getPlayerTeam()) {
+                if (!p.isFainted()) {
+                    nextPlayer = p;
+                    break;
+                }
+            }
+            if (nextPlayer != null) {
+                dataAccess.setPlayerActivePokemon(nextPlayer);
+            }
+        }
+
+        dataAccess.saveBattle(battle);
+        updateDisplay();
     }
 
     private void executeSwitch(Pokemon pokemon) {
-        System.out.println("=== EXECUTING SWITCH ===");
-        controller.executePlayerSwitch(pokemon);
-        // Force UI refresh after switch (with small delay to let AI turn complete)
-        javax.swing.Timer refreshTimer = new javax.swing.Timer(800, e -> {
-            System.out.println("=== REFRESH TIMER FIRED - Calling updateDisplay ===");
-            updateDisplay();
-        });
-        refreshTimer.setRepeats(false);
-        refreshTimer.start();
+        // Update active Pokemon in dataAccess
+        dataAccess.setPlayerActivePokemon(pokemon);
+
+        Battle battle = dataAccess.getBattle();
+        AIPlayer aiPlayer = dataAccess.getAIPlayer();
+
+        if (battle == null || aiPlayer == null) return;
+
+        messageArea.setText("Switched to " + pokemon.getName() + "!");
+
+        // AI gets a free turn when player switches
+        controller.executeAITurn(battle, aiPlayer, false);
+
+        dataAccess.saveBattle(battle);
+        updateDisplay();
+    }
+
+    private boolean hasAvailablePokemon(User user) {
+        if (user == null || user.getOwnedPokemon().isEmpty()) {
+            return false;
+        }
+        for (Pokemon pokemon : user.getOwnedPokemon()) {
+            if (!pokemon.isFainted()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private void displayBattleEnded(Battle battle) {

@@ -1,35 +1,57 @@
 package use_case.battle_ai;
 
 import entities.Battle;
+import entities.Pokemon;
 import entities.User;
+import entities.AIPlayer;
+
+import java.util.List;
 
 /**
  * Data access interface for the battle AI use case.
- * This interface defines the contract for accessing and persisting battle and user data.
  */
 public interface BattleAIUserDataAccessInterface {
 
-    /**
-     * Saves the battle state.
-     * @param battle the battle to save
-     */
     void saveBattle(Battle battle);
 
-    /**
-     * Gets the current battle.
-     * @return the battle
-     */
     Battle getBattle();
 
-    /**
-     * Saves the user.
-     * @param user the user to save
-     */
     void saveUser(User user);
 
-    /**
-     * Gets the user.
-     * @return the user
-     */
     User getUser();
+
+    /**
+     * Gets all available Pokemon for AI team generation.
+     */
+    List<Pokemon> getAllPokemon();
+
+    /**
+     * Saves the AI player state.
+     */
+    void saveAIPlayer(AIPlayer aiPlayer);
+
+    /**
+     * Gets the current AI player.
+     */
+    AIPlayer getAIPlayer();
+
+    /**
+     * Saves the player's team for the battle.
+     */
+    void savePlayerTeam(List<Pokemon> team);
+
+    /**
+     * Gets the player's battle team.
+     */
+    List<Pokemon> getPlayerTeam();
+
+    /**
+     * Sets the player's active Pokemon.
+     */
+    void setPlayerActivePokemon(Pokemon pokemon);
+
+    /**
+     * Gets the player's active Pokemon.
+     */
+    Pokemon getPlayerActivePokemon();
 }

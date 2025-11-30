@@ -179,7 +179,7 @@ public class BattleAIInteractorTest extends TestCase {
         assertNotNull(presenter.outputData);
         assertSame(battle, presenter.outputData.getBattle());
         assertFalse(presenter.outputData.isBattleEnded());
-        assertEquals("IN_PROGRESS", presenter.outputData.getBattleStatus());
+        assertEquals("IN_PROGRESS", presenter.outputData.getBattle().getBattleStatus());
         assertSame(battle, gateway.savedBattle);
         assertTrue(gateway.savedUsers.isEmpty());
         assertEquals(200, player1.getCurrency());
@@ -210,7 +210,7 @@ public class BattleAIInteractorTest extends TestCase {
         assertNull(presenter.errorMessage);
         assertNotNull(presenter.outputData);
         assertTrue(presenter.outputData.isBattleEnded());
-        assertEquals("COMPLETED", presenter.outputData.getBattleStatus());
+        assertEquals("COMPLETED", presenter.outputData.getBattle().getBattleStatus());
         assertSame(player2, battle.getWinner());
         assertEquals(player2Start + 500, player2.getCurrency());
         assertEquals(player1Start + 100, player1.getCurrency());
@@ -246,7 +246,7 @@ public class BattleAIInteractorTest extends TestCase {
         assertNull(presenter.errorMessage);
         assertNotNull(presenter.outputData);
         assertTrue(presenter.outputData.isBattleEnded());
-        assertEquals("COMPLETED", presenter.outputData.getBattleStatus());
+        assertEquals("COMPLETED", presenter.outputData.getBattle().getBattleStatus());
         assertSame(player1, battle.getWinner());
         assertEquals(player1Start + 500, player1.getCurrency());
         assertEquals(player2Start + 100, player2.getCurrency());
@@ -276,9 +276,9 @@ public class BattleAIInteractorTest extends TestCase {
         assertNull(presenter.errorMessage);
         assertNotNull(presenter.outputData);
         assertFalse(presenter.outputData.isBattleEnded());
-        assertEquals("IN_PROGRESS", presenter.outputData.getBattleStatus());
-        assertNotNull(presenter.outputData.getDecision());
-        assertTrue(presenter.outputData.getDecision().isSwitch());
+        assertEquals("IN_PROGRESS", presenter.outputData.getBattle().getBattleStatus());
+        assertNotNull(presenter.outputData.getExecutedTurn());
+        assertTrue(presenter.outputData.getExecutedTurn() instanceof entities.SwitchTurn);
         assertSame(battle, gateway.savedBattle);
     }
 
@@ -374,6 +374,9 @@ public class BattleAIInteractorTest extends TestCase {
         private Battle battle;
         private Battle savedBattle;
         private final List<User> savedUsers = new ArrayList<>();
+        private List<Pokemon> playerTeam = new ArrayList<>();
+        private AIPlayer aiPlayer;
+        private Pokemon playerActivePokemon;
 
         InMemoryBattleGateway(Battle battle) {
             this.battle = battle;
@@ -398,6 +401,41 @@ public class BattleAIInteractorTest extends TestCase {
         @Override
         public User getUser() {
             return battle != null ? battle.getPlayer1() : null;
+        }
+
+        @Override
+        public List<Pokemon> getAllPokemon() {
+            return new ArrayList<>();
+        }
+
+        @Override
+        public void savePlayerTeam(List<Pokemon> team) {
+            this.playerTeam = team;
+        }
+
+        @Override
+        public List<Pokemon> getPlayerTeam() {
+            return playerTeam;
+        }
+
+        @Override
+        public void saveAIPlayer(AIPlayer aiPlayer) {
+            this.aiPlayer = aiPlayer;
+        }
+
+        @Override
+        public AIPlayer getAIPlayer() {
+            return aiPlayer;
+        }
+
+        @Override
+        public void setPlayerActivePokemon(Pokemon pokemon) {
+            this.playerActivePokemon = pokemon;
+        }
+
+        @Override
+        public Pokemon getPlayerActivePokemon() {
+            return playerActivePokemon;
         }
     }
 }
