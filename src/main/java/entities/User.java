@@ -1,8 +1,12 @@
 package entities;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class User implements Serializable {
     private static final long serialVersionUID = 1L;
@@ -11,6 +15,7 @@ public class User implements Serializable {
     private String name;
     private int currency;
     private String email; //do we need a password?
+    private final Map<Integer, Deck> decks = new HashMap<>();
 
     private final List<Pokemon> ownedPokemon;
 
@@ -47,6 +52,16 @@ public class User implements Serializable {
         this.ownedPokemon.add(pokemon);
     }
 
+    public Map<Integer, Deck> getDecks() { return decks; }
+
+    public void addDeck(Deck deck) {
+        decks.put(deck.getId(), deck);
+    }
+
+    public void deleteDeck(int deckId) {
+        decks.remove(deckId);
+    }
+
     //got rid of openPack method because that will be used with the open pack interactor
 
     public boolean canAffordPack(int amount){
@@ -77,6 +92,55 @@ public class User implements Serializable {
         return null;
     }
 
+    public Deck getDeckById(int id) {
+        return decks.get(id);
+    }
+    public String toJSONString(){
+        JSONObject json = new JSONObject();
+        json.put("id", id);
+        json.put("name", name);
+        json.put("email", email);
+        json.put("currency", currency);
 
+        JSONArray pokemons = new JSONArray();
+        for (Pokemon pokemon : ownedPokemon){
+            pokemons.put(new JSONObject(pokemon.toJSONString()));
+        }
+        json.put("ownedpokemons", pokemons);
+
+        JSONArray decksArray = new JSONArray();
+        for (Deck deck : decks.values()) {
+            decksArray.put(deck.toJSONObject());
+        }
+        json.put("decks", decksArray);
+
+        return json.toString(2);
+    }
+
+    public static User fromJSON(JSONObject json){
+        int id = json.getInt("id");
+        String name = json.getString("name");
+        String email = json.getString("email");
+        int currency = json.getInt("currency");
+
+        User user = new User(id, name, email, currency);
+        JSONArray pokemons = json.getJSONArray("ownedpokemons");
+        for (int i = 0; i < pokemons.length(); i++){
+            JSONObject pokeJSON = pokemons.getJSONObject(i);
+            Pokemon p = Pokemon.fromJSON(pokeJSON);
+            user.addPokemon(p);
+        }
+
+        if (json.has("decks")) {
+            JSONArray decksArray = json.getJSONArray("decks");
+            for (int i = 0; i < decksArray.length(); i++) {
+                JSONObject deckJSON = decksArray.getJSONObject(i);
+                Deck deck = Deck.fromJSON(deckJSON);
+                user.addDeck(deck);
+            }
+        }
+
+        return user;
+    }
 
 }

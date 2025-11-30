@@ -5,15 +5,13 @@ import entities.Pokemon;
 import pokeapi.JSONLoader;
 import interface_adapters.battle_ai.BattleAIController;
 import interface_adapters.battle_ai.BattleAIViewModel;
-import interface_adapters.ui.*;
 
 import javax.swing.*;
 import java.awt.*;
 import java.util.List;
 
 /**
- * Main battle board view where battles take place.
- * Displays both Pokemon with HP bars, move buttons, and battle log.
+ * Simple, clean battle board view for AI battles.
  */
 public class BattleBoardView extends JFrame implements BattleAIViewModel.ViewModelListener {
 
@@ -22,16 +20,17 @@ public class BattleBoardView extends JFrame implements BattleAIViewModel.ViewMod
 
     private JLabel playerPokemonName;
     private JLabel playerPokemonSprite;
-    private HPBar playerHPBar;
+    private JProgressBar playerHPBar;
+    private JLabel playerHPLabel;
     private JPanel movesPanel;
 
     private JLabel aiPokemonName;
     private JLabel aiPokemonSprite;
-    private HPBar aiHPBar;
+    private JProgressBar aiHPBar;
+    private JLabel aiHPLabel;
 
     private JTextArea battleLog;
 
-    // Store max HP values
     private int playerMaxHP = 100;
     private int aiMaxHP = 100;
 
@@ -39,23 +38,31 @@ public class BattleBoardView extends JFrame implements BattleAIViewModel.ViewMod
         this.controller = controller;
 
         setTitle("Pokemon Battle");
-        setSize(1000, 700);
+        setSize(900, 650);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setLayout(new BorderLayout());
+        setLayout(new BorderLayout(15, 15));
+        getContentPane().setBackground(Color.WHITE);
 
-        // Top - AI Pokemon
-        JPanel aiPanel = createAIPokemonPanel();
-        add(aiPanel, BorderLayout.NORTH);
+        JPanel mainPanel = new JPanel(new BorderLayout(15, 15));
+        mainPanel.setBackground(Color.WHITE);
+        mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
-        // Center - Battle Log
-        JPanel centerPanel = createCenterPanel();
-        add(centerPanel, BorderLayout.CENTER);
+        // Title
+        JLabel title = new JLabel("POKEMON BATTLE", SwingConstants.CENTER);
+        title.setFont(new Font("SansSerif", Font.BOLD, 24));
+        title.setBorder(BorderFactory.createEmptyBorder(0, 0, 10, 0));
+        mainPanel.add(title, BorderLayout.NORTH);
 
-        // Bottom - Player Pokemon and Moves
-        JPanel playerPanel = createPlayerPanel();
-        add(playerPanel, BorderLayout.SOUTH);
+        // Battle arena
+        JPanel arenaPanel = createArenaPanel();
+        mainPanel.add(arenaPanel, BorderLayout.CENTER);
 
-        // Initialize display
+        // Bottom - Battle log and moves
+        JPanel bottomPanel = createBottomPanel();
+        mainPanel.add(bottomPanel, BorderLayout.SOUTH);
+
+        add(mainPanel, BorderLayout.CENTER);
+
         updateDisplay();
     }
 
@@ -71,95 +78,150 @@ public class BattleBoardView extends JFrame implements BattleAIViewModel.ViewMod
         SwingUtilities.invokeLater(this::updateDisplay);
     }
 
-    private JPanel createAIPokemonPanel() {
-        JPanel panel = new JPanel();
-        panel.setBackground(new Color(240, 240, 255));
-        panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
-        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+    private JPanel createArenaPanel() {
+        JPanel panel = new JPanel(new GridLayout(1, 2, 60, 0));
+        panel.setBackground(Color.WHITE);
+        panel.setBorder(BorderFactory.createEmptyBorder(20, 30, 20, 30));
 
-        aiPokemonName = new JLabel("AI Pokemon");
-        aiPokemonName.setFont(UIStyleConstants.HEADING_FONT);
-        aiPokemonName.setAlignmentX(Component.CENTER_ALIGNMENT);
-        panel.add(aiPokemonName);
+        // Player Pokemon (left)
+        JPanel playerPanel = createPokemonPanel(true);
+        panel.add(playerPanel);
 
-        panel.add(Box.createVerticalStrut(10));
-
-        aiPokemonSprite = new JLabel("Loading...", SwingConstants.CENTER);
-        aiPokemonSprite.setPreferredSize(new Dimension(128, 128));
-        aiPokemonSprite.setAlignmentX(Component.CENTER_ALIGNMENT);
-        panel.add(aiPokemonSprite);
-
-        panel.add(Box.createVerticalStrut(10));
-
-        aiHPBar = new HPBar();
-        aiHPBar.setAlignmentX(Component.CENTER_ALIGNMENT);
-        panel.add(aiHPBar);
+        // AI Pokemon (right)
+        JPanel aiPanel = createPokemonPanel(false);
+        panel.add(aiPanel);
 
         return panel;
     }
 
-    private JPanel createCenterPanel() {
-        JPanel panel = new JPanel(new BorderLayout());
-        panel.setBackground(UIStyleConstants.BACKGROUND);
-        panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+    private JPanel createPokemonPanel(boolean isPlayer) {
+        JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        panel.setBackground(Color.WHITE);
+        panel.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(230, 230, 230)),
+            BorderFactory.createEmptyBorder(20, 20, 20, 20)
+        ));
 
-        JLabel logLabel = new JLabel("Battle Log");
-        logLabel.setFont(UIStyleConstants.HEADING_FONT);
-        panel.add(logLabel, BorderLayout.NORTH);
+        // Label
+        JLabel label = new JLabel(isPlayer ? "YOUR POKEMON" : "OPPONENT");
+        label.setFont(new Font("SansSerif", Font.BOLD, 14));
+        label.setForeground(Color.GRAY);
+        label.setAlignmentX(Component.CENTER_ALIGNMENT);
+        panel.add(label);
 
-        battleLog = new JTextArea();
+        panel.add(Box.createVerticalStrut(8));
+
+        // Pokemon name
+        JLabel nameLabel = new JLabel("---");
+        nameLabel.setFont(new Font("SansSerif", Font.BOLD, 18));
+        nameLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        if (isPlayer) playerPokemonName = nameLabel;
+        else aiPokemonName = nameLabel;
+        panel.add(nameLabel);
+
+        panel.add(Box.createVerticalStrut(15));
+
+        // Pokemon sprite
+        JLabel spriteLabel = new JLabel("Loading...", SwingConstants.CENTER);
+        spriteLabel.setPreferredSize(new Dimension(150, 150));
+        spriteLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        if (isPlayer) playerPokemonSprite = spriteLabel;
+        else aiPokemonSprite = spriteLabel;
+        panel.add(spriteLabel);
+
+        // Circle/shadow below Pokemon
+        JPanel circlePanel = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                Graphics2D g2d = (Graphics2D) g;
+                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2d.setColor(new Color(200, 200, 200));
+                int w = getWidth();
+                g2d.fillOval(w/2 - 50, 0, 100, 20);
+            }
+        };
+        circlePanel.setPreferredSize(new Dimension(150, 25));
+        circlePanel.setMaximumSize(new Dimension(150, 25));
+        circlePanel.setOpaque(false);
+        circlePanel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        panel.add(circlePanel);
+
+        panel.add(Box.createVerticalStrut(15));
+
+        // HP section
+        JPanel hpPanel = new JPanel();
+        hpPanel.setLayout(new BoxLayout(hpPanel, BoxLayout.Y_AXIS));
+        hpPanel.setBackground(Color.WHITE);
+        hpPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        hpPanel.setMaximumSize(new Dimension(200, 50));
+
+        JLabel hpText = new JLabel("HP");
+        hpText.setFont(new Font("SansSerif", Font.PLAIN, 12));
+        hpText.setAlignmentX(Component.CENTER_ALIGNMENT);
+        hpPanel.add(hpText);
+
+        JProgressBar hpBar = new JProgressBar(0, 100);
+        hpBar.setValue(100);
+        hpBar.setStringPainted(false);
+        hpBar.setPreferredSize(new Dimension(160, 12));
+        hpBar.setMaximumSize(new Dimension(160, 12));
+        hpBar.setForeground(new Color(76, 175, 80));
+        hpBar.setBackground(new Color(230, 230, 230));
+        hpBar.setAlignmentX(Component.CENTER_ALIGNMENT);
+        if (isPlayer) playerHPBar = hpBar;
+        else aiHPBar = hpBar;
+        hpPanel.add(hpBar);
+
+        JLabel hpLabel = new JLabel("100 / 100");
+        hpLabel.setFont(new Font("SansSerif", Font.PLAIN, 11));
+        hpLabel.setForeground(Color.GRAY);
+        hpLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        if (isPlayer) playerHPLabel = hpLabel;
+        else aiHPLabel = hpLabel;
+        hpPanel.add(hpLabel);
+
+        panel.add(hpPanel);
+
+        return panel;
+    }
+
+    private JPanel createBottomPanel() {
+        JPanel panel = new JPanel(new BorderLayout(15, 10));
+        panel.setBackground(Color.WHITE);
+
+        // Battle log
+        battleLog = new JTextArea(4, 40);
         battleLog.setEditable(false);
-        battleLog.setFont(UIStyleConstants.BODY_FONT);
+        battleLog.setFont(new Font("SansSerif", Font.PLAIN, 13));
         battleLog.setLineWrap(true);
         battleLog.setWrapStyleWord(true);
         battleLog.setText("Battle starting...\n");
+        battleLog.setBorder(BorderFactory.createEmptyBorder(8, 10, 8, 10));
 
         JScrollPane scrollPane = new JScrollPane(battleLog);
-        scrollPane.setPreferredSize(new Dimension(900, 200));
+        scrollPane.setBorder(BorderFactory.createLineBorder(new Color(220, 220, 220)));
         panel.add(scrollPane, BorderLayout.CENTER);
 
-        return panel;
-    }
+        // Moves panel
+        JPanel movesContainer = new JPanel();
+        movesContainer.setLayout(new BoxLayout(movesContainer, BoxLayout.Y_AXIS));
+        movesContainer.setBackground(Color.WHITE);
 
-    private JPanel createPlayerPanel() {
-        JPanel panel = new JPanel();
-        panel.setBackground(new Color(255, 250, 240));
-        panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
-        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-
-        // Pokemon info
-        playerPokemonName = new JLabel("Your Pokemon");
-        playerPokemonName.setFont(UIStyleConstants.HEADING_FONT);
-        playerPokemonName.setAlignmentX(Component.CENTER_ALIGNMENT);
-        panel.add(playerPokemonName);
-
-        panel.add(Box.createVerticalStrut(10));
-
-        playerPokemonSprite = new JLabel("Loading...", SwingConstants.CENTER);
-        playerPokemonSprite.setPreferredSize(new Dimension(128, 128));
-        playerPokemonSprite.setAlignmentX(Component.CENTER_ALIGNMENT);
-        panel.add(playerPokemonSprite);
-
-        panel.add(Box.createVerticalStrut(10));
-
-        playerHPBar = new HPBar();
-        playerHPBar.setAlignmentX(Component.CENTER_ALIGNMENT);
-        panel.add(playerHPBar);
-
-        panel.add(Box.createVerticalStrut(20));
-
-        // Moves
-        JLabel movesLabel = new JLabel("Moves:");
-        movesLabel.setFont(UIStyleConstants.BODY_FONT);
+        JLabel movesLabel = new JLabel("MOVES");
+        movesLabel.setFont(new Font("SansSerif", Font.BOLD, 14));
         movesLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-        panel.add(movesLabel);
+        movesContainer.add(movesLabel);
 
-        panel.add(Box.createVerticalStrut(10));
+        movesContainer.add(Box.createVerticalStrut(8));
 
-        movesPanel = new JPanel(new GridLayout(2, 2, 10, 10));
-        movesPanel.setOpaque(false);
-        movesPanel.setMaximumSize(new Dimension(600, 100));
-        panel.add(movesPanel);
+        movesPanel = new JPanel(new GridLayout(2, 2, 8, 8));
+        movesPanel.setBackground(Color.WHITE);
+        movesPanel.setPreferredSize(new Dimension(300, 100));
+        movesContainer.add(movesPanel);
+
+        panel.add(movesContainer, BorderLayout.EAST);
 
         return panel;
     }
@@ -173,12 +235,10 @@ public class BattleBoardView extends JFrame implements BattleAIViewModel.ViewMod
         if (playerPokemon != null) {
             String pokemonName = capitalize(playerPokemon.getName());
 
-            // Check if Pokemon changed (new max HP needed)
             if (!playerPokemonName.getText().equals(pokemonName)) {
                 playerMaxHP = playerPokemon.getStats().getHp();
                 playerPokemonName.setText(pokemonName);
 
-                // Load sprite for new Pokemon
                 SpriteLoader.loadSpriteAsync(playerPokemon.getSpriteUrl(), sprite -> {
                     if (sprite != null) {
                         playerPokemonSprite.setIcon(new ImageIcon(sprite));
@@ -186,25 +246,24 @@ public class BattleBoardView extends JFrame implements BattleAIViewModel.ViewMod
                     }
                 });
 
-                // Update moves for new Pokemon
                 updateMoves(playerPokemon);
             }
 
-            // Always update HP (this changes during battle)
             int currentHP = playerPokemon.getStats().getHp();
-            playerHPBar.updateHP(currentHP, playerMaxHP);
+            int hpPercent = playerMaxHP > 0 ? (currentHP * 100 / playerMaxHP) : 0;
+            playerHPBar.setValue(hpPercent);
+            playerHPLabel.setText(currentHP + " / " + playerMaxHP);
+            updateHPBarColor(playerHPBar, hpPercent);
         }
 
         // Update AI Pokemon
         if (aiPokemon != null) {
             String pokemonName = capitalize(aiPokemon.getName());
 
-            // Check if Pokemon changed (new max HP needed)
             if (!aiPokemonName.getText().equals(pokemonName)) {
                 aiMaxHP = aiPokemon.getStats().getHp();
                 aiPokemonName.setText(pokemonName);
 
-                // Load sprite for new Pokemon
                 SpriteLoader.loadSpriteAsync(aiPokemon.getSpriteUrl(), sprite -> {
                     if (sprite != null) {
                         aiPokemonSprite.setIcon(new ImageIcon(sprite));
@@ -213,15 +272,27 @@ public class BattleBoardView extends JFrame implements BattleAIViewModel.ViewMod
                 });
             }
 
-            // Always update HP (this changes during battle)
             int currentHP = aiPokemon.getStats().getHp();
-            aiHPBar.updateHP(currentHP, aiMaxHP);
+            int hpPercent = aiMaxHP > 0 ? (currentHP * 100 / aiMaxHP) : 0;
+            aiHPBar.setValue(hpPercent);
+            aiHPLabel.setText(currentHP + " / " + aiMaxHP);
+            updateHPBarColor(aiHPBar, hpPercent);
         }
 
         // Check if battle ended
         if (controller.getCurrentBattle() != null &&
                 "COMPLETED".equals(controller.getCurrentBattle().getBattleStatus())) {
             showBattleResults();
+        }
+    }
+
+    private void updateHPBarColor(JProgressBar bar, int percent) {
+        if (percent > 50) {
+            bar.setForeground(new Color(76, 175, 80)); // Green
+        } else if (percent > 25) {
+            bar.setForeground(new Color(255, 193, 7)); // Yellow
+        } else {
+            bar.setForeground(new Color(244, 67, 54)); // Red
         }
     }
 
@@ -233,11 +304,11 @@ public class BattleBoardView extends JFrame implements BattleAIViewModel.ViewMod
 
         for (int i = 0; i < moveCount; i++) {
             String moveName = moveNames.get(i);
-
-            // Look up move from JSONLoader
             Move move = findMoveByName(moveName);
 
-            StyledButton moveBtn = new StyledButton(capitalize(moveName));
+            JButton moveBtn = new JButton(capitalize(moveName));
+            moveBtn.setFont(new Font("SansSerif", Font.BOLD, 12));
+            moveBtn.setFocusPainted(false);
             moveBtn.addActionListener(e -> {
                 if (move != null) {
                     executeMove(move);
@@ -267,33 +338,25 @@ public class BattleBoardView extends JFrame implements BattleAIViewModel.ViewMod
     }
 
     private void executeMove(Move move) {
-        // Disable moves during execution
         setMovesEnabled(false);
 
-        // Execute player move
         controller.executePlayerMove(move);
 
-        // Get and display the turn result
         String turnResult = controller.getLastTurnDescription();
         if (turnResult != null) {
             appendLog(turnResult + "\n");
         }
 
-        // Update display
         updateDisplay();
 
-        // Schedule AI turn display update (after AI executes)
         javax.swing.Timer updateTimer = new javax.swing.Timer(600, e -> {
-            // Get AI turn result
             String aiTurnResult = controller.getLastTurnDescription();
             if (aiTurnResult != null && !aiTurnResult.equals(turnResult)) {
                 appendLog(aiTurnResult + "\n");
             }
 
-            // Update display again after AI turn
             updateDisplay();
 
-            // Re-enable moves if battle still in progress
             if (controller.getCurrentBattle() != null &&
                     "IN_PROGRESS".equals(controller.getCurrentBattle().getBattleStatus())) {
                 setMovesEnabled(true);

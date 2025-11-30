@@ -26,6 +26,7 @@ public class CollectionView extends JPanel implements PropertyChangeListener {
     private final PokemonCollectionPanel pokemonCollectionPanel;
     private final ViewCollectionViewModel collectionViewModel;
     private ViewCollectionController controller;
+    private Runnable navigationCallback;
 
 
     private List<Pokemon> pokemonOnPage;
@@ -46,10 +47,15 @@ public class CollectionView extends JPanel implements PropertyChangeListener {
         title.setAlignmentX(Component.CENTER_ALIGNMENT);
         title.setBorder(new EmptyBorder(10, 10, 10, 10));
 
-        final JButton returnButton = new JButton("Back to menu:");
+        final JButton returnButton = new JButton("Back to Menu");
         returnButton.setFont(new Font(title.getFont().getFontName(), Font.PLAIN, 18));
         returnButton.setAlignmentX(Component.CENTER_ALIGNMENT);
         returnButton.setBorder(new EmptyBorder(10, 10, 10, 10));
+        returnButton.addActionListener(e -> {
+            if (navigationCallback != null) {
+                navigationCallback.run();
+            }
+        });
 
         final JPanel body = new JPanel();
         body.setLayout(new BoxLayout(body, BoxLayout.X_AXIS));
@@ -94,6 +100,10 @@ public class CollectionView extends JPanel implements PropertyChangeListener {
 
     public void setController(ViewCollectionController controller) {
         this.controller = controller;
+    }
+
+    public void setNavigationCallback(Runnable callback) {
+        this.navigationCallback = callback;
     }
 
 

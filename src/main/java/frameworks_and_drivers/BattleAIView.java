@@ -2,11 +2,11 @@ package frameworks_and_drivers;
 
 import interface_adapters.battle_ai.BattleAIController;
 import interface_adapters.battle_ai.BattleAIViewModel;
+import interface_adapters.ui.RetroButton;
+import interface_adapters.ui.UIStyleConstants;
 import entities.*;
 
 import javax.swing.*;
-import javax.swing.border.EmptyBorder;
-import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.io.IOException;
 import java.net.URL;
@@ -20,44 +20,43 @@ import pokeapi.JSONLoader;
 public class BattleAIView extends JFrame implements BattleAIViewModel.ViewModelListener {
     private final BattleAIController controller;
     private BattleAIViewModel viewModel;
+    private Runnable returnCallback;
 
-    // UI Components - Status
-    private JLabel battleStatusLabel;
-
-    // UI Components - Player (User)
-    private JPanel playerPanel;
-    private JLabel playerNameLabel;
-    private JLabel playerPokemonImageLabel;
+    // UI Components - Player
     private JLabel playerPokemonNameLabel;
-    private JLabel playerHPLabel;
+    private JLabel playerPokemonImageLabel;
     private JProgressBar playerHPBar;
-    private JPanel playerMovesPanel;
-    private JPanel playerTeamPanel;
+    private JLabel playerHPLabel;
 
-    // UI Components - AI Opponent
-    private JPanel aiPanel;
-    private JLabel aiNameLabel;
-    private JLabel aiPokemonImageLabel;
+    // UI Components - AI
     private JLabel aiPokemonNameLabel;
-    private JLabel aiHPLabel;
+    private JLabel aiPokemonImageLabel;
     private JProgressBar aiHPBar;
-    private JPanel aiTeamPanel;
+    private JLabel aiHPLabel;
 
-    // UI Components - Battle Info
-    private JTextArea turnResultArea;
-    private JLabel errorLabel;
+    // UI Components - Battle Controls
+    private JPanel movesPanel;
+    private JButton[] moveButtons = new JButton[4];
+    private JPanel teamPanel;
+    private JTextArea messageArea;
     private JPanel battleEndedPanel;
     private JLabel winnerLabel;
-
-    // UI Components - Main
-    private JPanel mainPanel;
-    private JScrollPane scrollPane;
 
     // Track max HP for each Pokemon
     private Map<Pokemon, Integer> maxHPMap = new HashMap<>();
 
+    // Track currently displayed Pokemon to avoid reloading same image (prevents flickering)
+    private int currentPlayerPokemonId = -1;
+    private int currentAIPokemonId = -1;
+    private Map<String, ImageIcon> imageCache = new HashMap<>();
+
     public BattleAIView(BattleAIController controller) {
+        this(controller, null);
+    }
+
+    public BattleAIView(BattleAIController controller, Runnable returnCallback) {
         this.controller = controller;
+        this.returnCallback = returnCallback;
         initializeGUI();
     }
 
@@ -76,334 +75,476 @@ public class BattleAIView extends JFrame implements BattleAIViewModel.ViewModelL
 
     private void initializeGUI() {
         setTitle("Pokemon Battle - AI Opponent");
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLayout(new BorderLayout());
+        getContentPane().setBackground(UIStyleConstants.DARK_BG);
 
-        // Create main panel
-        mainPanel = new JPanel();
-        mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
-        mainPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
-        mainPanel.setBackground(new Color(240, 248, 255));
+        // Main battle panel
+        JPanel mainPanel = new JPanel(new BorderLayout(5, 5));
+        mainPanel.setBackground(UIStyleConstants.DARK_BG);
+        mainPanel.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
 
-        // Battle Status Panel
-        JPanel statusPanel = createStatusPanel();
-        mainPanel.add(statusPanel);
-
-        mainPanel.add(Box.createVerticalStrut(10));
-
-        // Battle Arena Panel (Player and AI)
+        // Top: Battle Arena
         JPanel arenaPanel = createArenaPanel();
-        mainPanel.add(arenaPanel);
+        mainPanel.add(arenaPanel, BorderLayout.CENTER);
 
-        mainPanel.add(Box.createVerticalStrut(10));
+        // Bottom: Controls (moves and team)
+        JPanel controlsPanel = createControlsPanel();
+        mainPanel.add(controlsPanel, BorderLayout.SOUTH);
 
-        // Turn Result Panel
-        JPanel resultPanel = createResultPanel();
-        mainPanel.add(resultPanel);
+        add(mainPanel, BorderLayout.CENTER);
 
-        mainPanel.add(Box.createVerticalStrut(10));
-
-        // Error Panel
-        JPanel errorPanel = createErrorPanel();
-        mainPanel.add(errorPanel);
-
-        // Battle Ended Panel
-        battleEndedPanel = createBattleEndedPanel();
-        battleEndedPanel.setVisible(false);
-        mainPanel.add(battleEndedPanel);
-
-        // Add scroll pane
-        scrollPane = new JScrollPane(mainPanel);
-        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
-        scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-        scrollPane.setBorder(null);
-
-        add(scrollPane, BorderLayout.CENTER);
-
-        // Set window properties
-        setSize(1000, 800);
+        setSize(900, 650);
+        setMinimumSize(new Dimension(800, 600));
         setLocationRelativeTo(null);
     }
 
-    private JPanel createStatusPanel() {
-        JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        panel.setBorder(new TitledBorder("Battle Status"));
-        panel.setBackground(Color.WHITE);
-
-        battleStatusLabel = new JLabel("Status: Waiting for battle to start...");
-        battleStatusLabel.setFont(new Font("Arial", Font.BOLD, 14));
-        panel.add(battleStatusLabel);
-
-        return panel;
-    }
-
     private JPanel createArenaPanel() {
-        JPanel panel = new JPanel(new GridLayout(1, 2, 10, 0));
-        panel.setBorder(new TitledBorder("Battle Arena"));
-        panel.setBackground(Color.WHITE);
+        // Store references for repositioning
+        JPanel aiInfoBox = createPokemonInfoBox(false);
+        JPanel playerInfoBox = createPokemonInfoBox(true);
 
-        // Player Panel (Left side - User with controls)
-        playerPanel = createPlayerPanel();
-        panel.add(playerPanel);
-
-        // AI Panel (Right side - AI Opponent, no controls)
-        aiPanel = createAIPanel();
-        panel.add(aiPanel);
-
-        return panel;
-    }
-
-    private JPanel createPlayerPanel() {
-        JPanel panel = new JPanel();
-        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-        panel.setBorder(new TitledBorder("You"));
-        panel.setBackground(new Color(255, 240, 240));
-        panel.setAlignmentX(Component.LEFT_ALIGNMENT);
-
-        // Player name
-        playerNameLabel = new JLabel("Player: -");
-        playerNameLabel.setFont(new Font("Arial", Font.BOLD, 12));
-        playerNameLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        panel.add(playerNameLabel);
-
-        panel.add(Box.createVerticalStrut(10));
-
-        // Pokemon image
-        playerPokemonImageLabel = new JLabel();
-        playerPokemonImageLabel.setPreferredSize(new Dimension(200, 200));
-        playerPokemonImageLabel.setMinimumSize(new Dimension(200, 200));
-        playerPokemonImageLabel.setMaximumSize(new Dimension(200, 200));
-        playerPokemonImageLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        playerPokemonImageLabel.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2));
-        playerPokemonImageLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        playerPokemonImageLabel.setIcon(createPlaceholderIcon());
-        panel.add(playerPokemonImageLabel);
-
-        panel.add(Box.createVerticalStrut(5));
-
-        // Pokemon name
-        playerPokemonNameLabel = new JLabel("Pokemon: -");
-        playerPokemonNameLabel.setFont(new Font("Arial", Font.PLAIN, 11));
-        playerPokemonNameLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        panel.add(playerPokemonNameLabel);
-
-        panel.add(Box.createVerticalStrut(5));
-
-        // HP Label
-        playerHPLabel = new JLabel("HP: - / -");
-        playerHPLabel.setFont(new Font("Arial", Font.PLAIN, 11));
-        playerHPLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        panel.add(playerHPLabel);
-
-        panel.add(Box.createVerticalStrut(5));
-
-        // HP Bar
-        playerHPBar = new JProgressBar(0, 100);
-        playerHPBar.setStringPainted(true);
-        playerHPBar.setPreferredSize(new Dimension(180, 20));
-        playerHPBar.setAlignmentX(Component.LEFT_ALIGNMENT);
-        panel.add(playerHPBar);
-
-        // Moves panel
-        panel.add(Box.createVerticalStrut(10));
-        playerMovesPanel = createMovesPanel();
-        panel.add(playerMovesPanel);
-
-        // Team panel
-        panel.add(Box.createVerticalStrut(10));
-        playerTeamPanel = createTeamPanel("Your Team");
-        panel.add(playerTeamPanel);
-
-        return panel;
-    }
-
-    private JPanel createAIPanel() {
-        JPanel panel = new JPanel();
-        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-        panel.setBorder(new TitledBorder("AI Opponent"));
-        panel.setBackground(new Color(240, 240, 255));
-        panel.setAlignmentX(Component.LEFT_ALIGNMENT);
-
-        // AI name
-        aiNameLabel = new JLabel("AI: -");
-        aiNameLabel.setFont(new Font("Arial", Font.BOLD, 12));
-        aiNameLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        panel.add(aiNameLabel);
-
-        panel.add(Box.createVerticalStrut(10));
-
-        // Pokemon image
         aiPokemonImageLabel = new JLabel();
-        aiPokemonImageLabel.setPreferredSize(new Dimension(200, 200));
-        aiPokemonImageLabel.setMinimumSize(new Dimension(200, 200));
-        aiPokemonImageLabel.setMaximumSize(new Dimension(200, 200));
         aiPokemonImageLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        aiPokemonImageLabel.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2));
-        aiPokemonImageLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        aiPokemonImageLabel.setIcon(createPlaceholderIcon());
+
+        playerPokemonImageLabel = new JLabel();
+        playerPokemonImageLabel.setHorizontalAlignment(SwingConstants.CENTER);
+
+        JPanel panel = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                Graphics2D g2d = (Graphics2D) g;
+                int w = getWidth();
+                int h = getHeight();
+
+                // Draw battle background gradient (sky)
+                GradientPaint skyGradient = new GradientPaint(
+                    0, 0, new Color(135, 206, 235),
+                    0, h / 2, new Color(176, 224, 230)
+                );
+                g2d.setPaint(skyGradient);
+                g2d.fillRect(0, 0, w, h / 2);
+
+                // Draw ground
+                GradientPaint groundGradient = new GradientPaint(
+                    0, h / 2, new Color(144, 238, 144),
+                    0, h, new Color(34, 139, 34)
+                );
+                g2d.setPaint(groundGradient);
+                g2d.fillRect(0, h / 2, w, h / 2);
+
+                // Calculate platform positions relative to panel size
+                int playerPlatformX = (int)(w * 0.08);
+                int playerPlatformY = h - 70;
+                int playerPlatformW = 220;
+                int playerPlatformH = 55;
+
+                int aiPlatformX = (int)(w * 0.65);
+                int aiPlatformY = (int)(h * 0.42);
+                int aiPlatformW = 180;
+                int aiPlatformH = 45;
+
+                // Player platform (bottom left)
+                g2d.setColor(new Color(139, 90, 43));
+                g2d.fillOval(playerPlatformX, playerPlatformY, playerPlatformW, playerPlatformH);
+                g2d.setColor(new Color(160, 120, 80));
+                g2d.fillOval(playerPlatformX + 5, playerPlatformY + 5, playerPlatformW - 10, playerPlatformH - 10);
+
+                // AI platform (top right)
+                g2d.setColor(new Color(139, 90, 43));
+                g2d.fillOval(aiPlatformX, aiPlatformY, aiPlatformW, aiPlatformH);
+                g2d.setColor(new Color(160, 120, 80));
+                g2d.fillOval(aiPlatformX + 5, aiPlatformY + 5, aiPlatformW - 10, aiPlatformH - 10);
+            }
+
+            @Override
+            public void doLayout() {
+                super.doLayout();
+                int w = getWidth();
+                int h = getHeight();
+
+                // Position AI info box (top left)
+                aiInfoBox.setBounds(15, 10, 260, 75);
+
+                // Position AI Pokemon (above AI platform)
+                int aiPlatformX = (int)(w * 0.65);
+                int aiPlatformY = (int)(h * 0.42);
+                aiPokemonImageLabel.setBounds(aiPlatformX + 15, aiPlatformY - 130, 150, 150);
+
+                // Position Player info box (bottom right area)
+                playerInfoBox.setBounds(w - 275, h - 95, 260, 75);
+
+                // Position Player Pokemon (above player platform)
+                int playerPlatformX = (int)(w * 0.08);
+                int playerPlatformY = h - 70;
+                playerPokemonImageLabel.setBounds(playerPlatformX + 10, playerPlatformY - 180, 200, 200);
+            }
+        };
+        panel.setLayout(null);
+        panel.setPreferredSize(new Dimension(880, 300));
+
         panel.add(aiPokemonImageLabel);
-
-        panel.add(Box.createVerticalStrut(5));
-
-        // Pokemon name
-        aiPokemonNameLabel = new JLabel("Pokemon: -");
-        aiPokemonNameLabel.setFont(new Font("Arial", Font.PLAIN, 11));
-        aiPokemonNameLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        panel.add(aiPokemonNameLabel);
-
-        panel.add(Box.createVerticalStrut(5));
-
-        // HP Label
-        aiHPLabel = new JLabel("HP: - / -");
-        aiHPLabel.setFont(new Font("Arial", Font.PLAIN, 11));
-        aiHPLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        panel.add(aiHPLabel);
-
-        panel.add(Box.createVerticalStrut(5));
-
-        // HP Bar
-        aiHPBar = new JProgressBar(0, 100);
-        aiHPBar.setStringPainted(true);
-        aiHPBar.setPreferredSize(new Dimension(180, 20));
-        aiHPBar.setAlignmentX(Component.LEFT_ALIGNMENT);
-        panel.add(aiHPBar);
-
-        // Team panel for AI
-        panel.add(Box.createVerticalStrut(10));
-        aiTeamPanel = createTeamPanel("AI Team");
-        panel.add(aiTeamPanel);
+        panel.add(aiInfoBox);
+        panel.add(playerPokemonImageLabel);
+        panel.add(playerInfoBox);
 
         return panel;
+    }
+
+    private JPanel createPokemonInfoBox(boolean isPlayer) {
+        JPanel box = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                Graphics2D g2d = (Graphics2D) g;
+                int w = getWidth();
+                int h = getHeight();
+
+                // Outer border
+                g2d.setColor(new Color(64, 64, 64));
+                g2d.fillRect(0, 0, w, h);
+
+                // Inner background
+                g2d.setColor(new Color(248, 248, 248));
+                g2d.fillRect(4, 4, w - 8, h - 8);
+
+                // 3D effect
+                g2d.setColor(Color.WHITE);
+                g2d.drawLine(4, 4, w - 4, 4);
+                g2d.drawLine(4, 4, 4, h - 4);
+                g2d.setColor(new Color(180, 180, 180));
+                g2d.drawLine(w - 4, 4, w - 4, h - 4);
+                g2d.drawLine(4, h - 4, w - 4, h - 4);
+            }
+        };
+        box.setLayout(new BoxLayout(box, BoxLayout.Y_AXIS));
+        box.setBorder(BorderFactory.createEmptyBorder(10, 15, 10, 15));
+        box.setOpaque(false);
+
+        // Pokemon name
+        JLabel nameLabel = new JLabel(isPlayer ? "Your Pokemon" : "Enemy Pokemon");
+        nameLabel.setFont(new Font("SansSerif", Font.BOLD, 14));
+        nameLabel.setForeground(Color.BLACK);
+        nameLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        box.add(nameLabel);
+
+        if (isPlayer) {
+            playerPokemonNameLabel = nameLabel;
+        } else {
+            aiPokemonNameLabel = nameLabel;
+        }
+
+        box.add(Box.createVerticalStrut(5));
+
+        // HP label row
+        JPanel hpRow = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
+        hpRow.setOpaque(false);
+        hpRow.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JLabel hpText = new JLabel("HP:");
+        hpText.setFont(new Font("SansSerif", Font.PLAIN, 12));
+        hpText.setForeground(Color.BLACK);
+        hpRow.add(hpText);
+
+        // HP Bar
+        JProgressBar hpBar = new JProgressBar(0, 100);
+        hpBar.setValue(100);
+        hpBar.setStringPainted(false);
+        hpBar.setPreferredSize(new Dimension(150, 14));
+        hpBar.setForeground(new Color(76, 175, 80));
+        hpBar.setBackground(new Color(48, 48, 48));
+        hpRow.add(hpBar);
+
+        if (isPlayer) {
+            playerHPBar = hpBar;
+        } else {
+            aiHPBar = hpBar;
+        }
+
+        box.add(hpRow);
+
+        box.add(Box.createVerticalStrut(3));
+
+        // HP numbers
+        JLabel hpNumLabel = new JLabel("100 / 100");
+        hpNumLabel.setFont(new Font("SansSerif", Font.PLAIN, 11));
+        hpNumLabel.setForeground(Color.GRAY);
+        hpNumLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        box.add(hpNumLabel);
+
+        if (isPlayer) {
+            playerHPLabel = hpNumLabel;
+        } else {
+            aiHPLabel = hpNumLabel;
+        }
+
+        return box;
+    }
+
+    private JPanel createControlsPanel() {
+        JPanel panel = new JPanel(new BorderLayout(10, 5));
+        panel.setBackground(UIStyleConstants.DARK_BG);
+        panel.setPreferredSize(new Dimension(880, 240));
+
+        // Left side: Message box
+        JPanel messageBox = createMessageBox();
+        panel.add(messageBox, BorderLayout.CENTER);
+
+        // Right side: Action panel (moves + team)
+        JPanel actionPanel = new JPanel(new BorderLayout(5, 5));
+        actionPanel.setBackground(UIStyleConstants.DARK_BG);
+        actionPanel.setPreferredSize(new Dimension(420, 230));
+
+        // Moves panel (2x2 grid)
+        movesPanel = createMovesPanel();
+        actionPanel.add(movesPanel, BorderLayout.CENTER);
+
+        // Team panel (below moves)
+        teamPanel = createTeamPanel();
+        actionPanel.add(teamPanel, BorderLayout.SOUTH);
+
+        panel.add(actionPanel, BorderLayout.EAST);
+
+        // Battle ended panel (hidden initially)
+        battleEndedPanel = createBattleEndedPanel();
+        battleEndedPanel.setVisible(false);
+
+        return panel;
+    }
+
+    private JPanel createMessageBox() {
+        JPanel box = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                Graphics2D g2d = (Graphics2D) g;
+                int w = getWidth();
+                int h = getHeight();
+
+                // Outer white border
+                g2d.setColor(UIStyleConstants.TEXT_LIGHT);
+                g2d.fillRect(0, 0, w, h);
+
+                // Dark border
+                g2d.setColor(UIStyleConstants.BORDER_DARK);
+                g2d.fillRect(4, 4, w - 8, h - 8);
+
+                // Inner cream background
+                g2d.setColor(UIStyleConstants.MENU_BG);
+                g2d.fillRect(8, 8, w - 16, h - 16);
+
+                // 3D effect
+                g2d.setColor(Color.WHITE);
+                g2d.drawLine(8, 8, w - 8, 8);
+                g2d.drawLine(8, 8, 8, h - 8);
+                g2d.setColor(UIStyleConstants.SHADOW_COLOR);
+                g2d.drawLine(w - 8, 8, w - 8, h - 8);
+                g2d.drawLine(8, h - 8, w - 8, h - 8);
+            }
+        };
+        box.setLayout(new BorderLayout());
+        box.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
+
+        messageArea = new JTextArea();
+        messageArea.setFont(UIStyleConstants.MENU_FONT);
+        messageArea.setForeground(UIStyleConstants.TEXT_PRIMARY);
+        messageArea.setBackground(UIStyleConstants.MENU_BG);
+        messageArea.setEditable(false);
+        messageArea.setLineWrap(true);
+        messageArea.setWrapStyleWord(true);
+        messageArea.setText("What will you do?");
+        messageArea.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+
+        box.add(messageArea, BorderLayout.CENTER);
+
+        return box;
     }
 
     private JPanel createMovesPanel() {
-        JPanel panel = new JPanel();
-        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-        panel.setBorder(new TitledBorder("Moves"));
-        panel.setBackground(new Color(255, 255, 200));
-        panel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        JPanel outerPanel = new JPanel();
+        outerPanel.setLayout(new BorderLayout());
+        outerPanel.setBackground(Color.WHITE);
+        outerPanel.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(200, 200, 200), 2),
+            BorderFactory.createEmptyBorder(10, 10, 10, 10)
+        ));
+        outerPanel.setPreferredSize(new Dimension(400, 140));
 
-        JLabel placeholder = new JLabel("Select a Pokemon to see moves");
-        placeholder.setAlignmentX(Component.LEFT_ALIGNMENT);
-        panel.add(placeholder);
+        JPanel grid = new JPanel(new GridLayout(2, 2, 8, 8));
+        grid.setBackground(Color.WHITE);
+
+        for (int i = 0; i < 4; i++) {
+            moveButtons[i] = new JButton("-");
+            moveButtons[i].setFont(new Font("SansSerif", Font.BOLD, 12));
+            moveButtons[i].setEnabled(false);
+            moveButtons[i].setFocusPainted(false);
+            final int moveIndex = i;
+            moveButtons[i].addActionListener(e -> executeMove(moveIndex));
+            grid.add(moveButtons[i]);
+        }
+
+        outerPanel.add(grid, BorderLayout.CENTER);
+
+        return outerPanel;
+    }
+
+    private JPanel createTeamPanel() {
+        JPanel panel = new JPanel();
+        panel.setLayout(new FlowLayout(FlowLayout.LEFT, 8, 5));
+        panel.setBackground(Color.WHITE);
+        panel.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(200, 200, 200), 2),
+            BorderFactory.createEmptyBorder(10, 10, 10, 10)
+        ));
+        panel.setPreferredSize(new Dimension(420, 70));
+
+        JLabel label = new JLabel("SWITCH:");
+        label.setFont(new Font("SansSerif", Font.BOLD, 12));
+        panel.add(label);
 
         return panel;
     }
 
-    private JPanel createTeamPanel(String title) {
-        JPanel panel = new JPanel();
-        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-        panel.setBorder(new TitledBorder(title));
-        panel.setBackground(new Color(200, 255, 200));
-        panel.setAlignmentX(Component.LEFT_ALIGNMENT);
+    private JPanel createBattleEndedPanel() {
+        JPanel panel = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                Graphics2D g2d = (Graphics2D) g;
+                int w = getWidth();
+                int h = getHeight();
 
-        JLabel placeholder = new JLabel("No Pokemon in team");
-        placeholder.setAlignmentX(Component.LEFT_ALIGNMENT);
-        panel.add(placeholder);
+                // Semi-transparent overlay
+                g2d.setColor(new Color(0, 0, 0, 200));
+                g2d.fillRect(0, 0, w, h);
+
+                // Result box
+                int boxW = 400;
+                int boxH = 200;
+                int boxX = (w - boxW) / 2;
+                int boxY = (h - boxH) / 2;
+
+                g2d.setColor(UIStyleConstants.TEXT_LIGHT);
+                g2d.fillRect(boxX, boxY, boxW, boxH);
+                g2d.setColor(UIStyleConstants.BORDER_DARK);
+                g2d.fillRect(boxX + 4, boxY + 4, boxW - 8, boxH - 8);
+                g2d.setColor(UIStyleConstants.MENU_BG);
+                g2d.fillRect(boxX + 8, boxY + 8, boxW - 16, boxH - 16);
+            }
+        };
+        panel.setLayout(new GridBagLayout());
+        panel.setOpaque(false);
+
+        JPanel content = new JPanel();
+        content.setLayout(new BoxLayout(content, BoxLayout.Y_AXIS));
+        content.setOpaque(false);
+
+        winnerLabel = new JLabel("Battle Over!");
+        winnerLabel.setFont(UIStyleConstants.TITLE_FONT);
+        winnerLabel.setForeground(UIStyleConstants.TEXT_PRIMARY);
+        winnerLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        content.add(winnerLabel);
+
+        content.add(Box.createVerticalStrut(20));
+
+        RetroButton backButton = new RetroButton("Back to Menu");
+        backButton.setButtonColor(UIStyleConstants.POKEMON_BLUE);
+        backButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+        backButton.addActionListener(e -> {
+            dispose();
+            if (returnCallback != null) {
+                returnCallback.run();
+            }
+        });
+        content.add(backButton);
+
+        panel.add(content);
 
         return panel;
     }
 
-    private ImageIcon createPlaceholderIcon() {
-        BufferedImage img = new BufferedImage(200, 200, BufferedImage.TYPE_INT_ARGB);
-        Graphics2D g2 = img.createGraphics();
-        g2.setColor(Color.LIGHT_GRAY);
-        g2.fillRect(0, 0, 200, 200);
-        g2.setColor(Color.DARK_GRAY);
-        g2.drawRect(0, 0, 199, 199);
-        g2.dispose();
-        return new ImageIcon(img);
-    }
-
-    private void loadPokemonImage(JLabel imageLabel, Pokemon pokemon) {
+    private void loadPokemonImage(JLabel imageLabel, Pokemon pokemon, boolean isPlayer) {
         if (pokemon == null) {
-            imageLabel.setIcon(createPlaceholderIcon());
+            imageLabel.setIcon(null);
+            if (isPlayer) currentPlayerPokemonId = -1;
+            else currentAIPokemonId = -1;
             return;
         }
 
-        ImageIcon placeholder = createPlaceholderIcon();
-        imageLabel.setIcon(placeholder);
+        // Skip reloading if same Pokemon is already displayed (prevents flickering)
+        int pokemonId = pokemon.getId();
+        if (isPlayer && pokemonId == currentPlayerPokemonId) {
+            return; // Same Pokemon, skip reload
+        }
+        if (!isPlayer && pokemonId == currentAIPokemonId) {
+            return; // Same Pokemon, skip reload
+        }
+
+        // Update tracking
+        if (isPlayer) currentPlayerPokemonId = pokemonId;
+        else currentAIPokemonId = pokemonId;
+
+        int size = isPlayer ? 180 : 120;
+        String cacheKey = pokemonId + "_" + (isPlayer ? "back" : "front") + "_" + size;
+
+        // Check cache first
+        if (imageCache.containsKey(cacheKey)) {
+            imageLabel.setIcon(imageCache.get(cacheKey));
+            return;
+        }
 
         SwingWorker<ImageIcon, Void> worker = new SwingWorker<>() {
             @Override
             protected ImageIcon doInBackground() {
                 try {
-                    String imageUrl = pokemon.getSpriteUrl();
+                    // Try animated GIF first
+                    // Use back sprite for player's Pokemon, front sprite for AI
+                    String animatedUrl = isPlayer ? pokemon.getBackGIF() : pokemon.getFrontGIF();
+                    if (animatedUrl.endsWith(".gif")) {
+                        URL url = new URL(animatedUrl);
+                        // For GIFs, load directly as ImageIcon to preserve animation
+                        ImageIcon gifIcon = new ImageIcon(url);
+                        if (gifIcon.getIconWidth() > 0) {
+                            // Scale the GIF
+                            Image scaledImage = gifIcon.getImage().getScaledInstance(size, size, Image.SCALE_DEFAULT);
+                            return new ImageIcon(scaledImage);
+                        }
+                    }
+
+                    // Fallback to static PNG (back sprite for player)
+                    String imageUrl;
+                    if (isPlayer) {
+                        imageUrl = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/back/" + pokemon.getId() + ".png";
+                    } else {
+                        imageUrl = pokemon.getSpriteUrl();
+                    }
                     URL url = new URL(imageUrl);
                     Image image = ImageIO.read(url);
                     if (image != null) {
-                        Image scaledImage = image.getScaledInstance(200, 200, Image.SCALE_SMOOTH);
+                        Image scaledImage = image.getScaledInstance(size, size, Image.SCALE_SMOOTH);
                         return new ImageIcon(scaledImage);
                     }
                 } catch (IOException e) {
                     System.err.println("Error loading Pokemon image: " + e.getMessage());
                 }
-                return placeholder;
+                return null;
             }
 
             @Override
             protected void done() {
                 try {
                     ImageIcon icon = get();
-                    imageLabel.setIcon(icon);
+                    if (icon != null) {
+                        imageCache.put(cacheKey, icon);
+                        imageLabel.setIcon(icon);
+                    }
                 } catch (Exception e) {
-                    imageLabel.setIcon(placeholder);
+                    // Keep current icon
                 }
             }
         };
         worker.execute();
-    }
-
-    private JPanel createResultPanel() {
-        JPanel panel = new JPanel(new BorderLayout());
-        panel.setBorder(new TitledBorder("Turn Results"));
-        panel.setBackground(Color.WHITE);
-
-        turnResultArea = new JTextArea(5, 30);
-        turnResultArea.setEditable(false);
-        turnResultArea.setFont(new Font("Monospaced", Font.PLAIN, 11));
-        turnResultArea.setBackground(new Color(250, 250, 250));
-        turnResultArea.setText("No turn executed yet.");
-
-        JScrollPane scrollPane = new JScrollPane(turnResultArea);
-        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
-        panel.add(scrollPane, BorderLayout.CENTER);
-
-        return panel;
-    }
-
-    private JPanel createErrorPanel() {
-        JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        panel.setBackground(Color.WHITE);
-
-        errorLabel = new JLabel("");
-        errorLabel.setForeground(Color.RED);
-        errorLabel.setFont(new Font("Arial", Font.BOLD, 12));
-        errorLabel.setVisible(false);
-        panel.add(errorLabel);
-
-        return panel;
-    }
-
-    private JPanel createBattleEndedPanel() {
-        JPanel panel = new JPanel();
-        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-        panel.setBorder(new TitledBorder("Battle Ended"));
-        panel.setBackground(new Color(255, 255, 200));
-
-        winnerLabel = new JLabel("Winner: ");
-        winnerLabel.setFont(new Font("Arial", Font.BOLD, 16));
-        winnerLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-        panel.add(winnerLabel);
-
-        panel.add(Box.createVerticalStrut(10));
-
-        JButton closeButton = new JButton("Close");
-        closeButton.setAlignmentX(Component.CENTER_ALIGNMENT);
-        closeButton.addActionListener(e -> dispose());
-        panel.add(closeButton);
-
-        return panel;
     }
 
     private void updateDisplay() {
@@ -411,13 +552,9 @@ public class BattleAIView extends JFrame implements BattleAIViewModel.ViewModelL
             return;
         }
 
-        // Clear error first
-        errorLabel.setVisible(false);
-        errorLabel.setText("");
-
         Battle battle = controller.getCurrentBattle();
         if (battle == null) {
-            battleStatusLabel.setText("Status: No battle in progress");
+            messageArea.setText("Waiting for battle to start...");
             return;
         }
 
@@ -425,230 +562,213 @@ public class BattleAIView extends JFrame implements BattleAIViewModel.ViewModelL
         AIPlayer aiPlayer = controller.getAiPlayer();
         List<Pokemon> playerTeam = controller.getPlayerTeam();
 
-        // Update status
-        String status = battle.getBattleStatus();
-        battleStatusLabel.setText("Battle Status: " + status);
-
-        // Update player panel
-        if (playerPokemon != null && playerTeam != null) {
-            updatePlayerInfo(playerPokemon, playerTeam);
+        // Update player Pokemon
+        if (playerPokemon != null) {
+            updatePlayerPokemon(playerPokemon);
         }
 
-        // Update AI panel
-        if (aiPlayer != null) {
-            updateAIInfo(aiPlayer);
+        // Update AI Pokemon
+        if (aiPlayer != null && aiPlayer.getActivePokemon() != null) {
+            updateAIPokemon(aiPlayer.getActivePokemon(), aiPlayer.getDifficulty());
         }
 
-        // Update turn result
+        // Update team panel
+        if (playerTeam != null) {
+            updateTeamDisplay(playerTeam, playerPokemon);
+        }
+
+        // Update turn result / message
         String lastTurn = controller.getLastTurnDescription();
         if (lastTurn != null && !lastTurn.isEmpty()) {
-            turnResultArea.setText(lastTurn);
+            messageArea.setText(lastTurn);
         }
 
         // Check if battle ended
+        String status = battle.getBattleStatus();
         if ("COMPLETED".equals(status)) {
             displayBattleEnded(battle);
-        } else {
-            battleEndedPanel.setVisible(false);
         }
 
         revalidate();
         repaint();
     }
 
-    private void updatePlayerInfo(Pokemon activePokemon, List<Pokemon> team) {
-        // Update player name
-        if (controller.getCurrentBattle() != null) {
-            User player = controller.getCurrentBattle().getPlayer1();
-            playerNameLabel.setText("Player: " + player.getName());
-        }
+    private void updatePlayerPokemon(Pokemon pokemon) {
+        System.out.println("=== updatePlayerPokemon called with: " + pokemon.getName() + " (ID: " + pokemon.getId() + ") ===");
+        playerPokemonNameLabel.setText(pokemon.getName().toUpperCase());
+        loadPokemonImage(playerPokemonImageLabel, pokemon, true);
 
-        // Update active Pokemon
-        playerPokemonNameLabel.setText("Pokemon: " + activePokemon.getName());
-        loadPokemonImage(playerPokemonImageLabel, activePokemon);
-
-        // Update HP
-        int currentHP = activePokemon.getStats().getHp();
-        Integer maxHP = maxHPMap.get(activePokemon);
+        int currentHP = pokemon.getStats().getHp();
+        Integer maxHP = maxHPMap.get(pokemon);
         if (maxHP == null) {
             maxHP = currentHP;
-            maxHPMap.put(activePokemon, maxHP);
+            maxHPMap.put(pokemon, maxHP);
         }
 
-        playerHPLabel.setText("HP: " + currentHP + " / " + maxHP);
+        playerHPLabel.setText(currentHP + " / " + maxHP);
         int hpPercent = maxHP > 0 ? (currentHP * 100 / maxHP) : 0;
         playerHPBar.setValue(hpPercent);
-        playerHPBar.setString(hpPercent + "%");
 
-        // Set HP bar color based on percentage
+        // Update HP bar color based on percentage
         if (hpPercent > 50) {
-            playerHPBar.setForeground(Color.GREEN);
+            playerHPBar.setForeground(new Color(76, 175, 80)); // Green
         } else if (hpPercent > 25) {
-            playerHPBar.setForeground(Color.ORANGE);
+            playerHPBar.setForeground(new Color(255, 193, 7)); // Yellow
         } else {
-            playerHPBar.setForeground(Color.RED);
+            playerHPBar.setForeground(new Color(244, 67, 54)); // Red
         }
 
         // Update moves
-        updateMovesPanel(activePokemon);
-
-        // Update team
-        updatePlayerTeamPanel(team, activePokemon);
+        updateMovesDisplay(pokemon);
     }
 
-    private void updateAIInfo(AIPlayer aiPlayer) {
-        // Update AI name
-        aiNameLabel.setText("AI: " + aiPlayer.getName() + " (Difficulty: " + aiPlayer.getDifficulty() + ")");
+    private void updateAIPokemon(Pokemon pokemon, String difficulty) {
+        aiPokemonNameLabel.setText(pokemon.getName().toUpperCase() + " (Lv.50)");
+        loadPokemonImage(aiPokemonImageLabel, pokemon, false);
 
-        Pokemon activePokemon = aiPlayer.getActivePokemon();
-        if (activePokemon == null) {
-            return;
-        }
-
-        // Update active Pokemon
-        aiPokemonNameLabel.setText("Pokemon: " + activePokemon.getName());
-        loadPokemonImage(aiPokemonImageLabel, activePokemon);
-
-        // Update HP
-        int currentHP = activePokemon.getStats().getHp();
-        Integer maxHP = maxHPMap.get(activePokemon);
+        int currentHP = pokemon.getStats().getHp();
+        Integer maxHP = maxHPMap.get(pokemon);
         if (maxHP == null) {
             maxHP = currentHP;
-            maxHPMap.put(activePokemon, maxHP);
+            maxHPMap.put(pokemon, maxHP);
         }
 
-        aiHPLabel.setText("HP: " + currentHP + " / " + maxHP);
+        aiHPLabel.setText(currentHP + " / " + maxHP);
         int hpPercent = maxHP > 0 ? (currentHP * 100 / maxHP) : 0;
         aiHPBar.setValue(hpPercent);
-        aiHPBar.setString(hpPercent + "%");
 
-        // Set HP bar color
+        // Update HP bar color based on percentage
         if (hpPercent > 50) {
-            aiHPBar.setForeground(Color.GREEN);
+            aiHPBar.setForeground(new Color(76, 175, 80)); // Green
         } else if (hpPercent > 25) {
-            aiHPBar.setForeground(Color.ORANGE);
+            aiHPBar.setForeground(new Color(255, 193, 7)); // Yellow
         } else {
-            aiHPBar.setForeground(Color.RED);
+            aiHPBar.setForeground(new Color(244, 67, 54)); // Red
         }
-
-        // Update AI team
-        updateAITeamPanel(aiPlayer.getTeam());
     }
 
-    private void updateMovesPanel(Pokemon pokemon) {
-        playerMovesPanel.removeAll();
+    private void updateMovesDisplay(Pokemon pokemon) {
+        List<String> moves = pokemon.getMoves();
 
-        if (pokemon == null || pokemon.getMoves() == null || pokemon.getMoves().isEmpty()) {
-            JLabel noMoves = new JLabel("No moves available");
-            noMoves.setAlignmentX(Component.LEFT_ALIGNMENT);
-            playerMovesPanel.add(noMoves);
-            playerMovesPanel.revalidate();
-            playerMovesPanel.repaint();
-            return;
+        for (int i = 0; i < 4; i++) {
+            if (moves != null && i < moves.size()) {
+                String moveName = moves.get(i);
+                moveButtons[i].setText(moveName.toUpperCase());
+                moveButtons[i].setEnabled(true);
+            } else {
+                moveButtons[i].setText("-");
+                moveButtons[i].setEnabled(false);
+            }
         }
-
-        for (String moveName : pokemon.getMoves()) {
-            JButton moveButton = new JButton(moveName);
-            moveButton.setAlignmentX(Component.LEFT_ALIGNMENT);
-            moveButton.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30));
-            moveButton.addActionListener(e -> executePlayerMove(moveName));
-            playerMovesPanel.add(moveButton);
-            playerMovesPanel.add(Box.createVerticalStrut(3));
-        }
-
-        playerMovesPanel.revalidate();
-        playerMovesPanel.repaint();
     }
 
-    private void updatePlayerTeamPanel(List<Pokemon> team, Pokemon activePokemon) {
-        playerTeamPanel.removeAll();
+    private void updateTeamDisplay(List<Pokemon> team, Pokemon activePokemon) {
+        teamPanel.removeAll();
+
+        JLabel label = new JLabel("SWITCH:");
+        label.setFont(new Font("SansSerif", Font.BOLD, 12));
+        teamPanel.add(label);
 
         if (team == null || team.isEmpty()) {
-            JLabel noTeam = new JLabel("No Pokemon in team");
-            noTeam.setAlignmentX(Component.LEFT_ALIGNMENT);
-            playerTeamPanel.add(noTeam);
-            playerTeamPanel.revalidate();
-            playerTeamPanel.repaint();
+            teamPanel.revalidate();
+            teamPanel.repaint();
             return;
         }
 
         for (Pokemon pokemon : team) {
-            JButton pokemonButton = new JButton(pokemon.getName() + " (HP: " + pokemon.getStats().getHp() + ")");
-            pokemonButton.setAlignmentX(Component.LEFT_ALIGNMENT);
-            pokemonButton.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30));
+            if (pokemon == null) continue;
 
-            if (pokemon == activePokemon) {
-                pokemonButton.setEnabled(false);
-                pokemonButton.setText(pokemonButton.getText() + " [ACTIVE]");
-            } else if (pokemon.isFainted()) {
-                pokemonButton.setEnabled(false);
-                pokemonButton.setText(pokemonButton.getText() + " [FAINTED]");
-            } else {
-                pokemonButton.addActionListener(e -> executePlayerSwitch(pokemon));
+            String pokemonName = pokemon.getName();
+            if (pokemonName == null || pokemonName.isEmpty()) {
+                pokemonName = "PKM" + pokemon.getId();
             }
 
-            playerTeamPanel.add(pokemonButton);
-            playerTeamPanel.add(Box.createVerticalStrut(3));
+            String btnText = pokemonName;
+            boolean isActive = (activePokemon != null && pokemon.getId() == activePokemon.getId());
+            boolean isFainted = pokemon.isFainted();
+
+            if (isActive) {
+                btnText += " *";
+            } else if (isFainted) {
+                btnText += " X";
+            }
+
+            JButton pokemonBtn = new JButton(btnText);
+            pokemonBtn.setFont(new Font("SansSerif", Font.PLAIN, 11));
+            pokemonBtn.setFocusPainted(false);
+
+            if (isActive || isFainted) {
+                pokemonBtn.setEnabled(false);
+            } else {
+                final Pokemon switchTarget = pokemon;
+                pokemonBtn.addActionListener(e -> executeSwitch(switchTarget));
+            }
+
+            teamPanel.add(pokemonBtn);
         }
 
-        playerTeamPanel.revalidate();
-        playerTeamPanel.repaint();
+        teamPanel.revalidate();
+        teamPanel.repaint();
     }
 
-    private void updateAITeamPanel(List<Pokemon> team) {
-        aiTeamPanel.removeAll();
-
-        if (team == null || team.isEmpty()) {
-            JLabel noTeam = new JLabel("No Pokemon in team");
-            noTeam.setAlignmentX(Component.LEFT_ALIGNMENT);
-            aiTeamPanel.add(noTeam);
-            aiTeamPanel.revalidate();
-            aiTeamPanel.repaint();
-            return;
-        }
-
-        for (Pokemon pokemon : team) {
-            String status = pokemon.isFainted() ? " [FAINTED]" : "";
-            JLabel pokemonLabel = new JLabel(pokemon.getName() + " (HP: " + pokemon.getStats().getHp() + ")" + status);
-            pokemonLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
-            aiTeamPanel.add(pokemonLabel);
-            aiTeamPanel.add(Box.createVerticalStrut(3));
-        }
-
-        aiTeamPanel.revalidate();
-        aiTeamPanel.repaint();
-    }
-
-    private void executePlayerMove(String moveName) {
-        // Look up the move
-        Move selectedMove = null;
+    private Move findMove(String moveName) {
         for (Move move : JSONLoader.allMoves) {
             if (move.getName().equalsIgnoreCase(moveName)) {
-                selectedMove = move;
-                break;
+                return move;
             }
         }
+        return null;
+    }
+
+    private void executeMove(int moveIndex) {
+        Pokemon playerPokemon = controller.getPlayerActivePokemon();
+        if (playerPokemon == null || playerPokemon.getMoves() == null) {
+            return;
+        }
+
+        List<String> moves = playerPokemon.getMoves();
+        if (moveIndex >= moves.size()) {
+            return;
+        }
+
+        String moveName = moves.get(moveIndex);
+        Move selectedMove = findMove(moveName);
 
         if (selectedMove == null) {
             selectedMove = new Move().setName(moveName).setPower(40);
         }
 
-        // Execute the move through controller
         controller.executePlayerMove(selectedMove);
     }
 
-    private void executePlayerSwitch(Pokemon pokemon) {
+    private void executeSwitch(Pokemon pokemon) {
+        System.out.println("=== EXECUTING SWITCH ===");
         controller.executePlayerSwitch(pokemon);
+        // Force UI refresh after switch (with small delay to let AI turn complete)
+        javax.swing.Timer refreshTimer = new javax.swing.Timer(800, e -> {
+            System.out.println("=== REFRESH TIMER FIRED - Calling updateDisplay ===");
+            updateDisplay();
+        });
+        refreshTimer.setRepeats(false);
+        refreshTimer.start();
     }
 
     private void displayBattleEnded(Battle battle) {
-        battleEndedPanel.setVisible(true);
-
         User winner = battle.getWinner();
         if (winner != null) {
-            winnerLabel.setText("Winner: " + winner.getName());
+            winnerLabel.setText(winner.getName() + " wins!");
         } else {
-            winnerLabel.setText("Battle ended with no winner");
+            winnerLabel.setText("Battle Over!");
         }
+
+        // Show overlay
+        battleEndedPanel.setVisible(true);
+
+        // Add overlay to glass pane
+        JPanel glassPane = new JPanel(new BorderLayout());
+        glassPane.setOpaque(false);
+        glassPane.add(battleEndedPanel, BorderLayout.CENTER);
+        setGlassPane(glassPane);
+        glassPane.setVisible(true);
     }
 }
