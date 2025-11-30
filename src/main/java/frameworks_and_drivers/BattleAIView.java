@@ -1,6 +1,7 @@
 package frameworks_and_drivers;
 
 import interface_adapters.battle_ai.BattleAIController;
+import interface_adapters.battle_ai.BattleAIDataAccessObject;
 import interface_adapters.battle_ai.BattleAIViewModel;
 import interface_adapters.ui.RetroButton;
 import interface_adapters.ui.UIStyleConstants;
@@ -19,8 +20,9 @@ import pokeapi.JSONLoader;
 
 public class BattleAIView extends JFrame implements BattleAIViewModel.ViewModelListener {
     private final BattleAIController controller;
-    private BattleAIViewModel viewModel;
-    private Runnable returnCallback;
+    private final BattleAIDataAccessObject dataAccess;
+    private final BattleAIViewModel viewModel;
+    private final Runnable returnCallback;
 
     // UI Components - Player
     private JLabel playerPokemonNameLabel;
@@ -42,30 +44,24 @@ public class BattleAIView extends JFrame implements BattleAIViewModel.ViewModelL
     private JPanel battleEndedPanel;
     private JLabel winnerLabel;
 
-    // Track max HP for each Pokemon
-    private Map<Pokemon, Integer> maxHPMap = new HashMap<>();
-
     // Track currently displayed Pokemon to avoid reloading same image (prevents flickering)
     private int currentPlayerPokemonId = -1;
     private int currentAIPokemonId = -1;
     private Map<String, ImageIcon> imageCache = new HashMap<>();
 
-    public BattleAIView(BattleAIController controller) {
-        this(controller, null);
-    }
-
-    public BattleAIView(BattleAIController controller, Runnable returnCallback) {
+    public BattleAIView(BattleAIController controller, BattleAIDataAccessObject dataAccess,
+                        BattleAIViewModel viewModel, Runnable returnCallback) {
         this.controller = controller;
-        this.returnCallback = returnCallback;
-        initializeGUI();
-    }
-
-    public void setViewModel(BattleAIViewModel viewModel) {
+        this.dataAccess = dataAccess;
         this.viewModel = viewModel;
+        this.returnCallback = returnCallback;
+
         if (viewModel != null) {
             viewModel.addListener(this);
-            updateDisplay();
         }
+
+        initializeGUI();
+        updateDisplay();
     }
 
     @Override
@@ -347,7 +343,7 @@ public class BattleAIView extends JFrame implements BattleAIViewModel.ViewModelL
         box.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
 
         messageArea = new JTextArea();
-        messageArea.setFont(UIStyleConstants.MENU_FONT);
+        messageArea.setFont(new Font("SansSerif", Font.PLAIN, 12));
         messageArea.setForeground(UIStyleConstants.TEXT_PRIMARY);
         messageArea.setBackground(UIStyleConstants.MENU_BG);
         messageArea.setEditable(false);
@@ -548,19 +544,16 @@ public class BattleAIView extends JFrame implements BattleAIViewModel.ViewModelL
     }
 
     private void updateDisplay() {
-        if (viewModel == null) {
-            return;
-        }
-
-        Battle battle = controller.getCurrentBattle();
+        // Read state from dataAccess (not controller)
+        Battle battle = dataAccess.getBattle();
         if (battle == null) {
             messageArea.setText("Waiting for battle to start...");
             return;
         }
 
-        Pokemon playerPokemon = controller.getPlayerActivePokemon();
-        AIPlayer aiPlayer = controller.getAiPlayer();
-        List<Pokemon> playerTeam = controller.getPlayerTeam();
+        Pokemon playerPokemon = dataAccess.getPlayerActivePokemon();
+        AIPlayer aiPlayer = dataAccess.getAIPlayer();
+        List<Pokemon> playerTeam = dataAccess.getPlayerTeam();
 
         // Update player Pokemon
         if (playerPokemon != null) {
@@ -577,12 +570,6 @@ public class BattleAIView extends JFrame implements BattleAIViewModel.ViewModelL
             updateTeamDisplay(playerTeam, playerPokemon);
         }
 
-        // Update turn result / message
-        String lastTurn = controller.getLastTurnDescription();
-        if (lastTurn != null && !lastTurn.isEmpty()) {
-            messageArea.setText(lastTurn);
-        }
-
         // Check if battle ended
         String status = battle.getBattleStatus();
         if ("COMPLETED".equals(status)) {
@@ -594,16 +581,11 @@ public class BattleAIView extends JFrame implements BattleAIViewModel.ViewModelL
     }
 
     private void updatePlayerPokemon(Pokemon pokemon) {
-        System.out.println("=== updatePlayerPokemon called with: " + pokemon.getName() + " (ID: " + pokemon.getId() + ") ===");
         playerPokemonNameLabel.setText(pokemon.getName().toUpperCase());
         loadPokemonImage(playerPokemonImageLabel, pokemon, true);
 
         int currentHP = pokemon.getStats().getHp();
-        Integer maxHP = maxHPMap.get(pokemon);
-        if (maxHP == null) {
-            maxHP = currentHP;
-            maxHPMap.put(pokemon, maxHP);
-        }
+        int maxHP = pokemon.getStats().getMaxHp();
 
         playerHPLabel.setText(currentHP + " / " + maxHP);
         int hpPercent = maxHP > 0 ? (currentHP * 100 / maxHP) : 0;
@@ -627,11 +609,7 @@ public class BattleAIView extends JFrame implements BattleAIViewModel.ViewModelL
         loadPokemonImage(aiPokemonImageLabel, pokemon, false);
 
         int currentHP = pokemon.getStats().getHp();
-        Integer maxHP = maxHPMap.get(pokemon);
-        if (maxHP == null) {
-            maxHP = currentHP;
-            maxHPMap.put(pokemon, maxHP);
-        }
+        int maxHP = pokemon.getStats().getMaxHp();
 
         aiHPLabel.setText(currentHP + " / " + maxHP);
         int hpPercent = maxHP > 0 ? (currentHP * 100 / maxHP) : 0;
@@ -721,7 +699,7 @@ public class BattleAIView extends JFrame implements BattleAIViewModel.ViewModelL
     }
 
     private void executeMove(int moveIndex) {
-        Pokemon playerPokemon = controller.getPlayerActivePokemon();
+        Pokemon playerPokemon = dataAccess.getPlayerActivePokemon();
         if (playerPokemon == null || playerPokemon.getMoves() == null) {
             return;
         }
@@ -738,19 +716,69 @@ public class BattleAIView extends JFrame implements BattleAIViewModel.ViewModelL
             selectedMove = new Move().setName(moveName).setPower(40);
         }
 
-        controller.executePlayerMove(selectedMove);
+        Battle battle = dataAccess.getBattle();
+        AIPlayer aiPlayer = dataAccess.getAIPlayer();
+        User currentUser = dataAccess.getUser();
+
+        if (battle == null || aiPlayer == null || currentUser == null) return;
+
+        // Create and execute player's turn via controller
+        Player playerAdapter = new UserPlayerAdapter(currentUser);
+        MoveTurn playerTurn = new MoveTurn(1, playerAdapter, 1, selectedMove, aiPlayer);
+        controller.executePlayerTurn(playerTurn);
+        String playerResult = playerTurn.getResult();
+
+        // Get AI switch message from ViewModel (set by interactor)
+        String aiSwitchMsg = "";
+        String aiSwitchedTo = viewModel.getAiSwitchedToName();
+        if (aiSwitchedTo != null) {
+            aiSwitchMsg = "AI sent out " + aiSwitchedTo.toUpperCase() + "!\n\n";
+        }
+
+        // Check if battle ended after player's turn
+        battle = dataAccess.getBattle();
+        if ("COMPLETED".equals(battle.getBattleStatus())) {
+            messageArea.setText("YOU:\n" + playerResult);
+            updateDisplay();
+            return;
+        }
+
+        // Execute AI's turn via controller
+        controller.executeAITurn(battle, aiPlayer, false);
+
+        // Get AI result from ViewModel
+        String aiResult = viewModel.getCurrentTurnDescription();
+        if (aiResult == null) aiResult = "";
+
+        // Get player switch message from ViewModel (set by interactor)
+        String playerSwitchMsg = "";
+        String playerSwitchedTo = viewModel.getPlayerSwitchedToName();
+        if (playerSwitchedTo != null) {
+            playerSwitchMsg = "\n\nYou sent out " + playerSwitchedTo.toUpperCase() + "!";
+        }
+
+        // Show both messages (with switch notifications if applicable)
+        messageArea.setText("YOU:\n" + playerResult + "\n\n" + aiSwitchMsg + "AI:\n" + aiResult + playerSwitchMsg);
+        updateDisplay();
     }
 
     private void executeSwitch(Pokemon pokemon) {
-        System.out.println("=== EXECUTING SWITCH ===");
+        // Execute switch via controller - all logic is in Interactor
         controller.executePlayerSwitch(pokemon);
-        // Force UI refresh after switch (with small delay to let AI turn complete)
-        javax.swing.Timer refreshTimer = new javax.swing.Timer(800, e -> {
-            System.out.println("=== REFRESH TIMER FIRED - Calling updateDisplay ===");
-            updateDisplay();
-        });
-        refreshTimer.setRepeats(false);
-        refreshTimer.start();
+
+        // Get result from ViewModel
+        String result = viewModel.getCurrentTurnDescription();
+        if (result == null) result = "";
+
+        // Get player switch message from ViewModel (if Pokemon fainted after AI's turn)
+        String playerSwitchMsg = "";
+        String playerSwitchedTo = viewModel.getPlayerSwitchedToName();
+        if (playerSwitchedTo != null) {
+            playerSwitchMsg = "\n\nYou sent out " + playerSwitchedTo.toUpperCase() + "!";
+        }
+
+        messageArea.setText(result + playerSwitchMsg);
+        updateDisplay();
     }
 
     private void displayBattleEnded(Battle battle) {
