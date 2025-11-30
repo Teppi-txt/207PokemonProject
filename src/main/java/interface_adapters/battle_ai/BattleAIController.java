@@ -1,9 +1,6 @@
 package interface_adapters.battle_ai;
 
-import entities.AIPlayer;
-import entities.Battle;
 import entities.Pokemon;
-import entities.Turn;
 import entities.User;
 import use_case.battle_ai.BattleAIInputBoundary;
 import use_case.battle_ai.BattleAIInputData;
@@ -12,7 +9,7 @@ import java.util.List;
 
 /**
  * Controller for Battle AI use case.
- * Handles battle setup, player turns, and AI turns.
+ * Handles battle setup, player moves, and player switches.
  */
 public class BattleAIController {
 
@@ -31,26 +28,20 @@ public class BattleAIController {
     }
 
     /**
-     * Executes a player's turn in the battle.
+     * Executes a player's switch to a different Pokemon by ID.
+     * @param pokemonId the ID of the Pokemon to switch to
      */
-    public void executePlayerTurn(Turn turn) {
-        BattleAIInputData inputData = new BattleAIInputData(turn);
+    public void executePlayerSwitch(int pokemonId) {
+        BattleAIInputData inputData = BattleAIInputData.forSwitchById(pokemonId);
         interactor.execute(inputData);
     }
 
     /**
-     * Executes the AI player's turn in an ongoing battle.
+     * Executes a player's move by index.
+     * @param moveIndex the index of the move in the active Pokemon's move list
      */
-    public void executeAITurn(Battle battle, AIPlayer aiPlayer, boolean forcedSwitch) {
-        BattleAIInputData inputData = new BattleAIInputData(battle, aiPlayer, forcedSwitch);
-        interactor.execute(inputData);
-    }
-
-    /**
-     * Executes a player's switch to a different Pokemon.
-     */
-    public void executePlayerSwitch(Pokemon switchTarget) {
-        BattleAIInputData inputData = new BattleAIInputData(switchTarget);
+    public void executePlayerMove(int moveIndex) {
+        BattleAIInputData inputData = new BattleAIInputData(moveIndex);
         interactor.execute(inputData);
     }
 }

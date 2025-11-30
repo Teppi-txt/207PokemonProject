@@ -379,7 +379,7 @@ public class DeckSelectionForBattleView extends JFrame {
             controller.setupBattle(user, battleDeck, difficulty);
 
             // Create battle view
-            BattleAIView battleView = new BattleAIView(controller, dataAccess, viewModel, returnCallback);
+            BattleAIView battleView = new BattleAIView(controller, viewModel, returnCallback);
             battleView.setVisible(true);
         };
 
