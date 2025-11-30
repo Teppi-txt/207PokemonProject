@@ -341,7 +341,7 @@ public class BattleAIController {
      */
     private AIPlayer generateAIDeck(String difficulty) {
         // Ensure Pokemon data is loaded
-        if (JSONLoader.allPokemon.isEmpty()) {
+        if (AllPokemon.getInstance().getAllPokemon().isEmpty()) {
             return null;
         }
 
@@ -354,7 +354,7 @@ public class BattleAIController {
         if ("easy".equalsIgnoreCase(difficulty)) {
             // Easy: Pick actually weak Pokemon (low base stats, unevolved)
             List<Pokemon> weakPokemon = new ArrayList<>();
-            for (Pokemon p : JSONLoader.allPokemon) {
+            for (Pokemon p : AllPokemon.getInstance().getAllPokemon()) {
                 // Calculate total base stats
                 Stats s = p.getStats();
                 int totalStats = s.getHp() + s.getAttack() + s.getDefense() +
@@ -372,7 +372,7 @@ public class BattleAIController {
         } else if ("hard".equalsIgnoreCase(difficulty)) {
             // Hard: Pick strong fully-evolved Pokemon (total stats > 500)
             List<Pokemon> strongPokemon = new ArrayList<>();
-            for (Pokemon p : JSONLoader.allPokemon) {
+            for (Pokemon p : AllPokemon.getInstance().getAllPokemon()) {
                 Stats s = p.getStats();
                 int totalStats = s.getHp() + s.getAttack() + s.getDefense() +
                                  s.getSpAttack() + s.getSpDefense() + s.getSpeed();
@@ -387,7 +387,7 @@ public class BattleAIController {
         } else {
             // Medium: Pick mid-tier Pokemon (total stats 350-480)
             List<Pokemon> midPokemon = new ArrayList<>();
-            for (Pokemon p : JSONLoader.allPokemon) {
+            for (Pokemon p : AllPokemon.getInstance().getAllPokemon()) {
                 Stats s = p.getStats();
                 int totalStats = s.getHp() + s.getAttack() + s.getDefense() +
                                  s.getSpAttack() + s.getSpDefense() + s.getSpeed();
@@ -491,7 +491,7 @@ public class BattleAIController {
         String moveName = pokemon.getMoves().get(new Random().nextInt(pokemon.getMoves().size()));
 
         // Look up the move in JSONLoader
-        for (Move move : JSONLoader.allMoves) {
+        for (Move move : AllMoves.getInstance().getAllMoves()) {
             if (move.getName().equalsIgnoreCase(moveName)) {
                 return move;
             }

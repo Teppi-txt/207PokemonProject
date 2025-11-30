@@ -1,5 +1,7 @@
 package app;
 
+import entities.AllMoves;
+import entities.AllPokemon;
 import entities.Pokemon;
 import entities.User;
 import pokeapi.JSONLoader;
@@ -24,8 +26,8 @@ public class BattleAIMain {
         System.out.println("Loading Pokemon data...");
         JSONLoader.loadPokemon();
         JSONLoader.loadMoves();
-        System.out.println("Loaded " + JSONLoader.allPokemon.size() + " Pokemon");
-        System.out.println("Loaded " + JSONLoader.allMoves.size() + " Moves");
+        System.out.println("Loaded " + AllPokemon.getInstance().getAllPokemon().size() + " Pokemon");
+        System.out.println("Loaded " + AllMoves.getInstance().getAllMoves().size() + " Moves");
 
         // Create a test user with some Pokemon
         User user = createTestUser();
@@ -44,11 +46,11 @@ public class BattleAIMain {
         User user = new User(1, "Ash", "ash@pokemon.com", 1000);
 
         // Add some Pokemon to the user's collection
-        if (!JSONLoader.allPokemon.isEmpty()) {
+        if (!AllPokemon.getInstance().getAllPokemon().isEmpty()) {
             // Add first 6 Pokemon from the loaded data
-            int count = Math.min(6, JSONLoader.allPokemon.size());
+            int count = Math.min(6, AllPokemon.getInstance().getAllPokemon().size());
             for (int i = 0; i < count; i++) {
-                Pokemon pokemon = JSONLoader.allPokemon.get(i).copy();
+                Pokemon pokemon = AllPokemon.getInstance().getAllPokemon().get(i).copy();
                 user.addPokemon(pokemon);
             }
             System.out.println("Test user created with " + user.getOwnedPokemon().size() + " Pokemon");

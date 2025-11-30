@@ -1,5 +1,6 @@
 package app;
 
+import entities.AllPokemon;
 import entities.Deck;
 import entities.Pokemon;
 import entities.User;
@@ -61,9 +62,9 @@ public class BattlePlayerMain {
         User defaultUser = new User(1, "Trainer", "trainer@pokemon.com", 5000);
 
         // Give the user a healthy roster to choose from.
-        int ownedCount = Math.min(30, JSONLoader.allPokemon.size());
+        int ownedCount = Math.min(30, AllPokemon.getInstance().getAllPokemon().size());
         for (int i = 0; i < ownedCount; i++) {
-            defaultUser.addPokemon(JSONLoader.allPokemon.get(i).copy());
+            defaultUser.addPokemon(AllPokemon.getInstance().getAllPokemon().get(i).copy());
         }
 
         // Seed decks from our template list so the deck-based setup view works.
@@ -85,7 +86,7 @@ public class BattlePlayerMain {
     }
 
     private static Pokemon fetchPokemonFromJson(String name) {
-        for (Pokemon candidate : JSONLoader.allPokemon) {
+        for (Pokemon candidate : AllPokemon.getInstance().getAllPokemon()) {
             if (candidate.getName().equalsIgnoreCase(name)) {
                 ArrayList<String> moves = candidate.getMoves();
                 int limit = Math.min(4, moves.size());

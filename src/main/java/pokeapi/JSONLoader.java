@@ -1,5 +1,7 @@
 package pokeapi;
 
+import entities.AllMoves;
+import entities.AllPokemon;
 import entities.Move;
 import entities.Pokemon;
 import org.json.JSONArray;
@@ -15,8 +17,9 @@ import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 
 public class JSONLoader {
-    public static final ArrayList<Pokemon> allPokemon = new ArrayList<>();
-    public static final ArrayList<Move> allMoves = new ArrayList<>();
+    private static volatile JSONLoader instance;
+
+    private JSONLoader() {}
 
     static String readFile(String path, Charset encoding) throws IOException {
         byte[] encoded = Files.readAllBytes(Paths.get(path));
@@ -29,7 +32,7 @@ public class JSONLoader {
             JSONArray pokemonJSONArray = new JSONArray(jsonContent);
 
             for (int i = 0; i < pokemonJSONArray.length(); i++) {
-                allPokemon.add(Pokemon.fromJSON(pokemonJSONArray.getJSONObject(i)));
+                AllPokemon.getInstance().getAllPokemon().add(Pokemon.fromJSON(pokemonJSONArray.getJSONObject(i)));
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -42,11 +45,22 @@ public class JSONLoader {
             JSONArray moveJSONArray = new JSONArray(jsonContent);
 
             for (int i = 0; i < moveJSONArray.length(); i++) {
-                allMoves.add(Move.fromJSON(moveJSONArray.getJSONObject(i)));
+                AllMoves.getInstance().getAllMoves().add(Move.fromJSON(moveJSONArray.getJSONObject(i)));
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public static JSONLoader getInstance() {
+        if (instance == null) {
+            synchronized (JSONLoader.class) {
+                if (instance == null) {
+                    instance = new JSONLoader();
+                }
+            }
+        }
+        return instance;
     }
 
     public static void main(String[] args) {

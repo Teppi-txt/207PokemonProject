@@ -501,7 +501,7 @@ public class BattlePlayerView extends JFrame implements PropertyChangeListener {
     }
 
     private Move loadMove(String moveName) {
-        for (Move move : JSONLoader.allMoves) {
+        for (Move move : AllMoves.getInstance().getAllMoves()) {
             if (move.getName().equalsIgnoreCase(moveName)) {
                 return move;
             }
