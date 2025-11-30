@@ -4,23 +4,39 @@ import java.awt.*;
 import java.util.Map;
 
 /**
- * Centralized UI styling constants for consistent visual design across all views.
- * Provides color palette, typography, spacing, and Pokemon type colors.
+ * Simple UI styling constants.
  */
 public class UIStyleConstants {
 
-    // ============ COLOR PALETTE ============
-    public static final Color PRIMARY_COLOR = new Color(59, 76, 202);        // Pokemon blue
-    public static final Color SECONDARY_COLOR = new Color(255, 203, 5);      // Pokemon yellow
-    public static final Color BACKGROUND = new Color(245, 245, 245);         // Light gray
-    public static final Color CARD_BG = Color.WHITE;                         // White
-    public static final Color HP_HIGH = new Color(76, 175, 80);              // Green
-    public static final Color HP_MEDIUM = new Color(255, 193, 7);            // Yellow/Orange
-    public static final Color HP_LOW = new Color(244, 67, 54);               // Red
-    public static final Color TEXT_PRIMARY = new Color(33, 33, 33);          // Dark gray
-    public static final Color TEXT_SECONDARY = new Color(117, 117, 117);     // Medium gray
+    // Simple color palette
+    public static final Color PRIMARY_COLOR = new Color(50, 50, 50);
+    public static final Color PRIMARY_DARK = new Color(30, 30, 30);
+    public static final Color SECONDARY_COLOR = new Color(100, 100, 100);
+    public static final Color POKEMON_BLUE = new Color(66, 133, 244);
+    public static final Color POKEMON_BLUE_LIGHT = new Color(100, 160, 255);
 
-    // ============ POKEMON TYPE COLORS ============
+    // Backgrounds
+    public static final Color BACKGROUND = Color.WHITE;
+    public static final Color MENU_BG = new Color(250, 250, 250);
+    public static final Color CARD_BG = Color.WHITE;
+    public static final Color DARK_BG = new Color(40, 40, 40);
+
+    // HP Colors
+    public static final Color HP_HIGH = new Color(76, 175, 80);
+    public static final Color HP_MEDIUM = new Color(255, 193, 7);
+    public static final Color HP_LOW = new Color(244, 67, 54);
+
+    // Text colors
+    public static final Color TEXT_PRIMARY = new Color(33, 33, 33);
+    public static final Color TEXT_SECONDARY = new Color(117, 117, 117);
+    public static final Color TEXT_LIGHT = Color.WHITE;
+
+    // Borders
+    public static final Color BORDER_DARK = new Color(200, 200, 200);
+    public static final Color BORDER_LIGHT = new Color(230, 230, 230);
+    public static final Color SHADOW_COLOR = new Color(150, 150, 150);
+
+    // Pokemon type colors
     public static final Map<String, Color> TYPE_COLORS = Map.ofEntries(
             Map.entry("normal", new Color(168, 168, 120)),
             Map.entry("fighting", new Color(192, 48, 40)),
@@ -42,34 +58,30 @@ public class UIStyleConstants {
             Map.entry("fairy", new Color(238, 153, 172))
     );
 
-    // ============ TYPOGRAPHY ============
-    public static final Font TITLE_FONT = new Font("Segoe UI", Font.BOLD, 24);
-    public static final Font HEADING_FONT = new Font("Segoe UI", Font.BOLD, 18);
-    public static final Font BODY_FONT = new Font("Segoe UI", Font.PLAIN, 14);
-    public static final Font SMALL_FONT = new Font("Segoe UI", Font.PLAIN, 12);
-    public static final Font EXTRA_LARGE_FONT = new Font("Segoe UI", Font.BOLD, 48);
+    // Simple fonts
+    public static final Font TITLE_FONT = new Font("SansSerif", Font.BOLD, 28);
+    public static final Font HEADING_FONT = new Font("SansSerif", Font.BOLD, 18);
+    public static final Font BODY_FONT = new Font("SansSerif", Font.PLAIN, 14);
+    public static final Font SMALL_FONT = new Font("SansSerif", Font.PLAIN, 12);
+    public static final Font EXTRA_LARGE_FONT = new Font("SansSerif", Font.BOLD, 36);
+    public static final Font PIXEL_FONT = new Font("SansSerif", Font.BOLD, 16);
+    public static final Font MENU_FONT = new Font("SansSerif", Font.BOLD, 16);
 
-    // ============ SPACING ============
+    // Spacing
     public static final int SMALL_PADDING = 8;
     public static final int MEDIUM_PADDING = 16;
     public static final int LARGE_PADDING = 24;
     public static final int XLARGE_PADDING = 32;
 
-    // ============ BORDER & SHAPE ============
-    public static final int BORDER_RADIUS = 10;
-    public static final int SMALL_BORDER_RADIUS = 6;
+    // Shape
+    public static final int BORDER_RADIUS = 8;
+    public static final int SMALL_BORDER_RADIUS = 4;
 
-    // ============ SIZES ============
+    // Sizes
     public static final int SPRITE_SIZE = 96;
     public static final int LARGE_SPRITE_SIZE = 128;
     public static final int SMALL_SPRITE_SIZE = 64;
 
-    /**
-     * Gets the color for a Pokemon type.
-     *
-     * @param typeName The type name (case-insensitive)
-     * @return The color for that type, or gray if unknown
-     */
     public static Color getTypeColor(String typeName) {
         if (typeName == null) {
             return Color.GRAY;
@@ -77,12 +89,6 @@ public class UIStyleConstants {
         return TYPE_COLORS.getOrDefault(typeName.toLowerCase(), Color.GRAY);
     }
 
-    /**
-     * Gets HP bar color based on percentage.
-     *
-     * @param hpPercent HP percentage (0.0 to 1.0)
-     * @return Appropriate color (green, yellow, or red)
-     */
     public static Color getHPColor(float hpPercent) {
         if (hpPercent > 0.5f) {
             return HP_HIGH;
@@ -93,7 +99,6 @@ public class UIStyleConstants {
         }
     }
 
-    // Private constructor to prevent instantiation
     private UIStyleConstants() {
         throw new UnsupportedOperationException("Utility class cannot be instantiated");
     }

@@ -175,19 +175,28 @@ public class BattleAIController {
             return;
         }
 
-        if (!playerTeam.contains(pokemon)) {
+        // Find the Pokemon in our team by ID (reference equality may fail)
+        Pokemon targetPokemon = null;
+        for (Pokemon p : playerTeam) {
+            if (p.getId() == pokemon.getId()) {
+                targetPokemon = p;
+                break;
+            }
+        }
+
+        if (targetPokemon == null) {
             presenter.prepareFailView("This Pokemon is not in your team!");
             return;
         }
 
-        if (pokemon.isFainted()) {
+        if (targetPokemon.isFainted()) {
             presenter.prepareFailView("This Pokemon has fainted!");
             return;
         }
 
         // Switch Pokemon
-        this.playerActivePokemon = pokemon;
-        System.out.println("You switched to " + pokemon.getName());
+        this.playerActivePokemon = targetPokemon;
+        System.out.println("You switched to " + targetPokemon.getName());
 
         // Update presenter
         presenter.updateTeams(playerTeam, aiPlayer);
@@ -343,10 +352,16 @@ public class BattleAIController {
         List<Pokemon> aiTeam = new ArrayList<>();
 
         if ("easy".equalsIgnoreCase(difficulty)) {
-            // Easy: Pick weaker Pokemon (low IDs)
+            // Easy: Pick actually weak Pokemon (low base stats, unevolved)
             List<Pokemon> weakPokemon = new ArrayList<>();
             for (Pokemon p : JSONLoader.allPokemon) {
-                if (p.getId() <= 151) { // Gen 1 Pokemon
+                // Calculate total base stats
+                Stats s = p.getStats();
+                int totalStats = s.getHp() + s.getAttack() + s.getDefense() +
+                                 s.getSpAttack() + s.getSpDefense() + s.getSpeed();
+                // Only pick Pokemon with total stats < 350 (weak/unevolved Pokemon)
+                // Also limit to Gen 1-2 for familiarity
+                if (totalStats < 350 && p.getId() <= 251) {
                     weakPokemon.add(p);
                 }
             }
@@ -355,10 +370,13 @@ public class BattleAIController {
                 aiTeam.add(weakPokemon.get(i).copy());
             }
         } else if ("hard".equalsIgnoreCase(difficulty)) {
-            // Hard: Pick legendary/strong Pokemon
+            // Hard: Pick strong fully-evolved Pokemon (total stats > 500)
             List<Pokemon> strongPokemon = new ArrayList<>();
             for (Pokemon p : JSONLoader.allPokemon) {
-                if (p.getStats().getHp() > 80) { // High HP Pokemon
+                Stats s = p.getStats();
+                int totalStats = s.getHp() + s.getAttack() + s.getDefense() +
+                                 s.getSpAttack() + s.getSpDefense() + s.getSpeed();
+                if (totalStats > 500) {
                     strongPokemon.add(p);
                 }
             }
@@ -367,11 +385,19 @@ public class BattleAIController {
                 aiTeam.add(strongPokemon.get(i).copy());
             }
         } else {
-            // Medium: Random Pokemon
-            List<Pokemon> shuffled = new ArrayList<>(JSONLoader.allPokemon);
-            Collections.shuffle(shuffled);
-            for (int i = 0; i < 3 && i < shuffled.size(); i++) {
-                aiTeam.add(shuffled.get(i).copy());
+            // Medium: Pick mid-tier Pokemon (total stats 350-480)
+            List<Pokemon> midPokemon = new ArrayList<>();
+            for (Pokemon p : JSONLoader.allPokemon) {
+                Stats s = p.getStats();
+                int totalStats = s.getHp() + s.getAttack() + s.getDefense() +
+                                 s.getSpAttack() + s.getSpDefense() + s.getSpeed();
+                if (totalStats >= 350 && totalStats <= 480 && p.getId() <= 386) {
+                    midPokemon.add(p);
+                }
+            }
+            Collections.shuffle(midPokemon);
+            for (int i = 0; i < 3 && i < midPokemon.size(); i++) {
+                aiTeam.add(midPokemon.get(i).copy());
             }
         }
 
@@ -413,32 +439,44 @@ public class BattleAIController {
     }
 
     /**
-     * Simplified move execution.
-     * Directly applies damage based on move power.
+     * Move execution using Gen I damage formula.
+     * Calculates damage based on stats, types, and move properties.
      */
     private String executeMoveSimple(Pokemon attacker, Move move, Pokemon defender) {
         if (move == null || defender == null) {
             return "Move failed!";
         }
 
-        // Calculate damage (simplified - real calculation would consider types, stats, etc.)
-        int damage = move.getPower() != null ? move.getPower() : 20;
+        if (attacker == null) {
+            return "No attacker!";
+        }
+
+        // Calculate damage using the Gen I formula
+        int damage = entities.DamageCalculator.calculateDamage(attacker, defender, move);
         int currentHP = defender.getStats().getHp();
         int newHP = Math.max(0, currentHP - damage);
 
-        // Update HP
-        Stats newStats = new Stats(
-                newHP,
-                defender.getStats().getAttack(),
-                defender.getStats().getDefense(),
-                defender.getStats().getSpAttack(),
-                defender.getStats().getSpDefense(),
-                defender.getStats().getSpeed()
-        );
-        defender.setStats(newStats);
+        // Update HP directly on stats (preserves maxHp)
+        defender.getStats().setHp(newHP);
 
-        return attacker.getName() + " used " + move.getName() + "! " +
-                defender.getName() + " took " + damage + " damage! (HP: " + newHP + "/" + currentHP + ")";
+        // Get effectiveness for display
+        String effectiveness = entities.DamageCalculator.getEffectivenessDescription(move, defender);
+
+        // Build result message
+        StringBuilder result = new StringBuilder();
+        result.append(attacker.getName()).append(" used ").append(move.getName()).append("! ");
+
+        if (damage > 0) {
+            result.append(defender.getName()).append(" took ").append(damage).append(" damage");
+            if (!"normal".equals(effectiveness)) {
+                result.append(" (").append(effectiveness).append(")");
+            }
+            result.append("! (HP: ").append(newHP).append("/").append(defender.getStats().getMaxHp()).append(")");
+        } else {
+            result.append("It had no effect on ").append(defender.getName()).append("!");
+        }
+
+        return result.toString();
     }
 
     /**

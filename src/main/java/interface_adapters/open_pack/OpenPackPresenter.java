@@ -1,39 +1,47 @@
 package interface_adapters.open_pack;
 
-import entities.Pokemon;
+import frameworks_and_drivers.ViewManager;
 import use_case.open_pack.OpenPackOutputBoundary;
 import use_case.open_pack.OpenPackOutputData;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class OpenPackPresenter implements OpenPackOutputBoundary {
     private final OpenPackViewModel viewModel;
+    private final ViewManager viewManager;
 
-    public OpenPackPresenter(OpenPackViewModel viewModel) {
+    public OpenPackPresenter(OpenPackViewModel viewModel, ViewManager viewManager) {
         this.viewModel = viewModel;
+        this.viewManager = viewManager;
     }
 
     @Override
     public void prepareSuccessView(OpenPackOutputData outputData) {
+        if (outputData == null || outputData.getOpenedCards() == null || outputData.getDuplicateFlags() == null) {
+            return;
+        }
 
-        OpenPackState openPackState = new OpenPackState();
-        List<Pokemon> opened = new ArrayList<>();
+        OpenPackState newState = new OpenPackState();
 
-        openPackState.setOpenedCards(opened);
+        newState.setOpenedCards(outputData.getOpenedCards());
+        newState.setDuplicateFlags(outputData.getDuplicateFlags());
+        newState.setRemainingCurrency(outputData.getRemainingCurrency());
 
-        openPackState.setRemainingCurrency(outputData.getRemainingCurrency());
-        openPackState.setErrorMessage(null);
+        newState.setRevealIndex(0);
+        newState.setRevealMode(true);
 
-        viewModel.setState(openPackState);
+        newState.setErrorMessage(null);
 
+        viewModel.setState(newState);
+
+        viewManager.showOpenPack();
     }
 
     @Override
     public void prepareFailView(String errorMessage) {
-        OpenPackState openPackState = new OpenPackState();
-        openPackState.setErrorMessage(errorMessage);
-        viewModel.setState(openPackState);
+        OpenPackState newState = new OpenPackState();
+        newState.setErrorMessage(errorMessage);
+        newState.setRevealMode(false);
+
+        viewModel.setState(newState);
     }
 
 }

@@ -3,6 +3,8 @@ package interface_adapters.build_deck;
 import use_case.build_deck.BuildDeckOutputBoundary;
 import use_case.build_deck.BuildDeckOutputData;
 
+import java.util.ArrayList;
+
 /**
  * The Presenter for the Build Deck Use Case.
  */
@@ -15,18 +17,21 @@ public class BuildDeckPresenter implements BuildDeckOutputBoundary{
 
     @Override
     public void prepareSuccessView(BuildDeckOutputData outputData) {
-        // On success, switch to the build deck view
-
         BuildDeckState buildDeckState = new BuildDeckState();
         buildDeckState.setDeck(outputData.getDeck());
+        buildDeckState.setAllDecks(outputData.getAllDecks());
         buildDeckState.setErrorMessage(null);
-
-        viewModel.setState(buildDeckState);
+        this.viewModel.setState(buildDeckState);
+        this.viewModel.firePropertyChanged();
     }
 
     @Override
-    public void prepareFailView(String errorMessage){
-        BuildDeckState buildDeckState = new BuildDeckState();
-
+    public void prepareFailView(String errorMessage) {
+        BuildDeckState state = new BuildDeckState();
+        state.setDeck(null);
+        state.setAllDecks(new ArrayList<>());
+        state.setErrorMessage(errorMessage);
+        viewModel.setState(state);
+        this.viewModel.firePropertyChanged();
     }
 }

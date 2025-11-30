@@ -20,32 +20,58 @@ public class MoveTurn extends Turn {
         this.statusEffect = "";
     }
 
-    // subtract move power from target and auto-switch if fainted
+    // Calculate damage using Gen I formula and apply to target
     @Override
     public void executeTurn() {
         Pokemon targetPokemon = targetPlayer != null ? targetPlayer.getActivePokemon() : null;
+        Pokemon attackerPokemon = player != null ? player.getActivePokemon() : null;
 
         if (targetPokemon == null) {
             this.result = player.getName() + " used " + move.getName() + " but there was no target.";
             return;
         }
 
-        int power = Math.max(1, move.getPower());
+        if (attackerPokemon == null) {
+            this.result = player.getName() + " has no active Pokemon to attack with.";
+            return;
+        }
+
+        // Calculate damage using the Gen I formula
+        int calculatedDamage = DamageCalculator.calculateDamage(attackerPokemon, targetPokemon, move);
+
         Stats targetStats = targetPokemon.getStats();
         int startingHp = targetStats.getHp();
-        int remainingHp = Math.max(0, startingHp - power);
+        int remainingHp = Math.max(0, startingHp - calculatedDamage);
 
         targetStats.setHp(remainingHp);
         this.damage = startingHp - remainingHp;
 
+        // Get effectiveness for message
+        String effectivenessMsg = DamageCalculator.getEffectivenessDescription(move, targetPokemon);
+        this.effectiveness = effectivenessMsg;
+
+        // Build result message
+        StringBuilder resultMsg = new StringBuilder();
+        resultMsg.append(player.getName()).append(" used ").append(move.getName());
+
+        if (calculatedDamage > 0) {
+            resultMsg.append(" for ").append(damage).append(" damage");
+            if (!"normal".equals(effectivenessMsg)) {
+                resultMsg.append(" (").append(effectivenessMsg).append(")");
+            }
+            resultMsg.append(".");
+        } else {
+            resultMsg.append(" but it had no effect.");
+        }
+
         if (remainingHp == 0) {
             targetPokemon.setStats(targetStats); // ensure faint status propagates
-            this.result = player.getName() + " used " + move.getName() + " for " + damage +
-                    " damage. " + targetPokemon.getName() + " fainted!";
+            resultMsg.append(" ").append(targetPokemon.getName()).append(" fainted!");
+            this.result = resultMsg.toString();
             autoSwitchNextAvailable(targetPlayer);
         } else {
-            this.result = player.getName() + " used " + move.getName() + " for " + damage +
-                    " damage. " + targetPokemon.getName() + " has " + remainingHp + " HP left.";
+            resultMsg.append(" ").append(targetPokemon.getName()).append(" has ").append(remainingHp).append(" HP left.");
+            this.result = resultMsg.toString();
         }
     }
 
