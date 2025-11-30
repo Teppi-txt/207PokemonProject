@@ -3,8 +3,6 @@ package app;
 import entities.Deck;
 import entities.Pokemon;
 import entities.User;
-import frameworks_and_drivers.BattleSetupDeckView;
-import frameworks_and_drivers.BattleSetupViewIntegrated;
 import pokeapi.JSONLoader;
 
 import javax.swing.*;
@@ -46,14 +44,7 @@ public class BattlePlayerMain {
         }
 
         Runnable returnToSetup = BattlePlayerMain::showSetup;
-        boolean hasValidDeck = user.getDecks().values().stream()
-                .anyMatch(deck -> deck.getPokemons() != null && deck.getPokemons().size() >= 3);
-
-        if (hasValidDeck) {
-            setupView = new BattleSetupDeckView(user, returnToSetup);
-        } else {
-            setupView = new BattleSetupViewIntegrated(user, returnToSetup);
-        }
+        setupView = BattlePlayerFactory.createSetupView(user, returnToSetup);
         setupView.setVisible(true);
     }
 
