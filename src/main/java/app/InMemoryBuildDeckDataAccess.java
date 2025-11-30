@@ -2,6 +2,7 @@ package app;
 
 import entities.Deck;
 import entities.User;
+import frameworks_and_drivers.JsonUserDataAccess;
 import use_case.build_deck.BuildDeckUserDataAccessInterface;
 
 import java.util.ArrayList;
@@ -36,12 +37,18 @@ public class InMemoryBuildDeckDataAccess implements BuildDeckUserDataAccessInter
 
     @Override
     public void saveUser(User user) {
-        // No-op for in-memory storage - the user object is modified directly
+
     }
+
 
     @Override
     public User getUser() {
         return user;
+    }
+
+    @Override
+    public void saveUser() {
+
     }
 
     @Override

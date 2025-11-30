@@ -7,11 +7,12 @@ import entities.User;
 import java.util.ArrayList;
 import java.util.List;
 
-public class OpenPackInteractor implements OpenPackInputBoundary{
+public class OpenPackInteractor implements OpenPackInputBoundary {
 
     private final OpenPackUserDataAccessInterface userDataAccess;
     private final OpenPackOutputBoundary presenter;
     private final Pack pack;
+
     private static final int PACK_COST = 1000;
 
     public OpenPackInteractor(OpenPackUserDataAccessInterface userDataAccess,
@@ -31,9 +32,9 @@ public class OpenPackInteractor implements OpenPackInputBoundary{
             return;
         }
 
+        // Open the pack
         List<Pokemon> openedCards = pack.openPack();
 
-        // Check for duplicates before adding to collection
         List<Boolean> duplicateFlags = new ArrayList<>();
         for (Pokemon p : openedCards) {
             duplicateFlags.add(user.hasDuplicatePokemon(p));
@@ -42,12 +43,12 @@ public class OpenPackInteractor implements OpenPackInputBoundary{
         // Deduct currency
         user.buyPack(PACK_COST);
 
-        // Add opened Pokemon to user's collection
+        // Add cards to collection
         for (Pokemon p : openedCards) {
             user.addPokemon(p);
         }
 
-        userDataAccess.save(user);
+        userDataAccess.saveUser(user);
 
         OpenPackOutputData outputData = new OpenPackOutputData(
                 openedCards,
@@ -57,6 +58,4 @@ public class OpenPackInteractor implements OpenPackInputBoundary{
 
         presenter.prepareSuccessView(outputData);
     }
-
-
 }

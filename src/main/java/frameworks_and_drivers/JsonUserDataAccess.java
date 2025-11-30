@@ -1,59 +1,49 @@
 package frameworks_and_drivers;
 
 import entities.User;
-import use_case.open_pack.OpenPackUserDataAccessInterface;
 import org.json.JSONObject;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-public class JsonUserDataAccess implements OpenPackUserDataAccessInterface {
+public class JsonUserDataAccess {
 
-    private final Path filepath;
-    private User cachedUser = null;
+    private final Path filePath;
 
     public JsonUserDataAccess(String filename) {
-        this.filepath = Path.of(filename);
-        load();
+        this.filePath = Path.of(filename);
     }
 
-    private void load() {
-        if (!Files.exists(filepath)) {
-            System.out.println("No user data file found. Creating empty user.");
-            return;
-        }
-
+    public User loadUser() {
         try {
-            String jsonText = Files.readString(filepath);
-            JSONObject json = new JSONObject(jsonText);
-            this.cachedUser = User.fromJSON(json);
+            if (!Files.exists(filePath)) {
+                return null;
+            }
 
-            System.out.println("Loaded user from JSON.");
-        }
-        catch (Exception e) {
-            System.err.println("Failed to load user JSON: " + e.getMessage());
+            String text = Files.readString(filePath);
+            JSONObject json = new JSONObject(text);
+            return User.fromJSON(json);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
         }
     }
 
-    /**
-     * Saves the user to user.json
-     */
-    @Override
-    public void save(User user) {
+
+    public void saveUser(User user) {
         try {
-            String json = user.toJSONString();
-            Files.writeString(filepath, json);
-
-            this.cachedUser = user;
-            System.out.println("User saved to disk.");
-        }
-        catch (IOException e) {
-            throw new RuntimeException("Could not save user JSON", e);
+            Files.writeString(filePath, user.toJSONString());
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
-    @Override
     public User get() {
-        return cachedUser;
+        return loadUser();
+    }
+
+    public void save(User newUser) {
+        saveUser(newUser);
     }
 }

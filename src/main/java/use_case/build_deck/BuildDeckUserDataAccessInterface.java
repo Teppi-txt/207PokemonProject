@@ -35,6 +35,8 @@ public interface BuildDeckUserDataAccessInterface {
      */
     User getUser();
 
+    void saveUser();
+
     int getNextDeckId();
 
     /**

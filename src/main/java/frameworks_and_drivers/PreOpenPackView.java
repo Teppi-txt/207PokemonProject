@@ -3,6 +3,7 @@ package frameworks_and_drivers;
 import interface_adapters.open_pack.OpenPackState;
 import interface_adapters.open_pack.OpenPackViewModel;
 import interface_adapters.open_pack.OpenPackController;
+import view.ViewManager;
 
 import javax.swing.*;
 import java.awt.*;

@@ -1,7 +1,8 @@
-package frameworks_and_drivers;
+/*package frameworks_and_drivers;
 
 import interface_adapters.open_pack.OpenPackController;
 import interface_adapters.open_pack.OpenPackViewModel;
+import view.ViewManager;
 
 import javax.swing.*;
 import java.awt.event.WindowAdapter;
@@ -35,7 +36,7 @@ public class ViewManagerFrame extends JFrame implements ViewManager {
         });
 
         // Create PreOpenPackView
-        preView = new PreOpenPackView(vm, this);
+        preView = new PreOpenPackView(vm, viewManager);
 
         // Create OpenPackView
         openView = new OpenPackView(vm, this);
@@ -70,4 +71,4 @@ public class ViewManagerFrame extends JFrame implements ViewManager {
     public void closeWindow() {
         dispose();
     }
-}
+}*/

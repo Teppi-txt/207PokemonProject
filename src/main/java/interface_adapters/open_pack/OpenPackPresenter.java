@@ -1,6 +1,6 @@
 package interface_adapters.open_pack;
 
-import frameworks_and_drivers.ViewManager;
+import view.ViewManager;
 import use_case.open_pack.OpenPackOutputBoundary;
 import use_case.open_pack.OpenPackOutputData;
 
