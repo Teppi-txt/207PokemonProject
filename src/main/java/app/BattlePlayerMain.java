@@ -106,11 +106,11 @@ public class BattlePlayerMain {
         if (!PREBUILT_DECKS.isEmpty()) {
             return;
         }
-        PREBUILT_DECKS.put("Kanto Starters", List.of("bulbasaur", "ivysaur", "venusaur", "charmander", "charmeleon", "charizard"));
-        PREBUILT_DECKS.put("Electric Speedsters", List.of("pikachu", "raichu", "jolteon", "electabuzz", "magnezone", "ampharos"));
-        PREBUILT_DECKS.put("Rock Solid", List.of("geodude", "graveler", "golem", "onix", "rhyhorn", "rhydon"));
-        PREBUILT_DECKS.put("Water Masters", List.of("squirtle", "wartortle", "blastoise", "staryu", "psyduck", "poliwhirl"));
-        PREBUILT_DECKS.put("Eevee Friends", List.of("eevee", "vaporeon", "jolteon", "flareon", "espeon", "umbreon"));
+        PREBUILT_DECKS.put("Kanto Starters", List.of("bulbasaur", "charmander", "squirtle"));
+        PREBUILT_DECKS.put("Electric Speedsters", List.of("pikachu", "electabuzz", "ampharos"));
+        PREBUILT_DECKS.put("Rock Solid", List.of("golem", "onix", "rhydon"));
+        PREBUILT_DECKS.put("Water Masters", List.of("blastoise", "psyduck", "poliwhirl"));
+        PREBUILT_DECKS.put("Eevee Friends", List.of("vaporeon", "flareon", "umbreon"));
     }
     
 }

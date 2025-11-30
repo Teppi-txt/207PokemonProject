@@ -3,9 +3,6 @@ package use_case.battle_player;
 import entities.Battle;
 import entities.Pokemon;
 import entities.User;
-import entities.MoveTurn;
-import entities.Player;
-import entities.SwitchTurn;
 import entities.Turn;
 
 // interactor implementing the battle player use case
@@ -82,7 +79,6 @@ public class BattlePlayerInteractor implements BattlePlayerInputBoundary {
 
         battleDataAccess.saveBattle(battle);
 
-        //send it back
         BattlePlayerOutputData outputData = new BattlePlayerOutputData(
                 turn,
                 battle,
