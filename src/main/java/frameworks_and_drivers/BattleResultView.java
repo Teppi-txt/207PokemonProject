@@ -13,12 +13,8 @@ import java.awt.*;
 public class BattleResultView extends JFrame {
 
     private final String winner;
-    private final BattleAIController controller;
-
     public BattleResultView(String winner, BattleAIController controller) {
         this.winner = winner;
-        this.controller = controller;
-
         setTitle("Battle Results");
         setSize(600, 500);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

@@ -38,3 +38,6 @@ buildNumber.properties
 # OS
 .DS_Store
 Thumbs.db
+
+# User data
+user.json
