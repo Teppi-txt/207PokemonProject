@@ -4,6 +4,7 @@ import interface_adapters.open_pack.OpenPackController;
 import interface_adapters.open_pack.OpenPackState;
 import interface_adapters.open_pack.OpenPackViewModel;
 import entities.Pokemon;
+import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import java.awt.*;
@@ -17,7 +18,6 @@ public class OpenPackView extends JPanel {
     private final ViewManager viewManager;
 
     private final JPanel cardsPanel = new JPanel();
-    private final JLabel currencyLabel = new JLabel("Currency: 0");
     private final JButton openPackButton = new JButton("Open Pack");
     private final JButton nextButton = new JButton("Next");
     private final JLabel messageLabel = new JLabel("");
@@ -33,7 +33,6 @@ public class OpenPackView extends JPanel {
         JPanel topPanel = new JPanel(new FlowLayout());
         JButton backButton = new JButton("Back");
 
-        topPanel.add(currencyLabel);
         topPanel.add(openPackButton);
         topPanel.add(backButton);
 
@@ -58,7 +57,7 @@ public class OpenPackView extends JPanel {
 
         nextButton.addActionListener(e -> revealNext());
         addCollectionButton.addActionListener(e -> finishCollection());
-        backButton.addActionListener(e -> viewManager.closeWindow());
+        backButton.addActionListener(e -> viewManager.showPreOpenPack());
 
         viewModel.addPropertyChangeListener(evt -> {
             if ("state".equals(evt.getPropertyName())) {
@@ -67,7 +66,7 @@ public class OpenPackView extends JPanel {
         });
     }
 
-    /** Called by ViewManagerFrame */
+    /** Wiring controller at runtime */
     public void setController(OpenPackController controller) {
         this.controller = controller;
 
@@ -84,10 +83,10 @@ public class OpenPackView extends JPanel {
         int nextIndex = oldState.getRevealIndex() + 1;
 
         if (nextIndex >= oldState.getOpenedCards().size()) {
-            newState.setRevealMode(false);   // Switch to summary
+            newState.setRevealMode(false);
         } else {
             newState.setRevealIndex(nextIndex);
-            newState.setRevealMode(true);    // Stay in reveal mode
+            newState.setRevealMode(true);
         }
 
         viewModel.setState(newState);
@@ -96,11 +95,10 @@ public class OpenPackView extends JPanel {
     private void finishCollection() {
         messageLabel.setText("Cards added to your collection!");
         addCollectionButton.setVisible(false);
-        viewManager.closeWindow();
+        viewManager.showPreOpenPack();
     }
 
     public void updateView(OpenPackState state) {
-        currencyLabel.setText("Currency: " + state.getRemainingCurrency());
         cardsPanel.removeAll();
 
         List<Pokemon> opened = state.getOpenedCards();
@@ -111,18 +109,19 @@ public class OpenPackView extends JPanel {
 
             int idx = state.getRevealIndex();
             Pokemon p = opened.get(idx);
-
-            cardsPanel.add(makeCardPanel(p));
-
             boolean isDup = state.getDuplicateFlags().get(idx);
-            messageLabel.setText(isDup ? "Duplicate!" : "NEW card!");
+
+            cardsPanel.add(makeCardPanel(p, isDup));
+            messageLabel.setText(isDup ? "Duplicate! (+ $50)" : "NEW card!");
 
             nextButton.setEnabled(true);
             openPackButton.setEnabled(false);
 
         } else {
-            for (Pokemon p : opened) {
-                cardsPanel.add(makeCardPanel(p));
+            for (int i = 0; i < opened.size(); i++) {
+                Pokemon p = opened.get(i);
+                boolean isDup = state.getDuplicateFlags().get(i);
+                cardsPanel.add(makeCardPanel(p, isDup));
             }
 
             nextButton.setVisible(false);
@@ -135,27 +134,69 @@ public class OpenPackView extends JPanel {
         cardsPanel.repaint();
     }
 
-    private JPanel makeCardPanel(Pokemon pokemon) {
-        JPanel card = new JPanel(new BorderLayout());
-        card.setBorder(BorderFactory.createLineBorder(Color.GRAY, 2));
-        card.setBackground(Color.WHITE);
+    private JPanel makeCardPanel(Pokemon pokemon, boolean isDuplicate) {
+
+        JPanel card = getJPanel(pokemon);
 
         JLabel spriteLabel;
 
         try {
             ImageIcon icon = new ImageIcon(new URL(pokemon.getSpriteUrl()));
-            Image scaled = icon.getImage().getScaledInstance(120, 120, Image.SCALE_SMOOTH);
+            Image scaled = icon.getImage().getScaledInstance(200, 200, Image.SCALE_SMOOTH);
             spriteLabel = new JLabel(new ImageIcon(scaled));
         } catch (Exception e) {
             spriteLabel = new JLabel("[missing sprite]", SwingConstants.CENTER);
         }
 
-        String text = pokemon.isShiny() ? "⭐ Shiny " + pokemon.getName() : pokemon.getName();
-        JLabel name = new JLabel(text, SwingConstants.CENTER);
+        JLabel statusLabel = new JLabel("", SwingConstants.CENTER);
+        statusLabel.setFont(new Font("SansSerif", Font.BOLD, 18));
+        statusLabel.setOpaque(true);
+        statusLabel.setBackground(new Color(245, 245, 245));
+        statusLabel.setBorder(BorderFactory.createEmptyBorder(8, 0, 8, 0));
 
+        if (isDuplicate) {
+            statusLabel.setText("DUPLICATE! (+$50)");
+            statusLabel.setForeground(new Color(180, 50, 50));
+        } else {
+            statusLabel.setText("NEW CARD!");
+            statusLabel.setForeground(new Color(50, 130, 80));
+        }
+
+        String cleanName = pokemon.getName().replace("-", " ").toUpperCase();
+        String text = pokemon.isShiny() ? "⭐ SHINY " + cleanName : cleanName;
+
+        JLabel name = new JLabel(text, SwingConstants.CENTER);
+        name.setFont(new Font("SansSerif", Font.BOLD, 18));
+        name.setBorder(BorderFactory.createEmptyBorder(8, 0, 12, 0));
+        name.setOpaque(true);
+        name.setBackground(new Color(245, 245, 245));
+
+        card.add(statusLabel, BorderLayout.NORTH);
         card.add(spriteLabel, BorderLayout.CENTER);
         card.add(name, BorderLayout.SOUTH);
 
+        return card;
+    }
+
+    @NotNull
+    private static JPanel getJPanel(Pokemon pokemon) {
+        JPanel card = new JPanel(new BorderLayout());
+        card.setBorder(BorderFactory.createLineBorder(Color.GRAY, 2));
+        card.setBackground(Color.WHITE);
+
+        if (pokemon.isShiny()) {
+            card.setBorder(BorderFactory.createLineBorder(new Color(255, 215, 0), 4));
+
+            Timer shine = new Timer(300, null);
+            shine.addActionListener(e -> {
+                if (card.getBorder() == null) {
+                    card.setBorder(BorderFactory.createLineBorder(new Color(255, 215, 0), 4));
+                } else {
+                    card.setBorder(null);
+                }
+            });
+            shine.start();
+        }
         return card;
     }
 }
