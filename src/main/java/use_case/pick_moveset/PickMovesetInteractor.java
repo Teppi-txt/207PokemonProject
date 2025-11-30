@@ -1,6 +1,5 @@
 package use_case.pick_moveset;
 
-import entities.AllMoves;
 import entities.Deck;
 import entities.Move;
 import entities.Pokemon;
@@ -22,7 +21,7 @@ public class PickMovesetInteractor implements PickMovesetInputBoundary {
         for (Pokemon p : inputData.getDeck().getPokemons()) {
             List<Move> moves = new ArrayList<>();
             for (String mvName : p.getMoves()) {
-                for (Move m : AllMoves.getInstance().getAllMoves()) {
+                for (Move m : JSONLoader.getInstance().getAllMoves()) {
                     if (m.getName().equalsIgnoreCase(mvName)) {
                         moves.add(m);
                     }

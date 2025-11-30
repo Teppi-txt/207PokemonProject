@@ -1,7 +1,5 @@
 package app;
 
-import entities.AllMoves;
-import entities.AllPokemon;
 import pokeapi.JSONLoader;
 
 import javax.swing.*;
@@ -23,12 +21,12 @@ public class Main {
             try {
                 // Load Pokemon and Move data
                 System.out.println("Loading Pokemon data...");
-                JSONLoader.loadPokemon();
-                System.out.println("Loaded " + AllPokemon.getInstance().getAllPokemon().size() + " Pokemon");
+                JSONLoader.getInstance().loadPokemon();
+                System.out.println("Loaded " + JSONLoader.getInstance().getAllPokemon().size() + " Pokemon");
 
                 System.out.println("Loading Move data...");
-                JSONLoader.loadMoves();
-                System.out.println("Loaded " + AllMoves.getInstance().getAllMoves().size() + " Moves");
+                JSONLoader.getInstance().loadMoves();
+                System.out.println("Loaded " + JSONLoader.getInstance().getAllMoves().size() + " Moves");
 
                 // Build and display the application
                 AppBuilder appBuilder = new AppBuilder();

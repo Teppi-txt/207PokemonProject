@@ -712,7 +712,7 @@ public class BattleAIView extends JFrame implements BattleAIViewModel.ViewModelL
     }
 
     private Move findMove(String moveName) {
-        for (Move move : AllMoves.getInstance().getAllMoves()) {
+        for (Move move : JSONLoader.getInstance().getAllMoves()) {
             if (move.getName().equalsIgnoreCase(moveName)) {
                 return move;
             }

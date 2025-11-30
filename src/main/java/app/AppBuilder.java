@@ -98,16 +98,16 @@ public class AppBuilder {
         user = new User(1, "Trainer", "trainer@pokemon.com", 5000);
 
         // Add starter Pokémon
-        int starterCount = Math.min(6, AllPokemon.getInstance().getAllPokemon().size());
+        int starterCount = Math.min(6, JSONLoader.getInstance().getAllPokemon().size());
         for (int i = 0; i < starterCount; i++) {
-            Pokemon pokemon = AllPokemon.getInstance().getAllPokemon().get(i).copy();
+            Pokemon pokemon = JSONLoader.getInstance().getAllPokemon().get(i).copy();
             user.addPokemon(pokemon);
         }
 
         // Add additional Pokémon
-        int additionalCount = Math.min(20, AllPokemon.getInstance().getAllPokemon().size());
+        int additionalCount = Math.min(20, JSONLoader.getInstance().getAllPokemon().size());
         for (int i = 6; i < additionalCount; i++) {
-            Pokemon pokemon = AllPokemon.getInstance().getAllPokemon().get(i).copy();
+            Pokemon pokemon = JSONLoader.getInstance().getAllPokemon().get(i).copy();
             if (i % 5 == 0) pokemon.setShiny(true);
             user.addPokemon(pokemon);
         }
@@ -206,7 +206,7 @@ public class AppBuilder {
         InMemoryOpenPackDataAccess dataAccess =
                 new InMemoryOpenPackDataAccess(user, userDA);
 
-        Pack pack = new Pack(1, "Pokemon Pack", AllPokemon.getInstance().getAllPokemon());
+        Pack pack = new Pack(1, "Pokemon Pack", JSONLoader.getInstance().getAllPokemon());
 
         OpenPackOutputBoundary presenter =
                 new OpenPackPresenter(openPackViewModel, viewManager);

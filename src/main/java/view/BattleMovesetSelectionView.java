@@ -1,6 +1,5 @@
 package view;
 
-import entities.AllMoves;
 import entities.Move;
 import entities.Pokemon;
 import pokeapi.JSONLoader;
@@ -364,8 +363,8 @@ public class BattleMovesetSelectionView extends JFrame {
     }
 
     private Move findMoveDetail(String moveName) {
-        if (AllMoves.getInstance().getAllMoves() == null) return null;
-        for (Move m : AllMoves.getInstance().getAllMoves()) {
+        if (JSONLoader.getInstance().getAllMoves() == null) return null;
+        for (Move m : JSONLoader.getInstance().getAllMoves()) {
             if (m.getName().equalsIgnoreCase(moveName)) {
                 return m;
             }

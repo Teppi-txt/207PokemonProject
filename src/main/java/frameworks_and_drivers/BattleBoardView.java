@@ -1,6 +1,5 @@
 package frameworks_and_drivers;
 
-import entities.AllMoves;
 import entities.Move;
 import entities.Pokemon;
 import pokeapi.JSONLoader;
@@ -330,7 +329,7 @@ public class BattleBoardView extends JFrame implements BattleAIViewModel.ViewMod
     }
 
     private Move findMoveByName(String name) {
-        for (Move move : AllMoves.getInstance().getAllMoves()) {
+        for (Move move : JSONLoader.getInstance().getAllMoves()) {
             if (move.getName().equalsIgnoreCase(name)) {
                 return move;
             }

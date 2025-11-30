@@ -1,6 +1,5 @@
 package interface_adapters.pick_moveset;
 
-import entities.AllMoves;
 import pokeapi.JSONLoader;
 import use_case.pick_moveset.PickMovesetInputBoundary;
 import use_case.pick_moveset.PickMovesetInputData;
@@ -28,7 +27,7 @@ public class PickMovesetController {
     }
 
     public Move fetchMoveDetail(String name) {
-        for (Move m : AllMoves.getInstance().getAllMoves()) {
+        for (Move m : JSONLoader.getInstance().getAllMoves()) {
             if (m.getName().equalsIgnoreCase(name)) {
                 return m;
             }

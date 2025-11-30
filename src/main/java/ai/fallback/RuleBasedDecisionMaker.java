@@ -2,7 +2,6 @@ package ai.fallback;
 
 import ai.graph.BattleDecisionState;
 import ai.graph.Decision;
-import entities.AllMoves;
 import entities.Move;
 import entities.Pokemon;
 import pokeapi.JSONLoader;
@@ -158,7 +157,7 @@ public class RuleBasedDecisionMaker {
      */
     private static Move lookupMove(String moveName) {
         // Look up the full move from JSONLoader to get power and other properties
-        for (Move move : AllMoves.getInstance().getAllMoves()) {
+        for (Move move : JSONLoader.getInstance().getAllMoves()) {
             if (move.getName().equalsIgnoreCase(moveName)) {
                 return move;
             }

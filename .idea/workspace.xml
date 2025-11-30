@@ -5,10 +5,6 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="3a894337-a105-407e-8350-2167388c4002" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/main/java/entities/AllMoves.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/entities/AllPokemon.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/test/java/use_case/build_deck/BuildDeckInteractorTest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/ai/fallback/RuleBasedDecisionMaker.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ai/fallback/RuleBasedDecisionMaker.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/ai/parsers/LLMResponseParser.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ai/parsers/LLMResponseParser.java" afterDir="false" />
@@ -16,6 +12,8 @@
       <change beforePath="$PROJECT_DIR$/src/main/java/app/BattleAIMain.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/app/BattleAIMain.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/app/BattlePlayerMain.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/app/BattlePlayerMain.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/app/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/app/Main.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/entities/AllMoves.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/entities/AllPokemon.java" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/frameworks_and_drivers/BattleAIView.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/frameworks_and_drivers/BattleAIView.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/frameworks_and_drivers/BattleBoardView.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/frameworks_and_drivers/BattleBoardView.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/frameworks_and_drivers/BattlePlayerView.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/frameworks_and_drivers/BattlePlayerView.java" afterDir="false" />
@@ -25,7 +23,7 @@
       <change beforePath="$PROJECT_DIR$/src/main/java/use_case/collection/ViewCollectionInteractor.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/use_case/collection/ViewCollectionInteractor.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/use_case/pick_moveset/PickMovesetInteractor.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/use_case/pick_moveset/PickMovesetInteractor.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/view/BattleMovesetSelectionView.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/view/BattleMovesetSelectionView.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/user.json" beforeDir="false" afterPath="$PROJECT_DIR$/user.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/view/MovesetSelectionView.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/view/MovesetSelectionView.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

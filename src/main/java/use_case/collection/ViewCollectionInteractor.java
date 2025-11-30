@@ -1,6 +1,5 @@
 package use_case.collection;
 
-import entities.AllPokemon;
 import entities.Pokemon;
 import entities.User;
 import pokeapi.JSONLoader;
@@ -51,7 +50,7 @@ public class ViewCollectionInteractor implements ViewCollectionInputBoundary {
         List<Pokemon> result;
         switch (filter) {
             case "all":
-                result = AllPokemon.getInstance().getAllPokemon();
+                result = JSONLoader.getInstance().getAllPokemon();
                 break;
             case "owned":
                 result = user.getOwnedPokemon();
