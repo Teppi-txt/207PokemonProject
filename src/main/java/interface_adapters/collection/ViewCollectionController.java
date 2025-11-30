@@ -1,15 +1,9 @@
 package interface_adapters.collection;
 
 import entities.Pokemon;
-import entities.User;
-import pokeapi.JSONLoader;
 import use_case.collection.ViewCollectionInputBoundary;
 import use_case.collection.ViewCollectionInputData;
-import use_case.collection.ViewCollectionInteractor;
-import view.CollectionView;
 
-import javax.swing.*;
-import java.awt.*;
 import java.util.List;
 
 public class ViewCollectionController {
