@@ -71,4 +71,5 @@ public class ViewManagerFrame extends JFrame implements ViewManager {
     public void closeWindow() {
         dispose();
     }
-}*/
+}
+*/
