@@ -73,17 +73,10 @@ public class BattleAIController {
 
         // Create AI user (temporary user for battle system)
         User aiUser = new User(999, aiPlayer.getName(), "ai@pokemon.com", 0);
-        // Give AI user the AI Pokemon team so getOpponent() can see them
         for (Pokemon p : aiPlayer.getTeam()) {
             aiUser.addPokemon(p);
         }
 
-        // Update human player's owned Pokemon to reflect battle team
-        // (so AI can see opponent's team via Battle object)
-        user.getOwnedPokemon().clear();
-        user.getOwnedPokemon().addAll(playerTeam);
-
-        // Create battle
         this.currentBattle = new Battle(new Random().nextInt(10000), user, aiUser);
         this.currentBattle.startBattle();
 
@@ -237,9 +230,6 @@ public class BattleAIController {
         System.out.println("AI Difficulty: " + aiPlayer.getDifficulty());
         System.out.println("Forced Switch: " + forcedSwitch);
 
-        // Update player's owned Pokemon to reflect battle team (for AI to see)
-        updatePlayerTeamInBattle();
-
         // Create input data and execute through interactor (Clean Architecture)
         BattleAIInputData inputData = new BattleAIInputData(currentBattle, aiPlayer, forcedSwitch);
         aiInteractor.execute(inputData);
@@ -301,8 +291,7 @@ public class BattleAIController {
         } else if (allAIFainted) {
             currentBattle.endBattle(currentBattle.getPlayer1()); // Player wins
             // Award currency
-            User player = currentBattle.getPlayer1();
-            player.addCurrency(500);
+            currentBattle.getPlayer1().addCurrency(500);
             presenter.initializeBattle(currentBattle, playerTeam, aiPlayer);
             return true;
         }
@@ -508,16 +497,4 @@ public class BattleAIController {
         return viewModel;
     }
 
-    /**
-     * Updates the player's team in the battle's User object so AI can see it.
-     */
-    private void updatePlayerTeamInBattle() {
-        if (currentBattle != null && currentBattle.getPlayer1() != null) {
-            User player = currentBattle.getPlayer1();
-            // Clear and update with battle team
-            List<Pokemon> ownedPokemon = player.getOwnedPokemon();
-            ownedPokemon.clear();
-            ownedPokemon.addAll(playerTeam);
-        }
-    }
 }
