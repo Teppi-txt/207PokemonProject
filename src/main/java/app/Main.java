@@ -31,7 +31,6 @@ public class Main {
                 // Build and display the application
                 AppBuilder appBuilder = new AppBuilder();
                 JFrame application = appBuilder
-                        .createDefaultUser()
                         .addMainMenuView()
                         .addCollectionView()
                         .addBuildDeckView()
