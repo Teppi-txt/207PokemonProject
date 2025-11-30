@@ -5,7 +5,6 @@ import pokeapi.JSONLoader;
 import use_case.battle_ai.BattleAIInputBoundary;
 import use_case.battle_ai.BattleAIInputData;
 import use_case.battle_player.BattlePlayerInputBoundary;
-import use_case.battle_player.BattlePlayerInputData;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -158,7 +157,7 @@ public class BattleAIController {
 
         // Execute AI turn automatically (with small delay for UX)
         javax.swing.Timer aiTurnTimer = new javax.swing.Timer(500, e -> {
-            executeAITurnSimplified();
+            executeAITurn();
         });
         aiTurnTimer.setRepeats(false);
         aiTurnTimer.start();
@@ -204,20 +203,29 @@ public class BattleAIController {
         // Increment turn number
         turnNumber++;
 
-        // Execute AI turn
-        executeAITurnSimplified();
+        // Execute AI turn via interactor
+        executeAITurn();
     }
 
     /**
-     * Executes the AI's turn automatically (simplified version).
+     * Executes the AI's turn using the interactor (Clean Architecture).
+     * Creates BattleAIInputData and delegates to the interactor for decision-making.
      */
-    private void executeAITurnSimplified() {
+    private void executeAITurn() {
+        executeAITurn(false);
+    }
+
+    /**
+     * Executes the AI's turn using the interactor (Clean Architecture).
+     * @param forcedSwitch true if AI must switch (active Pokemon fainted)
+     */
+    private void executeAITurn(boolean forcedSwitch) {
         if (currentBattle == null || !"IN_PROGRESS".equals(currentBattle.getBattleStatus())) {
             return;
         }
 
         Pokemon aiActivePokemon = aiPlayer.getActivePokemon();
-        if (aiActivePokemon == null || aiActivePokemon.isFainted()) {
+        if (!forcedSwitch && (aiActivePokemon == null || aiActivePokemon.isFainted())) {
             return;
         }
 
@@ -225,55 +233,27 @@ public class BattleAIController {
             return;
         }
 
-        System.out.println("\n=== AI TURN START ===");
-        System.out.println("AI's Pokemon: " + aiActivePokemon.getName() + " (HP: " + aiActivePokemon.getStats().getHp() + ")");
-        System.out.println("Player's Pokemon: " + playerActivePokemon.getName() + " (HP: " + playerActivePokemon.getStats().getHp() + ")");
+        System.out.println("\n=== AI TURN START (via Interactor) ===");
         System.out.println("AI Difficulty: " + aiPlayer.getDifficulty());
+        System.out.println("Forced Switch: " + forcedSwitch);
 
         // Update player's owned Pokemon to reflect battle team (for AI to see)
         updatePlayerTeamInBattle();
 
-        // Try to use LangGraph AI decision
-        Move aiMove = null;
-        try {
-            System.out.println("Attempting to use LangGraph AI decision engine...");
-            aiMove = aiPlayer.chooseMove(currentBattle);
-            if (aiMove != null && aiMove.getName() != null && !aiMove.getName().isEmpty()) {
-                System.out.println("✓ LangGraph AI chose move: " + aiMove.getName() + " (Power: " + aiMove.getPower() + ")");
-            } else {
-                System.out.println("✗ LangGraph returned null/empty move, falling back to random selection");
-                aiMove = null;
-            }
-        } catch (Exception e) {
-            System.out.println("✗ LangGraph AI failed: " + e.getMessage());
-            System.out.println("Falling back to random move selection");
-            aiMove = null;
-        }
+        // Create input data and execute through interactor (Clean Architecture)
+        BattleAIInputData inputData = new BattleAIInputData(currentBattle, aiPlayer, forcedSwitch);
+        aiInteractor.execute(inputData);
 
-        // Fallback to random if LangGraph failed
-        if (aiMove == null) {
-            aiMove = chooseRandomMove(aiActivePokemon);
-            if (aiMove != null) {
-                System.out.println("Random fallback chose: " + aiMove.getName() + " (Power: " + aiMove.getPower() + ")");
-            }
-        }
-
-        if (aiMove == null) {
-            System.out.println("AI has no valid moves!");
-            System.out.println("=== AI TURN END ===\n");
-            return;
-        }
-
-        // Execute AI's move
-        String turnResult = executeMoveSimple(aiActivePokemon, aiMove, playerActivePokemon);
-        System.out.println("Turn result: " + turnResult);
-        System.out.println("=== AI TURN END ===\n");
-        this.lastTurnDescription = turnResult;
-
-        // Update view model
+        // After interactor completes, update the view with current team state
         presenter.updateTeams(playerTeam, aiPlayer);
 
-        // Check if player's Pokemon fainted
+        // Get the turn result from view model (set by presenter)
+        this.lastTurnDescription = viewModel.getCurrentTurnDescription();
+
+        System.out.println("Turn result: " + lastTurnDescription);
+        System.out.println("=== AI TURN END ===\n");
+
+        // Check if player's Pokemon fainted and handle switching
         if (playerActivePokemon.isFainted()) {
             String faintMessage = "Your " + playerActivePokemon.getName() + " fainted!";
             System.out.println(faintMessage);
@@ -281,8 +261,7 @@ public class BattleAIController {
 
             // Check if player has any Pokemon left
             if (!hasAvailablePlayerPokemon()) {
-                // AI wins!
-                checkBattleEnd();
+                // AI wins - battle end already handled by interactor
                 return;
             }
             // Player must switch to next available Pokemon
@@ -290,10 +269,8 @@ public class BattleAIController {
             String switchMessage = "Go, " + playerActivePokemon.getName() + "!";
             System.out.println(switchMessage);
             this.lastTurnDescription += " " + switchMessage;
+            presenter.updateTeams(playerTeam, aiPlayer);
         }
-
-        // Check if battle ended
-        checkBattleEnd();
 
         // Increment turn number
         turnNumber++;
@@ -477,31 +454,6 @@ public class BattleAIController {
         }
 
         return result.toString();
-    }
-
-    /**
-     * Chooses a random move for a Pokemon.
-     */
-    private Move chooseRandomMove(Pokemon pokemon) {
-        if (pokemon.getMoves() == null || pokemon.getMoves().isEmpty()) {
-            return null;
-        }
-
-        // Pick a random move name
-        String moveName = pokemon.getMoves().get(new Random().nextInt(pokemon.getMoves().size()));
-
-        // Look up the move in JSONLoader
-        for (Move move : JSONLoader.allMoves) {
-            if (move.getName().equalsIgnoreCase(moveName)) {
-                return move;
-            }
-        }
-
-        // If move not found, create a basic tackle move
-        Move tackle = new Move();
-        tackle.setName("Tackle");
-        tackle.setPower(40);
-        return tackle;
     }
 
     /**
