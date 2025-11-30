@@ -5,9 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="3a894337-a105-407e-8350-2167388c4002" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/interface_adapters/pick_moveset/PickMovesetController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/interface_adapters/pick_moveset/PickMovesetController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/view/MovesetSelectionView.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/view/MovesetSelectionView.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/use_case/battle_player/BattlePlayerInteractor.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/use_case/battle_player/BattlePlayerInteractor.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -29,6 +27,18 @@
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
+  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
+  "lastFilter": {
+    "state": "OPEN",
+    "assignee": "Dimural"
+  }
+}]]></component>
+  <component name="GithubPullRequestsUISettings"><![CDATA[{
+  "selectedUrlAndAccountId": {
+    "url": "https://github.com/Teppi-txt/207PokemonProject.git",
+    "accountId": "5b3f7747-8198-4f08-b8c5-c3b9faa6f0b1"
+  }
+}]]></component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 4
 }</component>
@@ -48,7 +58,7 @@
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
     "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "#21 on user__case__pickMoveset",
+    "git-widget-placeholder": "#41 on battle__player__test",
     "kotlin-language-version-configured": "true",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
@@ -97,7 +107,6 @@
     <attachedChunks>
       <set>
         <option value="bundled-jdk-9823dce3aa75-bf35d07a577b-intellij.indexing.shared.core-IU-252.25557.131" />
-        <option value="bundled-js-predefined-d6986cc7102b-b598e85cdad2-JavaScript-IU-252.25557.131" />
       </set>
     </attachedChunks>
   </component>
