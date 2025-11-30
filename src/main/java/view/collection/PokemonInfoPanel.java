@@ -3,15 +3,18 @@ package view.collection;
 import entities.Pokemon;
 import entities.Stats;
 import entities.PriceCalculator;
+import entities.User;
+import frameworks_and_drivers.JsonUserDataAccess;
 
 import javax.swing.*;
 import java.awt.*;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 public class PokemonInfoPanel extends JPanel {
+    private final BuyButtons buyButtons =
+            new BuyButtons(new JsonUserDataAccess("user.json"));
+
     public PokemonInfoPanel() {
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         setPreferredSize(new Dimension(300, 350));
@@ -32,7 +35,7 @@ public class PokemonInfoPanel extends JPanel {
         add(spriteLabel);
         add(nameLabel);
         add(statsPanel);
-        add(getBuyButtonsPanel(pokemon));
+        add(buyButtons.createBuyButtons(pokemon, this));
         add(Box.createVerticalGlue());
         this.revalidate();
         this.repaint();
@@ -97,30 +100,6 @@ public class PokemonInfoPanel extends JPanel {
             statsPanel.add(statLabel);
         }
         return statsPanel;
-    }
-
-    public JPanel getBuyButtonsPanel(Pokemon pokemon) {
-
-        JPanel panel = new JPanel();
-        panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
-        panel.setAlignmentX(Component.CENTER_ALIGNMENT);
-
-        int price = PriceCalculator.getPrice(pokemon);
-        int shinyPrice = PriceCalculator.getShinyPrice(pokemon);
-
-        JButton buyPokemonButton = new JButton("Buy (" + price + ")");
-        JButton buyShinyButton = new JButton("Shiny (" + shinyPrice + ")");
-
-        buyPokemonButton.setAlignmentY(Component.CENTER_ALIGNMENT);
-        buyShinyButton.setAlignmentY(Component.CENTER_ALIGNMENT);
-
-        panel.add(Box.createHorizontalGlue());
-        panel.add(buyPokemonButton);
-        panel.add(Box.createHorizontalStrut(10));
-        panel.add(buyShinyButton);
-        panel.add(Box.createHorizontalGlue());
-
-        return panel;
     }
 
     public String capitaliseFirstLetter(String str) {
