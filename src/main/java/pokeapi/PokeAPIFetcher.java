@@ -3,6 +3,7 @@ package pokeapi;
 import entities.Move;
 import entities.Pokemon;
 import entities.Stats;
+import interface_adapters.PokemonBuilder;
 import okhttp3.Call;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -40,15 +41,15 @@ public class PokeAPIFetcher {
         try {
             Response response = call.execute();
             final JSONObject responseBody = new JSONObject(response.body().string());
+            PokemonBuilder pokemonBuilder = new PokemonBuilder()
+                .addName(responseBody.getString("name"))
+                .addID(responseBody.getInt("id"))
+                .addType(extractTypesFromJSON(responseBody))
+                .addStats(extractStatsFromJSON(responseBody))
+                .addMove(extractMovesFromJSON(responseBody));
 
-            String pokemonName = responseBody.getString("name");
-            int pokemonID = responseBody.getInt("id");
-            ArrayList<String> types = extractTypesFromJSON(responseBody);
-            Stats stats = extractStatsFromJSON(responseBody);
-            ArrayList<String> moves = extractMovesFromJSON(responseBody);
 
-
-            return new Pokemon(pokemonName, pokemonID, types, stats, moves);
+            return pokemonBuilder.build();
 
         } catch (IOException | JSONException exception) {
             throw new PokemonNotFoundException(pokemon);
