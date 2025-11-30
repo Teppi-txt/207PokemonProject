@@ -5,6 +5,7 @@ import entities.Pack;
 import entities.Pokemon;
 import entities.User;
 import frameworks_and_drivers.BattlePlayerDataAccessObject;
+import frameworks_and_drivers.JsonUserDataAccess;
 import frameworks_and_drivers.ViewManagerFrame;
 import interface_adapters.NavigationController;
 import interface_adapters.ViewManagerModel;
@@ -51,6 +52,7 @@ public class AppBuilder {
     private final NavigationController navigationController;
 
     private User user;
+    private JsonUserDataAccess userDA = new JsonUserDataAccess("user.json");
 
     // Views
     private MainMenuView mainMenuView;
@@ -77,6 +79,8 @@ public class AppBuilder {
         cardPanel.setLayout(cardLayout);
         viewManager = new ViewManager(cardPanel, cardLayout, viewManagerModel);
         navigationController = new NavigationController(viewManagerModel);
+        // Try loading user
+        user = userDA.loadUser();
     }
 
     /**
@@ -94,25 +98,22 @@ public class AppBuilder {
     public AppBuilder createDefaultUser() {
         user = new User(1, "Trainer", "trainer@pokemon.com", 5000);
 
-        // Add starter Pokemon from the loaded data
+        // Add starter Pokémon
         int starterCount = Math.min(6, JSONLoader.allPokemon.size());
         for (int i = 0; i < starterCount; i++) {
             Pokemon pokemon = JSONLoader.allPokemon.get(i).copy();
             user.addPokemon(pokemon);
         }
 
-        // Add some additional Pokemon for variety
+        // Add additional Pokémon
         int additionalCount = Math.min(20, JSONLoader.allPokemon.size());
         for (int i = 6; i < additionalCount; i++) {
             Pokemon pokemon = JSONLoader.allPokemon.get(i).copy();
-            // Make some shiny for fun
-            if (i % 5 == 0) {
-                pokemon.setShiny(true);
-            }
+            if (i % 5 == 0) pokemon.setShiny(true);
             user.addPokemon(pokemon);
         }
 
-        // Create a starter deck with first 5 Pokemon
+        // Starter deck
         Deck starterDeck = new Deck(1, "Starter Deck");
         int deckSize = Math.min(5, user.getOwnedPokemon().size());
         for (int i = 0; i < deckSize; i++) {
@@ -120,8 +121,11 @@ public class AppBuilder {
         }
         user.addDeck(starterDeck);
 
+        userDA.saveUser(user);
+
         return this;
     }
+
 
     /**
      * Adds the main menu view to the application.
@@ -309,46 +313,41 @@ public class AppBuilder {
     private void openOpenPackFlow() {
         if (user == null) {
             JOptionPane.showMessageDialog(cardPanel,
-                "No user found!",
-                "Error",
-                JOptionPane.ERROR_MESSAGE);
+                    "No user found!",
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE);
             return;
         }
 
         if (user.getCurrency() < 1000) {
             JOptionPane.showMessageDialog(cardPanel,
-                "Not enough currency! You need 1000 to open a pack.\nWin battles to earn more currency!",
-                "Insufficient Currency",
-                JOptionPane.WARNING_MESSAGE);
+                    "Not enough currency! You need 1000 to open a pack.\nWin battles to earn more currency!",
+                    "Insufficient Currency",
+                    JOptionPane.WARNING_MESSAGE);
             return;
         }
 
-        // Create the pack with the card pool
         Pack pack = new Pack(1, "Pokemon Pack", JSONLoader.allPokemon);
 
-        // Create data access with shared user
-        InMemoryOpenPackDataAccess dataAccess = new InMemoryOpenPackDataAccess(user);
+        InMemoryOpenPackDataAccess dataAccess =
+                new InMemoryOpenPackDataAccess(user, userDA);
 
-        // Create view model
         OpenPackViewModel viewModel = new OpenPackViewModel();
         viewModel.getState().setRemainingCurrency(user.getCurrency());
 
-        // Create callback to refresh main menu when pack window closes
         Runnable onClose = () -> {
             mainMenuView.refreshUserInfo();
         };
 
-        // Create the frame with callback support
         ViewManagerFrame frame = new ViewManagerFrame(viewModel, (OpenPackController) null, onClose);
 
-        // Create presenter and interactor
         OpenPackOutputBoundary presenter = new OpenPackPresenter(viewModel, frame);
         OpenPackInputBoundary interactor = new OpenPackInteractor(dataAccess, presenter, pack);
         OpenPackController controller = new OpenPackController(interactor);
 
-        // Wire the controller
         frame.setController(controller);
     }
+
 
     /**
      * Resets all Pokemon HP to their max values after a battle.

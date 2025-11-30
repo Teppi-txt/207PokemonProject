@@ -1,15 +1,16 @@
 package use_case.open_pack;
+
 import entities.User;
 
 public interface OpenPackUserDataAccessInterface {
 
     /**
-     * Saves the user.
-     * @param user the user to save
+     * Returns the shared user instance.
      */
-    void save(User user);
-
     User get();
 
-
+    /**
+     * Saves the user state (currency, pokemon, decks, etc.)
+     */
+    void saveUser(User user);
 }
