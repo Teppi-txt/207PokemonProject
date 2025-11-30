@@ -52,7 +52,11 @@ public class BuildDeckView extends JPanel implements PropertyChangeListener {
         this.deckSelector = new JComboBox<>();
         this.deckSelector.addActionListener(deckSelectListener);
 
-        this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+        this.setLayout(new BorderLayout());
+
+        // Top panel with title and back button
+        JPanel topPanel = new JPanel();
+        topPanel.setLayout(new BoxLayout(topPanel, BoxLayout.Y_AXIS));
 
         final JLabel title = new JLabel("Build Your Deck");
         title.setFont(new Font(title.getFont().getFontName(), Font.BOLD, 46));
@@ -109,20 +113,20 @@ public class BuildDeckView extends JPanel implements PropertyChangeListener {
         controlsPanel.add(Box.createHorizontalGlue());
         controlsPanel.add(actionPanel);
 
+        topPanel.add(title);
+        topPanel.add(returnButton);
+        topPanel.add(errorMessageLabel);
+        topPanel.add(controlsPanel);
+
         // main content panel (deck display and selection)
-        JPanel contentPanel = new JPanel();
-        contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.X_AXIS));
+        JPanel contentPanel = new JPanel(new BorderLayout(20, 0));
         contentPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
 
-        contentPanel.add(deckDisplayPanel);
-        contentPanel.add(Box.createHorizontalStrut(20));
-        contentPanel.add(selectionPanel);
+        contentPanel.add(deckDisplayPanel, BorderLayout.WEST);
+        contentPanel.add(selectionPanel, BorderLayout.CENTER);
 
-        this.add(title);
-        this.add(returnButton);
-        this.add(errorMessageLabel);
-        this.add(controlsPanel);
-        this.add(contentPanel);
+        this.add(topPanel, BorderLayout.NORTH);
+        this.add(contentPanel, BorderLayout.CENTER);
 
         //  initial load
         Deck initialDeck = viewModel.getState().getDeck();
@@ -421,20 +425,23 @@ public class BuildDeckView extends JPanel implements PropertyChangeListener {
         private final JPanel pokemonGrid;
 
         public OwnedPokemonSelectionPanel() {
-            this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+            this.setLayout(new BorderLayout());
             this.setBorder(BorderFactory.createTitledBorder("Owned Pokémon (Click to Add/Remove)"));
+            this.setMinimumSize(new Dimension(400, 300));
 
-            pokemonGrid = new JPanel(new GridLayout(0, 5, 5, 5));
+            pokemonGrid = new JPanel(new GridLayout(0, 4, 8, 8));
+            pokemonGrid.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
             for (Pokemon pokemon : ownedPokemon) {
                 pokemonGrid.add(createPokemonButton(pokemon));
             }
 
             JScrollPane scrollPane = new JScrollPane(pokemonGrid);
-            scrollPane.setPreferredSize(new Dimension(350, 300));
+            scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
             scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+            scrollPane.getVerticalScrollBar().setUnitIncrement(16);
 
-            this.add(scrollPane);
+            this.add(scrollPane, BorderLayout.CENTER);
         }
 
         private JButton createPokemonButton(Pokemon pokemon) {
