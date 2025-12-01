@@ -15,7 +15,6 @@ public class OpenPackController {
     }
 
     public void openPack(){
-        System.out.println("CONTROLLER: openPack() called");
         OpenPackInputData openPackInputData = new OpenPackInputData();
         openPackUseCaseInteractor.execute(openPackInputData);
     }

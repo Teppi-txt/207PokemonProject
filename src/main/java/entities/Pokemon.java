@@ -89,7 +89,7 @@ public class Pokemon implements Serializable {
                 this.name,
                 this.id,
                 new ArrayList<>(this.types),
-                this.stats,
+                this.stats.copy(),  // Copy stats so HP changes don't affect original
                 new ArrayList<>(this.moves)
         );
         clone.setShiny(this.shiny);
