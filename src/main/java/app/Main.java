@@ -12,7 +12,7 @@ public class Main {
     public static void main(String[] args) {
         // Set up Swing look and feel
         try {
-            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+            // UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (Exception e) {
             // Use default look and feel
         }
@@ -21,11 +21,9 @@ public class Main {
             try {
                 // Load Pokemon and Move data
                 System.out.println("Loading Pokemon data...");
-                JSONLoader.getInstance().loadPokemon();
                 System.out.println("Loaded " + JSONLoader.getInstance().getAllPokemon().size() + " Pokemon");
 
                 System.out.println("Loading Move data...");
-                JSONLoader.getInstance().loadMoves();
                 System.out.println("Loaded " + JSONLoader.getInstance().getAllMoves().size() + " Moves");
 
                 // Build and display the application

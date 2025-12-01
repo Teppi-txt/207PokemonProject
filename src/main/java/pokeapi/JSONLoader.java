@@ -20,7 +20,10 @@ public class JSONLoader {
     private final ArrayList<Move> allMoves = new ArrayList<>();
 
     // private constructor
-    private JSONLoader() {}
+    private JSONLoader() {
+        loadPokemon();
+        loadMoves();
+    }
 
     // singleton getter
     public static JSONLoader getInstance() {
