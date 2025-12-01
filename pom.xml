@@ -10,8 +10,8 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
-                    <source>11</source>
-                    <target>11</target>
+                    <source>15</source>
+                    <target>15</target>
                 </configuration>
             </plugin>
         </plugins>
@@ -64,6 +64,7 @@
       <groupId>org.bsc.langgraph4j</groupId>
       <artifactId>langgraph4j-core</artifactId>
     </dependency>
+
       <dependency>
           <groupId>junit</groupId>
           <artifactId>junit</artifactId>
