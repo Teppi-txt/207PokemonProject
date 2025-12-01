@@ -50,7 +50,7 @@ public class ViewCollectionInteractor implements ViewCollectionInputBoundary {
         List<Pokemon> result;
         switch (filter) {
             case "all":
-                result = JSONLoader.allPokemon;
+                result = JSONLoader.getInstance().getAllPokemon();
                 break;
             case "owned":
                 result = user.getOwnedPokemon();

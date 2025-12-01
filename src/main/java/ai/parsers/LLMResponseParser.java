@@ -71,7 +71,7 @@ public class LLMResponseParser {
 
         // Look up the full move from JSONLoader to get power and other properties
         Move selectedMove = null;
-        for (Move move : JSONLoader.allMoves) {
+        for (Move move : JSONLoader.getInstance().getAllMoves()) {
             if (move.getName().equalsIgnoreCase(moveName)) {
                 selectedMove = move;
                 break;

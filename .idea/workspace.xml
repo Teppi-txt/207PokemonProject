@@ -5,7 +5,25 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="3a894337-a105-407e-8350-2167388c4002" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/src/main/java/use_case/battle_player/BattlePlayerInteractor.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/use_case/battle_player/BattlePlayerInteractor.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/ai/fallback/RuleBasedDecisionMaker.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ai/fallback/RuleBasedDecisionMaker.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/ai/parsers/LLMResponseParser.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ai/parsers/LLMResponseParser.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/app/AppBuilder.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/app/AppBuilder.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/app/BattleAIMain.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/app/BattleAIMain.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/app/BattlePlayerMain.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/app/BattlePlayerMain.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/app/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/app/Main.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/entities/AllMoves.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/entities/AllPokemon.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/frameworks_and_drivers/BattleAIView.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/frameworks_and_drivers/BattleAIView.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/frameworks_and_drivers/BattleBoardView.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/frameworks_and_drivers/BattleBoardView.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/frameworks_and_drivers/BattlePlayerView.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/frameworks_and_drivers/BattlePlayerView.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/interface_adapters/battle_ai/BattleAIController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/interface_adapters/battle_ai/BattleAIController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/interface_adapters/pick_moveset/PickMovesetController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/interface_adapters/pick_moveset/PickMovesetController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/pokeapi/JSONLoader.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/pokeapi/JSONLoader.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/use_case/collection/ViewCollectionInteractor.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/use_case/collection/ViewCollectionInteractor.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/use_case/pick_moveset/PickMovesetInteractor.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/use_case/pick_moveset/PickMovesetInteractor.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/view/BattleMovesetSelectionView.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/view/BattleMovesetSelectionView.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/view/MovesetSelectionView.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/view/MovesetSelectionView.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -22,23 +40,23 @@
   <component name="Git.Settings">
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
-        <entry key="$PROJECT_DIR$" value="appbuilder" />
+        <entry key="$PROJECT_DIR$" value="build_deck_interactor_tests" />
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
-  "lastFilter": {
-    "state": "OPEN",
-    "assignee": "Dimural"
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;Dimural&quot;
   }
-}]]></component>
-  <component name="GithubPullRequestsUISettings"><![CDATA[{
-  "selectedUrlAndAccountId": {
-    "url": "https://github.com/Teppi-txt/207PokemonProject.git",
-    "accountId": "5b3f7747-8198-4f08-b8c5-c3b9faa6f0b1"
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/Teppi-txt/207PokemonProject.git&quot;,
+    &quot;accountId&quot;: &quot;5b3f7747-8198-4f08-b8c5-c3b9faa6f0b1&quot;
   }
-}]]></component>
+}</component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 4
 }</component>
@@ -53,12 +71,13 @@
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
     "Application.CollectionView.executor": "Run",
+    "Application.Main.executor": "Run",
     "Application.ViewCollectionController.executor": "Run",
     "ModuleVcsDetector.initialDetectionPerformed": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
     "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "#41 on battle__player__test",
+    "git-widget-placeholder": "singleton__refactoring",
     "kotlin-language-version-configured": "true",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",

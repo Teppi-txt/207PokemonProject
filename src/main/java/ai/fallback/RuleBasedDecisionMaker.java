@@ -157,7 +157,7 @@ public class RuleBasedDecisionMaker {
      */
     private static Move lookupMove(String moveName) {
         // Look up the full move from JSONLoader to get power and other properties
-        for (Move move : JSONLoader.allMoves) {
+        for (Move move : JSONLoader.getInstance().getAllMoves()) {
             if (move.getName().equalsIgnoreCase(moveName)) {
                 return move;
             }

@@ -21,7 +21,7 @@ public class PickMovesetInteractor implements PickMovesetInputBoundary {
         for (Pokemon p : inputData.getDeck().getPokemons()) {
             List<Move> moves = new ArrayList<>();
             for (String mvName : p.getMoves()) {
-                for (Move m : JSONLoader.allMoves) {
+                for (Move m : JSONLoader.getInstance().getAllMoves()) {
                     if (m.getName().equalsIgnoreCase(mvName)) {
                         moves.add(m);
                     }
