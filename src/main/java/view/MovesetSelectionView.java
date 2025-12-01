@@ -30,7 +30,6 @@ public class MovesetSelectionView extends JFrame implements PropertyChangeListen
         this.user = user;
         this.deck = deck;
         this.viewModel = viewModel;
-
         this.viewModel.addPropertyChangeListener(this);
 
         setTitle("Pick Moveset For Your Pokémon");
