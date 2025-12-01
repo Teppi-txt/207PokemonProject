@@ -1,6 +1,8 @@
 package entities;
 
 import java.io.Serializable;
+import java.lang.reflect.Array;
+
 import org.json.JSONObject;
 import pokeapi.JSONUtility;
 
@@ -91,12 +93,15 @@ public class Pokemon implements Serializable {
 
     // cloning the pokemon so that they can be marked with the shiny attribute not changing the original data
     public Pokemon copy() {
+        ArrayList<String>copiedTypes = this.types != null ? new ArrayList<>(this.types) : new ArrayList<>();
+        ArrayList<String>copiedMoves = this.moves != null ? new ArrayList<>(this.moves) : new ArrayList<>();
+        Stats copiedStats = this.stats != null ? this.stats.copy() : null;
         Pokemon clone = new Pokemon(
                 this.name,
                 this.id,
-                new ArrayList<>(this.types),
-                this.stats.copy(),  // Copy stats so HP changes don't affect original
-                new ArrayList<>(this.moves)
+                copiedTypes,
+                copiedStats,  // Copy stats so HP changes don't affect original
+                copiedMoves
         );
         clone.setShiny(this.shiny);
         return clone;
