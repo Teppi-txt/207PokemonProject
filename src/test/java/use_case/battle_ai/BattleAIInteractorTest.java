@@ -299,7 +299,6 @@ public class BattleAIInteractorTest extends TestCase {
         assertSame(battle, presenter.outputData.getBattle());
     }
 
-    // ==================== Helper Methods ====================
 
     private Pokemon pokemonWithHp(String name, int hp) {
         Stats stats = new Stats(hp, 10, 10, 10, 10, 10);
