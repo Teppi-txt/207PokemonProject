@@ -26,7 +26,8 @@ public class Pack {
 
     public String getType() { return type; }
 
-    public List<Pokemon> getCardPool() { return cardPool; }
+    // public List<Pokemon> getCardPool() { return cardPool; }
+    //i think this can be removed
 
     public List<Pokemon> openPack() {
         List<Pokemon> opened = new ArrayList<>();
@@ -39,9 +40,11 @@ public class Pack {
             int index = random.nextInt(cardPool.size());
             Pokemon base = cardPool.get(index);
             Pokemon card = base.copy();
+
             if(random.nextDouble() < SHINY_PROBABILITY) {
                 card.setShiny(true);
             }
+
             opened.add(card);
         }
 

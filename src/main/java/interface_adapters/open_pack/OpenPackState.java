@@ -13,6 +13,7 @@ public class OpenPackState {
     private int remainingCurrency;
 
     private List<Pokemon> openedCards;
+
     private List<Boolean> duplicateFlags;
 
     private boolean revealMode;
@@ -35,12 +36,16 @@ public class OpenPackState {
     }
 
     public int getRemainingCurrency() { return remainingCurrency; }
-    public List<Pokemon> getOpenedCards() { return openedCards; }
-    public List<Boolean> getDuplicateFlags() { return duplicateFlags; }
-    public boolean isRevealMode() { return revealMode; }
-    public int getRevealIndex() { return revealIndex; }
-    public String getErrorMessage() { return errorMessage; }
 
+    public List<Pokemon> getOpenedCards() { return openedCards; }
+
+    public List<Boolean> getDuplicateFlags() { return duplicateFlags; }
+
+    public boolean isRevealMode() { return revealMode; }
+
+    public int getRevealIndex() { return revealIndex; }
+
+    public String getErrorMessage() { return errorMessage; }
 
     public void setRemainingCurrency(int amount) { this.remainingCurrency = amount; }
 
@@ -53,7 +58,9 @@ public class OpenPackState {
     }
 
     public void setRevealMode(boolean b) { this.revealMode = b; }
+
     public void setRevealIndex(int idx) { this.revealIndex = idx; }
+
     public void setErrorMessage(String msg) { this.errorMessage = msg; }
 
 }
