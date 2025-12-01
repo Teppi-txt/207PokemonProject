@@ -191,4 +191,51 @@ public class BuildDeckInteractorTest extends TestCase {
         assertNull(presenter.error);
         assertEquals(3, presenter.output.getDeck().getPokemons().size());
     }
+
+    public void testEditExistingDeck() {
+        Pokemon a = p(1, "A");
+        Pokemon b = p(2, "B");
+        User user = userWith(a, b);
+
+        InMemoryDeckGateway gw = new InMemoryDeckGateway(user);
+
+        Deck existing = new Deck(1, "OldName");
+        existing.addPokemon(a);
+        gw.saveDeck(existing);
+
+        RecordingPresenter presenter = new RecordingPresenter();
+
+        BuildDeckInputData input = new BuildDeckInputData(
+                1, "NewName", List.of(b), false, false
+        );
+
+        BuildDeckInteractor interactor = new BuildDeckInteractor(gw, presenter);
+        interactor.execute(input);
+
+        assertNull(presenter.error);
+        assertEquals("NewName", presenter.output.getDeck().getName());
+        assertEquals(1, presenter.output.getDeck().getPokemons().size());
+        assertEquals(2, presenter.output.getDeck().getPokemons().get(0).getID());
+    }
+
+    public void testDeleteDeck() {
+        User user = userWith();
+        InMemoryDeckGateway gw = new InMemoryDeckGateway(user);
+
+        Deck d = new Deck(1, "ToDelete");
+        gw.saveDeck(d);
+
+        RecordingPresenter presenter = new RecordingPresenter();
+
+        BuildDeckInputData input = new BuildDeckInputData(
+                1, null, null, false, true
+        );
+
+        BuildDeckInteractor interactor = new BuildDeckInteractor(gw, presenter);
+        interactor.execute(input);
+
+        assertNull(presenter.error);
+        assertEquals(1, gw.deletedId);
+        assertFalse(gw.getDecks().isEmpty());
+    }
 }
