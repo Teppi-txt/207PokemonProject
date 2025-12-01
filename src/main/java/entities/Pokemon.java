@@ -32,8 +32,14 @@ public class Pokemon implements Serializable {
         ArrayList<String> types = JSONUtility.jsonArrayToString(jsonObject.getJSONArray("types"));
         ArrayList<String> moves = JSONUtility.jsonArrayToString(jsonObject.getJSONArray("moves"));
         Stats stats = Stats.fromJSON(jsonObject.getJSONObject("stats"));
-        return new Pokemon(name, id, types, stats, moves);
+        Pokemon p = new Pokemon(name, id, types, stats, moves);
+        if (jsonObject.has("shiny")) {
+            p.setShiny(jsonObject.getBoolean("shiny"));
+        }
+
+        return p;
     }
+
 
     public boolean isShiny() {
         return shiny;
@@ -106,8 +112,7 @@ public class Pokemon implements Serializable {
         json.append("{");
         json.append("\"name\":\"").append(name).append("\",");
         json.append("\"id\":").append(id).append(",");
-
-        // typing
+        json.append("\"shiny\":").append(shiny).append(",");
         json.append("\"types\":[");
         for (int i = 0; i < types.size(); i++) {
             json.append("\"").append(types.get(i)).append("\"");
@@ -125,7 +130,6 @@ public class Pokemon implements Serializable {
         json.append("]}");
         return json.toString();
     }
-
 
     private static final String SPRITE_BASE_URL = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/";
     private static final String ANIMATED_FRONT_BASE_URL = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/";
