@@ -34,7 +34,7 @@ public class BattleAIFactory {
     public static JFrame createWithCallback(User user, Runnable returnCallback) {
         // Data Access Layer
         BattleAIDataAccessObject dataAccess = new BattleAIDataAccessObject(
-                JSONLoader.allPokemon, JSONLoader.allMoves);
+                JSONLoader.getInstance().getAllPokemon(), JSONLoader.getInstance().getAllMoves());
 
         // Presenter & ViewModel
         BattleAIViewModel viewModel = new BattleAIViewModel();
@@ -69,7 +69,7 @@ public class BattleAIFactory {
     public static DeckSelectionForBattleView createDeckBasedView(User user, Runnable returnCallback) {
         // Data Access Layer
         BattleAIDataAccessObject dataAccess = new BattleAIDataAccessObject(
-                JSONLoader.allPokemon, JSONLoader.allMoves);
+                JSONLoader.getInstance().getAllPokemon(), JSONLoader.getInstance().getAllMoves());
 
         // Presenter & ViewModel
         BattleAIViewModel viewModel = new BattleAIViewModel();

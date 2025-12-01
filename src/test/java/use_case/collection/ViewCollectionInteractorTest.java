@@ -20,20 +20,19 @@ class ViewCollectionInteractorTest {
     private ViewCollectionInteractor interactor;
 
     void setUp() {
-        JSONLoader.loadPokemon();
         user = new User(1, "Trainer", "trainer@pokemon.com", 5000);
 
         // Add specific Gen 1 starter Pokémon by ID
         int[] starterIds = {1, 4, 7, 25, 133};  // Bulbasaur, Charmander, Squirtle, Pikachu, Eevee
         for (int id : starterIds) {
-            Pokemon pokemon = JSONLoader.allPokemon.get(id);
+            Pokemon pokemon = JSONLoader.getInstance().getAllPokemon().get(id);
             if (pokemon != null) {
                 user.addPokemon(pokemon.copy());
             }
         }
 
         for (int i = 160; i < 190; i++) {
-            Pokemon pokemon = JSONLoader.allPokemon.get(i);
+            Pokemon pokemon = JSONLoader.getInstance().getAllPokemon().get(i);
             if (pokemon != null) {
                 Pokemon shiny = pokemon.copy();
                 shiny.setShiny(true);
@@ -62,7 +61,7 @@ class ViewCollectionInteractorTest {
         ViewCollectionInputData input1 = new ViewCollectionInputData(new ArrayList<>(), 0, "all");
         interactor.execute( input1 );
         ArrayList<Pokemon> userFirstPage = new ArrayList<>(
-                JSONLoader.allPokemon.subList(0, 20));
+                JSONLoader.getInstance().getAllPokemon().subList(0, 20));
         assertEquals(presenter.lastOutput.getPokemonOnPage(), userFirstPage);
     }
 
@@ -72,7 +71,7 @@ class ViewCollectionInteractorTest {
         ViewCollectionInputData input1 = new ViewCollectionInputData(new ArrayList<>(), 10, "all");
         interactor.execute( input1 );
         ArrayList<Pokemon> userFirstPage = new ArrayList<>(
-                JSONLoader.allPokemon.subList(200, 220));
+                JSONLoader.getInstance().getAllPokemon().subList(200, 220));
         assertEquals(presenter.lastOutput.getPokemonOnPage(), userFirstPage);
     }
 
@@ -99,6 +98,15 @@ class ViewCollectionInteractorTest {
             }
         }
         assertFalse(failed);
+    }
+
+    @Test
+    void invalidFilterEmpty() {
+        setUp();
+        ViewCollectionInputData input1 = new ViewCollectionInputData(new ArrayList<>(), 0, "absc");
+        interactor.execute( input1 );
+
+        assertTrue(presenter.lastOutput.getPokemonOnPage().isEmpty());
     }
 
     @Test
