@@ -1,6 +1,6 @@
 package frameworks_and_drivers;
 
-import entities.User;
+import entities.user.User;
 import org.json.JSONObject;
 import use_case.open_pack.OpenPackUserDataAccessInterface;
 
@@ -31,7 +31,6 @@ public class JsonUserDataAccess implements OpenPackUserDataAccessInterface {
             return null;
         }
     }
-
 
     public void saveUser(User user) {
         try {

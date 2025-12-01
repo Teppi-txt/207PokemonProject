@@ -1,5 +1,9 @@
 package frameworks_and_drivers.battle;
 
+import entities.battle.AIPlayer;
+import entities.battle.Battle;
+import entities.battle.Move;
+import entities.user.User;
 import interface_adapters.battle_ai.BattleAIController;
 import interface_adapters.battle_ai.BattleAIViewModel;
 import interface_adapters.ui.RetroButton;

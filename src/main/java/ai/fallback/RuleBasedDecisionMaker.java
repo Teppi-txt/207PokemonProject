@@ -2,7 +2,7 @@ package ai.fallback;
 
 import ai.graph.BattleDecisionState;
 import ai.graph.Decision;
-import entities.Move;
+import entities.battle.Move;
 import entities.Pokemon;
 import pokeapi.JSONLoader;
 

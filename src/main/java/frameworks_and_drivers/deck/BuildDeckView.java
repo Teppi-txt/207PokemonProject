@@ -1,9 +1,9 @@
 package frameworks_and_drivers.deck;
 
-import entities.Deck;
+import entities.battle.Deck;
 import entities.Pokemon;
-import entities.Stats;
-import entities.User;
+import entities.battle.Stats;
+import entities.user.User;
 import interface_adapters.build_deck.BuildDeckController;
 import interface_adapters.build_deck.BuildDeckState;
 import interface_adapters.build_deck.BuildDeckViewModel;
@@ -272,7 +272,7 @@ public class BuildDeckView extends JPanel implements PropertyChangeListener {
     public class DeckDisplayPanel extends JPanel {
 
         private final JPanel[] slotPanels;
-        private static final int DECK_LIMIT = entities.Deck.DECK_LIMIT;
+        private static final int DECK_LIMIT = Deck.DECK_LIMIT;
 
         public DeckDisplayPanel() {
             this.setLayout(new GridLayout(1, DECK_LIMIT, 10, 0));

@@ -18,6 +18,7 @@ public class OpenPackView extends JPanel {
     private final OpenPackViewModel viewModel;
     private final ViewManager viewManager;
 
+    //panels and buttons
     private final JPanel cardsPanel = new JPanel();
     private final JButton openPackButton = new JButton("Open Pack");
     private final JButton nextButton = new JButton("Next");
@@ -35,7 +36,7 @@ public class OpenPackView extends JPanel {
         // Top
         JPanel topPanel = new JPanel(new FlowLayout());
 
-        topPanel.add(openPackButton);
+        // topPanel.add(openPackButton); i dont think this is needed
         topPanel.add(backButton);
 
         add(topPanel, BorderLayout.NORTH);
@@ -51,7 +52,6 @@ public class OpenPackView extends JPanel {
         bottomPanel.add(messageLabel);
         bottomPanel.add(nextButton);
         bottomPanel.add(addCollectionButton);
-
         add(bottomPanel, BorderLayout.SOUTH);
 
         nextButton.setVisible(false);
@@ -122,9 +122,11 @@ public class OpenPackView extends JPanel {
 
         } else {
             for (int i = 0; i < opened.size(); i++) {
+
                 Pokemon p = opened.get(i);
                 boolean isDup = state.getDuplicateFlags().get(i);
                 cardsPanel.add(makeCardPanel(p, isDup));
+
             }
 
             nextButton.setVisible(false);

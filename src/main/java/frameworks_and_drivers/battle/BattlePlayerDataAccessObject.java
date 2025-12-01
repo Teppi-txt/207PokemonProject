@@ -1,7 +1,7 @@
 package frameworks_and_drivers.battle;
 
-import entities.Battle;
-import entities.User;
+import entities.battle.Battle;
+import entities.user.User;
 import use_case.battle_player.BattlePlayerUserDataAccessInterface;
 
 /**

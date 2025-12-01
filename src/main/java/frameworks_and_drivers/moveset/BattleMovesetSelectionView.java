@@ -1,6 +1,6 @@
 package frameworks_and_drivers.moveset;
 
-import entities.Move;
+import entities.battle.Move;
 import entities.Pokemon;
 import pokeapi.JSONLoader;
 

@@ -1,7 +1,7 @@
 package frameworks_and_drivers.moveset;
 
-import entities.Deck;
-import entities.Move;
+import entities.battle.Deck;
+import entities.battle.Move;
 import entities.Pokemon;
 import interface_adapters.pick_moveset.PickMovesetController;
 import interface_adapters.pick_moveset.PickMovesetPresenter;

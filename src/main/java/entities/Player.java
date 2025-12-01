@@ -1,5 +1,9 @@
 package entities;
 
+import entities.battle.Battle;
+import entities.battle.Deck;
+import entities.battle.Move;
+
 import java.util.List;
 
 public interface Player {

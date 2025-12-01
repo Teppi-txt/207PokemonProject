@@ -68,7 +68,8 @@ public class PreOpenPackView extends JPanel {
     }
 
     private void updateCurrency(int remainingCurrency) {
-        // TODO document why this method is empty
+        // i dont know why i cant remove this but if i do it messes stuff up
+        //so i will leave it be
     }
 
     /** NEW: controller injection */

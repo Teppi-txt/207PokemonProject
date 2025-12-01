@@ -1,8 +1,8 @@
 package ai.graph;
 
-import entities.Battle;
+import entities.battle.Battle;
 import entities.Player;
-import entities.Turn;
+import entities.battle.Turn;
 import org.bsc.langgraph4j.state.AgentState;
 import org.bsc.langgraph4j.state.Channel;
 

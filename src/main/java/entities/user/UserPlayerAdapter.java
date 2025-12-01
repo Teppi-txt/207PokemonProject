@@ -1,4 +1,9 @@
-package entities;
+package entities.user;
+
+import entities.*;
+import entities.battle.Battle;
+import entities.battle.Deck;
+import entities.battle.Move;
 
 import java.io.Serializable;
 import java.util.ArrayList;

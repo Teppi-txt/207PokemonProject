@@ -1,8 +1,8 @@
 package use_case.open_pack;
 
-import entities.Pack;
+import entities.open_pack.Pack;
 import entities.Pokemon;
-import entities.User;
+import entities.user.User;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,6 +1,6 @@
 package app;
 
-import entities.User;
+import entities.user.User;
 import interface_adapters.ViewManagerModel;
 
 import javax.imageio.ImageIO;

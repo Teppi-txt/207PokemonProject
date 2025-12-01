@@ -1,6 +1,6 @@
 package app.battle;
 
-import entities.User;
+import entities.user.User;
 import frameworks_and_drivers.deck.DeckSelectionForBattleView;
 import frameworks_and_drivers.deck.DeckSelectionView;
 import interface_adapters.battle_ai.*;

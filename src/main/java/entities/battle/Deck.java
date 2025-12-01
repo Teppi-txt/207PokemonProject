@@ -1,5 +1,6 @@
-package entities;
+package entities.battle;
 
+import entities.Pokemon;
 import org.json.JSONArray;
 import org.json.JSONObject;
 

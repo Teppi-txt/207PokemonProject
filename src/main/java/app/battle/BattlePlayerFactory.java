@@ -1,7 +1,7 @@
 package app.battle;
 
-import entities.Battle;
-import entities.User;
+import entities.battle.Battle;
+import entities.user.User;
 import frameworks_and_drivers.battle.BattlePlayerDataAccessObject;
 import frameworks_and_drivers.battle.BattlePlayerView;
 import frameworks_and_drivers.battle.BattleSetupDeckView;

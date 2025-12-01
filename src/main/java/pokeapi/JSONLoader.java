@@ -1,6 +1,6 @@
 package pokeapi;
 
-import entities.Move;
+import entities.battle.Move;
 import entities.Pokemon;
 import org.json.JSONArray;
 

@@ -1,11 +1,11 @@
 package interface_adapters.battle_ai;
 
 import entities.*;
+import entities.battle.*;
+import entities.user.User;
 import pokeapi.JSONLoader;
 import use_case.battle_ai.BattleAIInputBoundary;
-import use_case.battle_ai.BattleAIInputData;
 import use_case.battle_player.BattlePlayerInputBoundary;
-import use_case.battle_player.BattlePlayerInputData;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -452,7 +452,7 @@ public class BattleAIController {
         }
 
         // Calculate damage using the Gen I formula
-        int damage = entities.DamageCalculator.calculateDamage(attacker, defender, move);
+        int damage = DamageCalculator.calculateDamage(attacker, defender, move);
         int currentHP = defender.getStats().getHp();
         int newHP = Math.max(0, currentHP - damage);
 
@@ -460,7 +460,7 @@ public class BattleAIController {
         defender.getStats().setHp(newHP);
 
         // Get effectiveness for display
-        String effectiveness = entities.DamageCalculator.getEffectivenessDescription(move, defender);
+        String effectiveness = DamageCalculator.getEffectivenessDescription(move, defender);
 
         // Build result message
         StringBuilder result = new StringBuilder();

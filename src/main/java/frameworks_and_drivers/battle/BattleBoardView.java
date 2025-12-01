@@ -1,6 +1,6 @@
 package frameworks_and_drivers.battle;
 
-import entities.Move;
+import entities.battle.Move;
 import entities.Pokemon;
 import frameworks_and_drivers.SpriteLoader;
 import pokeapi.JSONLoader;

@@ -1,9 +1,11 @@
-package entities;
+package entities.battle;
 
 import ai.graph.BattleDecisionState;
 import ai.graph.Decision;
 import ai.graph.DecisionGraph;
-import entities.Deck;
+import entities.*;
+import entities.user.User;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -115,11 +117,11 @@ public class AIPlayer implements Player, Serializable {
      */
     private static class HumanPlayerWrapper implements Player, java.io.Serializable {
         private static final long serialVersionUID = 1L;
-        private final entities.User user;
+        private final User user;
         private Pokemon activePokemon;
         private List<Pokemon> team;
 
-        public HumanPlayerWrapper(entities.User user) {
+        public HumanPlayerWrapper(User user) {
             this.user = user;
             this.team = user.getOwnedPokemon();
 

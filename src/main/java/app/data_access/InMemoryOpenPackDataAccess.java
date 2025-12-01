@@ -1,6 +1,6 @@
 package app.data_access;
 
-import entities.User;
+import entities.user.User;
 import frameworks_and_drivers.JsonUserDataAccess;
 import use_case.open_pack.OpenPackUserDataAccessInterface;
 
