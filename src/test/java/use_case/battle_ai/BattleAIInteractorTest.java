@@ -1,6 +1,11 @@
 package use_case.battle_ai;
 
-import entities.*;
+import entities.AIPlayer;
+import entities.Battle;
+import entities.Move;
+import entities.Pokemon;
+import entities.Stats;
+import entities.User;
 import junit.framework.TestCase;
 
 import java.util.ArrayList;
@@ -9,280 +14,292 @@ import java.util.List;
 
 public class BattleAIInteractorTest extends TestCase {
 
-    public void testBattleNotFound() {
+
+    public void testSetupSuccess() {
         RecordingPresenter presenter = new RecordingPresenter();
-        InMemoryBattleGateway gateway = new InMemoryBattleGateway(null);
+        InMemoryBattleGateway gateway = new InMemoryBattleGateway();
+        gateway.setAllPokemon(createPokemonPool());
         BattleAIInteractor interactor = new BattleAIInteractor(gateway, presenter);
 
-        MockAIPlayer aiPlayer = new MockAIPlayer("AI");
-        interactor.execute(new BattleAIInputData(null, aiPlayer, false));
+        User user = userWithPokemon("Ash", 100, pokemonWithHp("Pikachu", 50));
+        List<Pokemon> playerTeam = Arrays.asList(pokemonWithHp("Pikachu", 50));
+
+        interactor.execute(new BattleAIInputData(user, playerTeam, "easy"));
+
+        assertNull(presenter.errorMessage);
+        assertNotNull(presenter.outputData);
+        assertNotNull(gateway.savedBattle);
+        assertEquals("IN_PROGRESS", gateway.savedBattle.getBattleStatus());
+    }
+
+    public void testSetupFailsWithNullUser() {
+        RecordingPresenter presenter = new RecordingPresenter();
+        InMemoryBattleGateway gateway = new InMemoryBattleGateway();
+        BattleAIInteractor interactor = new BattleAIInteractor(gateway, presenter);
+
+        List<Pokemon> playerTeam = Arrays.asList(pokemonWithId("Pikachu", 1, 50));
+
+        // When user is null, isSetupRequest() returns false, so it falls through to "Invalid request"
+        interactor.execute(new BattleAIInputData(null, playerTeam, "easy"));
+
+        assertEquals("Invalid request", presenter.errorMessage);
+        assertNull(presenter.outputData);
+    }
+
+    public void testSetupFailsWithEmptyTeam() {
+        RecordingPresenter presenter = new RecordingPresenter();
+        InMemoryBattleGateway gateway = new InMemoryBattleGateway();
+        BattleAIInteractor interactor = new BattleAIInteractor(gateway, presenter);
+
+        User user = userWithPokemon("Ash", 100);
+
+        interactor.execute(new BattleAIInputData(user, new ArrayList<>(), "easy"));
+
+        assertEquals("Invalid setup: user and team required", presenter.errorMessage);
+        assertNull(presenter.outputData);
+    }
+
+    // ==================== Player Move Tests ====================
+
+    public void testPlayerMoveBattleNotFound() {
+        RecordingPresenter presenter = new RecordingPresenter();
+        InMemoryBattleGateway gateway = new InMemoryBattleGateway();
+        BattleAIInteractor interactor = new BattleAIInteractor(gateway, presenter);
+
+        interactor.execute(new BattleAIInputData(0));
 
         assertEquals("Battle not found", presenter.errorMessage);
         assertNull(presenter.outputData);
-        assertNull(gateway.savedBattle);
-        assertTrue(gateway.savedUsers.isEmpty());
     }
 
-    public void testBattleAlreadyCompleted() {
-        User player1 = userWithPokemon("Ash", 100, pokemonWithHp("Bulbasaur", 40));
-        User player2 = userWithPokemon("AI", 80, pokemonWithHp("Squirtle", 35));
-        Battle battle = new Battle(1, player1, player2);
-        battle.endBattle(player1);
-
+    public void testPlayerMoveBattleAlreadyCompleted() {
         RecordingPresenter presenter = new RecordingPresenter();
-        InMemoryBattleGateway gateway = new InMemoryBattleGateway(battle);
+        InMemoryBattleGateway gateway = new InMemoryBattleGateway();
         BattleAIInteractor interactor = new BattleAIInteractor(gateway, presenter);
 
-        MockAIPlayer aiPlayer = new MockAIPlayer("AI");
-        aiPlayer.addPokemonToTeam(pokemonWithHp("Squirtle", 35));
-        interactor.execute(new BattleAIInputData(battle, aiPlayer, false));
+        User player1 = userWithPokemon("Ash", 100, pokemonWithHp("Pikachu", 50));
+        User player2 = userWithPokemon("AI Trainer", 100, pokemonWithHp("Squirtle", 50));
+        Battle battle = new Battle(1, player1, player2);
+        battle.endBattle(player1);
+        gateway.saveBattle(battle);
+
+        interactor.execute(new BattleAIInputData(0));
 
         assertEquals("Battle is already completed", presenter.errorMessage);
         assertNull(presenter.outputData);
-        assertNull(gateway.savedBattle);
-        assertTrue(gateway.savedUsers.isEmpty());
     }
 
-    public void testBattleNotInProgress() {
-        User player1 = userWithPokemon("Ash", 90, pokemonWithHp("Bulbasaur", 40));
-        User player2 = userWithPokemon("AI", 70, pokemonWithHp("Squirtle", 35));
-        Battle battle = new Battle(2, player1, player2);
-
+    public void testPlayerMoveBattleStateNotFound() {
         RecordingPresenter presenter = new RecordingPresenter();
-        InMemoryBattleGateway gateway = new InMemoryBattleGateway(battle);
+        InMemoryBattleGateway gateway = new InMemoryBattleGateway();
         BattleAIInteractor interactor = new BattleAIInteractor(gateway, presenter);
 
-        MockAIPlayer aiPlayer = new MockAIPlayer("AI");
-        aiPlayer.addPokemonToTeam(pokemonWithHp("Squirtle", 35));
-        interactor.execute(new BattleAIInputData(battle, aiPlayer, false));
+        User player1 = userWithPokemon("Ash", 100, pokemonWithHp("Pikachu", 50));
+        User player2 = userWithPokemon("AI Trainer", 100, pokemonWithHp("Squirtle", 50));
+        Battle battle = battleInProgress(player1, player2);
+        gateway.saveBattle(battle);
+        // Don't set user, aiPlayer, or playerActivePokemon
 
-        assertEquals("Battle is not in progress", presenter.errorMessage);
+        interactor.execute(new BattleAIInputData(0));
+
+        assertEquals("Battle state not found", presenter.errorMessage);
         assertNull(presenter.outputData);
-        assertNull(gateway.savedBattle);
-        assertTrue(gateway.savedUsers.isEmpty());
     }
 
-    public void testAIPlayerNotFound() {
-        User player1 = userWithPokemon("Ash", 100, pokemonWithHp("Bulbasaur", 40));
-        User player2 = userWithPokemon("Gary", 80, pokemonWithHp("Squirtle", 35));
+    public void testPlayerMoveInvalidMoveIndex() {
+        RecordingPresenter presenter = new RecordingPresenter();
+        InMemoryBattleGateway gateway = new InMemoryBattleGateway();
+        BattleAIInteractor interactor = new BattleAIInteractor(gateway, presenter);
+
+        User player1 = userWithPokemon("Ash", 100, pokemonWithHp("Pikachu", 50));
+        User player2 = userWithPokemon("AI Trainer", 100, pokemonWithHp("Squirtle", 50));
         Battle battle = battleInProgress(player1, player2);
 
-        RecordingPresenter presenter = new RecordingPresenter();
-        InMemoryBattleGateway gateway = new InMemoryBattleGateway(battle);
-        BattleAIInteractor interactor = new BattleAIInteractor(gateway, presenter);
+        Pokemon playerPokemon = pokemonWithHp("Pikachu", 50);
+        AIPlayer aiPlayer = new AIPlayer("AI Trainer", "easy");
+        aiPlayer.setTeam(Arrays.asList(pokemonWithHp("Squirtle", 50)));
+        aiPlayer.setActivePokemon(aiPlayer.getTeam().get(0));
 
-        interactor.execute(new BattleAIInputData(battle, null, false));
+        gateway.saveBattle(battle);
+        gateway.saveUser(player1);
+        gateway.saveAIPlayer(aiPlayer);
+        gateway.setPlayerActivePokemon(playerPokemon);
 
-        assertEquals("AI player not found", presenter.errorMessage);
+        interactor.execute(new BattleAIInputData(10)); // Invalid index
+
+        assertEquals("Invalid move index", presenter.errorMessage);
         assertNull(presenter.outputData);
-        assertNull(gateway.savedBattle);
-        assertTrue(gateway.savedUsers.isEmpty());
     }
 
-    public void testAIPlayerHasNoAvailablePokemon() {
-        User player1 = userWithPokemon("Ash", 100, pokemonWithHp("Bulbasaur", 40));
-        User player2 = userWithPokemon("AI", 80, pokemonWithHp("Squirtle", 0));
-        Battle battle = battleInProgress(player1, player2);
-
+    public void testPlayerMoveSuccess() {
         RecordingPresenter presenter = new RecordingPresenter();
-        InMemoryBattleGateway gateway = new InMemoryBattleGateway(battle);
+        InMemoryBattleGateway gateway = new InMemoryBattleGateway();
         BattleAIInteractor interactor = new BattleAIInteractor(gateway, presenter);
 
-        MockAIPlayer aiPlayer = new MockAIPlayer("AI");
-        aiPlayer.addPokemonToTeam(pokemonWithHp("Squirtle", 0)); // Fainted Pokemon
-        interactor.execute(new BattleAIInputData(battle, aiPlayer, false));
-
-        assertEquals("AI player has no available Pokemon", presenter.errorMessage);
-        assertNull(presenter.outputData);
-        assertNull(gateway.savedBattle);
-        assertTrue(gateway.savedUsers.isEmpty());
-    }
-
-    public void testAIPlayerNotPartOfBattle() {
-        User player1 = userWithPokemon("Ash", 100, pokemonWithHp("Bulbasaur", 40));
-        User player2 = userWithPokemon("Gary", 80, pokemonWithHp("Squirtle", 35));
+        User player1 = userWithPokemon("Ash", 200, pokemonWithHp("Pikachu", 100));
+        User player2 = userWithPokemon("AI Trainer", 150, pokemonWithHp("Squirtle", 100));
         Battle battle = battleInProgress(player1, player2);
 
-        RecordingPresenter presenter = new RecordingPresenter();
-        InMemoryBattleGateway gateway = new InMemoryBattleGateway(battle);
-        BattleAIInteractor interactor = new BattleAIInteractor(gateway, presenter);
-
-        MockAIPlayer aiPlayer = new MockAIPlayer("DifferentAI");
-        aiPlayer.addPokemonToTeam(pokemonWithHp("Pikachu", 50));
-        interactor.execute(new BattleAIInputData(battle, aiPlayer, false));
-
-        assertEquals("AI player is not part of this battle", presenter.errorMessage);
-        assertNull(presenter.outputData);
-        assertNull(gateway.savedBattle);
-        assertTrue(gateway.savedUsers.isEmpty());
-    }
-
-    public void testForcedSwitchFailsToChoosePokemon() {
-        User player1 = userWithPokemon("Ash", 100, pokemonWithHp("Bulbasaur", 40));
-        User player2 = userWithPokemon("AI", 80, pokemonWithHp("Squirtle", 35));
-        Battle battle = battleInProgress(player1, player2);
-
-        RecordingPresenter presenter = new RecordingPresenter();
-        InMemoryBattleGateway gateway = new InMemoryBattleGateway(battle);
-        BattleAIInteractor interactor = new BattleAIInteractor(gateway, presenter);
-
-        MockAIPlayer aiPlayer = new MockAIPlayer("AI");
-        aiPlayer.addPokemonToTeam(pokemonWithHp("Squirtle", 35));
-        aiPlayer.setSwitchDecision(null); // AI fails to choose
-        interactor.execute(new BattleAIInputData(battle, aiPlayer, true));
-
-        assertEquals("AI failed to choose a Pokemon to switch to", presenter.errorMessage);
-        assertNull(presenter.outputData);
-        assertNull(gateway.savedBattle);
-        assertTrue(gateway.savedUsers.isEmpty());
-    }
-
-    public void testAIFailsToChooseMove() {
-        User player1 = userWithPokemon("Ash", 100, pokemonWithHp("Bulbasaur", 40));
-        User player2 = userWithPokemon("AI", 80, pokemonWithHp("Squirtle", 35));
-        Battle battle = battleInProgress(player1, player2);
-
-        RecordingPresenter presenter = new RecordingPresenter();
-        InMemoryBattleGateway gateway = new InMemoryBattleGateway(battle);
-        BattleAIInteractor interactor = new BattleAIInteractor(gateway, presenter);
-
-        MockAIPlayer aiPlayer = new MockAIPlayer("AI");
-        aiPlayer.addPokemonToTeam(pokemonWithHp("Squirtle", 35));
-        aiPlayer.setMoveDecision(null); // AI fails to choose move
-        interactor.execute(new BattleAIInputData(battle, aiPlayer, false));
-
-        assertEquals("AI failed to choose a move", presenter.errorMessage);
-        assertNull(presenter.outputData);
-        assertNull(gateway.savedBattle);
-        assertTrue(gateway.savedUsers.isEmpty());
-    }
-
-    public void testBattleContinuesWithAvailablePokemon() {
-        User player1 = userWithPokemon("Ash", 200, pokemonWithHp("Bulbasaur", 40));
-        User player2 = userWithPokemon("AI", 150, pokemonWithHp("Squirtle", 35));
-        Battle battle = battleInProgress(player1, player2);
-
-        RecordingPresenter presenter = new RecordingPresenter();
-        InMemoryBattleGateway gateway = new InMemoryBattleGateway(battle);
-        BattleAIInteractor interactor = new BattleAIInteractor(gateway, presenter);
-
-        Move tackle = createMove("tackle", "normal", 40);
-        MockAIPlayer aiPlayer = new MockAIPlayer("AI");
-        Pokemon aiPokemon = pokemonWithHp("Squirtle", 35);
-        aiPlayer.addPokemonToTeam(aiPokemon);
+        Pokemon playerPokemon = pokemonWithHp("Pikachu", 100);
+        AIPlayer aiPlayer = new AIPlayer("AI Trainer", "easy");
+        Pokemon aiPokemon = pokemonWithHp("Squirtle", 100);
+        aiPlayer.setTeam(Arrays.asList(aiPokemon));
         aiPlayer.setActivePokemon(aiPokemon);
-        aiPlayer.setMoveDecision(tackle);
 
-        interactor.execute(new BattleAIInputData(battle, aiPlayer, false));
+        gateway.saveBattle(battle);
+        gateway.saveUser(player1);
+        gateway.saveAIPlayer(aiPlayer);
+        gateway.setPlayerActivePokemon(playerPokemon);
+        gateway.savePlayerTeam(Arrays.asList(playerPokemon));
+        gateway.addMove(createMove("tackle", "normal", 40));
+
+        interactor.execute(new BattleAIInputData(0));
 
         assertNull(presenter.errorMessage);
         assertNotNull(presenter.outputData);
         assertSame(battle, presenter.outputData.getBattle());
         assertFalse(presenter.outputData.isBattleEnded());
-        assertEquals("IN_PROGRESS", presenter.outputData.getBattle().getBattleStatus());
-        assertSame(battle, gateway.savedBattle);
-        assertTrue(gateway.savedUsers.isEmpty());
-        assertEquals(200, player1.getCurrency());
-        assertEquals(150, player2.getCurrency());
+        assertEquals("IN_PROGRESS", battle.getBattleStatus());
     }
 
-    public void testAIWinsAwardsCurrency() {
-        User player1 = userWithPokemon("Ash", 220, pokemonWithHp("Pikachu", 0));
-        User player2 = userWithPokemon("AI", 180, pokemonWithHp("Squirtle", 35));
-        Battle battle = battleInProgress(player1, player2);
-
+    public void testPlayerMoveEndsGamePlayerWins() {
         RecordingPresenter presenter = new RecordingPresenter();
-        InMemoryBattleGateway gateway = new InMemoryBattleGateway(battle);
+        InMemoryBattleGateway gateway = new InMemoryBattleGateway();
         BattleAIInteractor interactor = new BattleAIInteractor(gateway, presenter);
 
-        Move tackle = createMove("tackle", "normal", 40);
-        MockAIPlayer aiPlayer = new MockAIPlayer("AI");
-        Pokemon aiPokemon = pokemonWithHp("Squirtle", 35);
-        aiPlayer.addPokemonToTeam(aiPokemon);
+        // Player1 has healthy Pokemon, Player2 (AI) has all fainted Pokemon
+        User player1 = userWithPokemon("Ash", 200, pokemonWithHp("Pikachu", 100));
+        // Player2's owned Pokemon must be fainted for battle to end
+        Pokemon faintedSquirtle = pokemonWithHpAndMaxHp("Squirtle", 0, 100);
+        User player2 = userWithPokemon("AI Trainer", 150, faintedSquirtle);
+        Battle battle = battleInProgress(player1, player2);
+
+        Pokemon playerPokemon = pokemonWithHp("Pikachu", 100);
+        AIPlayer aiPlayer = new AIPlayer("AI Trainer", "easy");
+        Pokemon aiPokemon = pokemonWithHpAndMaxHp("Squirtle", 0, 100); // Already fainted
+        aiPlayer.setTeam(Arrays.asList(aiPokemon));
         aiPlayer.setActivePokemon(aiPokemon);
-        aiPlayer.setMoveDecision(tackle);
+
+        gateway.saveBattle(battle);
+        gateway.saveUser(player1);
+        gateway.saveAIPlayer(aiPlayer);
+        gateway.setPlayerActivePokemon(playerPokemon);
+        gateway.savePlayerTeam(Arrays.asList(playerPokemon));
+        gateway.addMove(createMove("tackle", "normal", 40));
 
         int player1Start = player1.getCurrency();
         int player2Start = player2.getCurrency();
 
-        interactor.execute(new BattleAIInputData(battle, aiPlayer, false));
+        interactor.execute(new BattleAIInputData(0));
 
         assertNull(presenter.errorMessage);
         assertNotNull(presenter.outputData);
         assertTrue(presenter.outputData.isBattleEnded());
-        assertEquals("COMPLETED", presenter.outputData.getBattle().getBattleStatus());
-        assertSame(player2, battle.getWinner());
-        assertEquals(player2Start + 500, player2.getCurrency());
-        assertEquals(player1Start + 100, player1.getCurrency());
-        assertEquals(2, gateway.savedUsers.size());
-        assertSame(battle, gateway.savedBattle);
-    }
-
-    public void testOpponentWinsAwardsCurrency() {
-        // Player1 has healthy Pokemon, player2 (AI user) has all fainted Pokemon
-        User player1 = userWithPokemon("Ash", 300, pokemonWithHp("Bulbasaur", 40));
-        // AI user's owned Pokemon are all fainted - this determines battle end
-        User player2 = userWithPokemon("AI", 400, pokemonWithHp("Squirtle", 0));
-        Battle battle = battleInProgress(player1, player2);
-
-        RecordingPresenter presenter = new RecordingPresenter();
-        InMemoryBattleGateway gateway = new InMemoryBattleGateway(battle);
-        BattleAIInteractor interactor = new BattleAIInteractor(gateway, presenter);
-
-        Move tackle = createMove("tackle", "normal", 40);
-        MockAIPlayer aiPlayer = new MockAIPlayer("AI");
-        // AIPlayer's team has available Pokemon (for validation)
-        // But the User's owned Pokemon are fainted (determines battle end)
-        Pokemon activePokemon = pokemonWithHp("Charmander", 50);
-        aiPlayer.addPokemonToTeam(activePokemon);
-        aiPlayer.setActivePokemon(activePokemon);
-        aiPlayer.setMoveDecision(tackle);
-
-        int player1Start = player1.getCurrency();
-        int player2Start = player2.getCurrency();
-
-        interactor.execute(new BattleAIInputData(battle, aiPlayer, false));
-
-        assertNull(presenter.errorMessage);
-        assertNotNull(presenter.outputData);
-        assertTrue(presenter.outputData.isBattleEnded());
-        assertEquals("COMPLETED", presenter.outputData.getBattle().getBattleStatus());
-        assertSame(player1, battle.getWinner());
+        assertEquals("COMPLETED", battle.getBattleStatus());
         assertEquals(player1Start + 500, player1.getCurrency());
         assertEquals(player2Start + 100, player2.getCurrency());
-        assertEquals(2, gateway.savedUsers.size());
-        assertSame(battle, gateway.savedBattle);
     }
 
-    public void testForcedSwitchSuccess() {
-        User player1 = userWithPokemon("Ash", 100, pokemonWithHp("Bulbasaur", 40));
-        User player2 = userWithPokemon("AI", 100, pokemonWithHp("Squirtle", 35));
-        Battle battle = battleInProgress(player1, player2);
 
+    public void testPlayerSwitchBattleNotFound() {
         RecordingPresenter presenter = new RecordingPresenter();
-        InMemoryBattleGateway gateway = new InMemoryBattleGateway(battle);
+        InMemoryBattleGateway gateway = new InMemoryBattleGateway();
         BattleAIInteractor interactor = new BattleAIInteractor(gateway, presenter);
 
-        MockAIPlayer aiPlayer = new MockAIPlayer("AI");
-        Pokemon faintedPokemon = pokemonWithHp("Squirtle", 0);
-        Pokemon reservePokemon = pokemonWithHp("Charmander", 50);
-        aiPlayer.addPokemonToTeam(faintedPokemon);
-        aiPlayer.addPokemonToTeam(reservePokemon);
-        aiPlayer.setActivePokemon(faintedPokemon);
-        aiPlayer.setSwitchDecision(reservePokemon);
+        interactor.execute(BattleAIInputData.forSwitchById(1));
 
-        interactor.execute(new BattleAIInputData(battle, aiPlayer, true));
+        assertEquals("Battle not found", presenter.errorMessage);
+        assertNull(presenter.outputData);
+    }
+
+    public void testPlayerSwitchBattleAlreadyCompleted() {
+        RecordingPresenter presenter = new RecordingPresenter();
+        InMemoryBattleGateway gateway = new InMemoryBattleGateway();
+        BattleAIInteractor interactor = new BattleAIInteractor(gateway, presenter);
+
+        User player1 = userWithPokemon("Ash", 100, pokemonWithHp("Pikachu", 50));
+        User player2 = userWithPokemon("AI Trainer", 100, pokemonWithHp("Squirtle", 50));
+        Battle battle = new Battle(1, player1, player2);
+        battle.endBattle(player1);
+        gateway.saveBattle(battle);
+
+        interactor.execute(BattleAIInputData.forSwitchById(1));
+
+        assertEquals("Battle is already completed", presenter.errorMessage);
+        assertNull(presenter.outputData);
+    }
+
+    public void testPlayerSwitchPokemonNotFound() {
+        RecordingPresenter presenter = new RecordingPresenter();
+        InMemoryBattleGateway gateway = new InMemoryBattleGateway();
+        BattleAIInteractor interactor = new BattleAIInteractor(gateway, presenter);
+
+        User player1 = userWithPokemon("Ash", 100, pokemonWithHp("Pikachu", 50));
+        User player2 = userWithPokemon("AI Trainer", 100, pokemonWithHp("Squirtle", 50));
+        Battle battle = battleInProgress(player1, player2);
+
+        Pokemon playerPokemon = pokemonWithHp("Pikachu", 50);
+        gateway.saveBattle(battle);
+        gateway.savePlayerTeam(Arrays.asList(playerPokemon));
+
+        interactor.execute(BattleAIInputData.forSwitchById(9999)); // Non-existent ID
+
+        assertEquals("Pokemon not found in team", presenter.errorMessage);
+        assertNull(presenter.outputData);
+    }
+
+    public void testPlayerSwitchToFaintedPokemon() {
+        RecordingPresenter presenter = new RecordingPresenter();
+        InMemoryBattleGateway gateway = new InMemoryBattleGateway();
+        BattleAIInteractor interactor = new BattleAIInteractor(gateway, presenter);
+
+        User player1 = userWithPokemon("Ash", 100, pokemonWithId("Pikachu", 1, 50));
+        User player2 = userWithPokemon("AI Trainer", 100, pokemonWithId("Squirtle", 2, 50));
+        Battle battle = battleInProgress(player1, player2);
+
+        Pokemon faintedPokemon = pokemonWithIdAndHp("Charizard", 100, 0, 100); // ID=100, currentHp=0, maxHp=100
+        gateway.saveBattle(battle);
+        gateway.savePlayerTeam(Arrays.asList(faintedPokemon));
+
+        interactor.execute(BattleAIInputData.forSwitchById(100)); // Use explicit positive ID
+
+        assertEquals("Cannot switch to fainted Pokemon", presenter.errorMessage);
+        assertNull(presenter.outputData);
+    }
+
+    public void testPlayerSwitchSuccess() {
+        RecordingPresenter presenter = new RecordingPresenter();
+        InMemoryBattleGateway gateway = new InMemoryBattleGateway();
+        BattleAIInteractor interactor = new BattleAIInteractor(gateway, presenter);
+
+        Pokemon p1Pokemon = pokemonWithId("Pikachu", 1, 50);
+        Pokemon p1Pokemon2 = pokemonWithId("Charizard", 2, 80);
+        User player1 = userWithPokemon("Ash", 200, p1Pokemon, p1Pokemon2);
+        User player2 = userWithPokemon("AI Trainer", 150, pokemonWithId("Squirtle", 3, 50));
+        Battle battle = battleInProgress(player1, player2);
+
+        Pokemon activePokemon = pokemonWithId("Pikachu", 10, 50);
+        Pokemon switchTarget = pokemonWithId("Charizard", 20, 80);
+        AIPlayer aiPlayer = new AIPlayer("AI Trainer", "easy");
+        Pokemon aiPokemon = pokemonWithId("Squirtle", 30, 50);
+        aiPlayer.setTeam(Arrays.asList(aiPokemon));
+        aiPlayer.setActivePokemon(aiPokemon);
+
+        gateway.saveBattle(battle);
+        gateway.saveUser(player1);
+        gateway.saveAIPlayer(aiPlayer);
+        gateway.setPlayerActivePokemon(activePokemon);
+        gateway.savePlayerTeam(Arrays.asList(activePokemon, switchTarget));
+        gateway.addMove(createMove("tackle", "normal", 40));
+
+        interactor.execute(BattleAIInputData.forSwitchById(20)); // switchTarget's ID
 
         assertNull(presenter.errorMessage);
         assertNotNull(presenter.outputData);
-        assertFalse(presenter.outputData.isBattleEnded());
-        assertEquals("IN_PROGRESS", presenter.outputData.getBattle().getBattleStatus());
-        assertNotNull(presenter.outputData.getExecutedTurn());
-        assertTrue(presenter.outputData.getExecutedTurn() instanceof entities.SwitchTurn);
-        assertSame(battle, gateway.savedBattle);
+        assertSame(battle, presenter.outputData.getBattle());
     }
 
-    // Helper methods
+    // ==================== Helper Methods ====================
 
     private Pokemon pokemonWithHp(String name, int hp) {
         Stats stats = new Stats(hp, 10, 10, 10, 10, 10);
@@ -290,7 +307,42 @@ public class BattleAIInteractorTest extends TestCase {
         types.add("normal");
         ArrayList<String> moves = new ArrayList<>();
         moves.add("tackle");
-        return new Pokemon(name, name.hashCode(), types, stats, moves);
+        return new Pokemon(name, Math.abs(name.hashCode()), types, stats, moves);
+    }
+
+    private Pokemon pokemonWithId(String name, int id, int hp) {
+        Stats stats = new Stats(hp, 10, 10, 10, 10, 10);
+        ArrayList<String> types = new ArrayList<>();
+        types.add("normal");
+        ArrayList<String> moves = new ArrayList<>();
+        moves.add("tackle");
+        return new Pokemon(name, id, types, stats, moves);
+    }
+
+    private Pokemon pokemonWithIdAndHp(String name, int id, int currentHp, int maxHp) {
+        Stats stats = new Stats(maxHp, 10, 10, 10, 10, 10);
+        ArrayList<String> types = new ArrayList<>();
+        types.add("normal");
+        ArrayList<String> moves = new ArrayList<>();
+        moves.add("tackle");
+        Pokemon pokemon = new Pokemon(name, id, types, stats, moves);
+        if (currentHp < maxHp) {
+            pokemon.getStats().setHp(currentHp);
+        }
+        return pokemon;
+    }
+
+    private Pokemon pokemonWithHpAndMaxHp(String name, int currentHp, int maxHp) {
+        Stats stats = new Stats(maxHp, 10, 10, 10, 10, 10);
+        ArrayList<String> types = new ArrayList<>();
+        types.add("normal");
+        ArrayList<String> moves = new ArrayList<>();
+        moves.add("tackle");
+        Pokemon pokemon = new Pokemon(name, Math.abs(name.hashCode()), types, stats, moves);
+        if (currentHp < maxHp) {
+            pokemon.getStats().setHp(currentHp);
+        }
+        return pokemon;
     }
 
     private User userWithPokemon(String name, int currency, Pokemon... pokemons) {
@@ -316,44 +368,20 @@ public class BattleAIInteractorTest extends TestCase {
                 .setEffect("Deals damage");
     }
 
-    // Mock classes for testing
-
-    private static class MockAIPlayer extends AIPlayer {
-        private Move moveDecision;
-        private Pokemon switchDecision;
-        private boolean moveDecisionSet = false;
-        private boolean switchDecisionSet = false;
-
-        MockAIPlayer(String name) {
-            super(name, "easy");
+    private List<Pokemon> createPokemonPool() {
+        List<Pokemon> pool = new ArrayList<>();
+        // Add Pokemon with low stats for "easy" difficulty
+        for (int i = 1; i <= 20; i++) {
+            Stats stats = new Stats(50, 30, 30, 30, 30, 30); // Total: 200 < 350
+            ArrayList<String> types = new ArrayList<>();
+            types.add("normal");
+            ArrayList<String> moves = new ArrayList<>();
+            moves.add("tackle");
+            pool.add(new Pokemon("Pokemon" + i, i, types, stats, moves));
         }
-
-        void setMoveDecision(Move move) {
-            this.moveDecision = move;
-            this.moveDecisionSet = true;
-        }
-
-        void setSwitchDecision(Pokemon pokemon) {
-            this.switchDecision = pokemon;
-            this.switchDecisionSet = true;
-        }
-
-        @Override
-        public Move chooseMove(Battle battle) {
-            if (moveDecisionSet) {
-                return moveDecision;
-            }
-            return super.chooseMove(battle);
-        }
-
-        @Override
-        public Pokemon decideSwitch(Battle battle) {
-            if (switchDecisionSet) {
-                return switchDecision;
-            }
-            return super.decideSwitch(battle);
-        }
+        return pool;
     }
+
 
     private static class RecordingPresenter implements BattleAIOutputBoundary {
         private BattleAIOutputData outputData;
@@ -371,16 +399,14 @@ public class BattleAIInteractorTest extends TestCase {
     }
 
     private static class InMemoryBattleGateway implements BattleAIUserDataAccessInterface {
+        private User currentUser;
         private Battle battle;
         private Battle savedBattle;
-        private final List<User> savedUsers = new ArrayList<>();
         private List<Pokemon> playerTeam = new ArrayList<>();
         private AIPlayer aiPlayer;
         private Pokemon playerActivePokemon;
-
-        InMemoryBattleGateway(Battle battle) {
-            this.battle = battle;
-        }
+        private List<Pokemon> allPokemon = new ArrayList<>();
+        private List<Move> allMoves = new ArrayList<>();
 
         @Override
         public void saveBattle(Battle battle) {
@@ -395,17 +421,21 @@ public class BattleAIInteractorTest extends TestCase {
 
         @Override
         public void saveUser(User user) {
-            savedUsers.add(user);
+            this.currentUser = user;
         }
 
         @Override
         public User getUser() {
-            return battle != null ? battle.getPlayer1() : null;
+            return currentUser;
         }
 
         @Override
         public List<Pokemon> getAllPokemon() {
-            return new ArrayList<>();
+            return allPokemon;
+        }
+
+        public void setAllPokemon(List<Pokemon> pokemon) {
+            this.allPokemon = pokemon;
         }
 
         @Override
@@ -436,6 +466,20 @@ public class BattleAIInteractorTest extends TestCase {
         @Override
         public Pokemon getPlayerActivePokemon() {
             return playerActivePokemon;
+        }
+
+        @Override
+        public Move getMoveByName(String moveName) {
+            for (Move move : allMoves) {
+                if (move.getName().equalsIgnoreCase(moveName)) {
+                    return move;
+                }
+            }
+            return null;
+        }
+
+        public void addMove(Move move) {
+            this.allMoves.add(move);
         }
     }
 }

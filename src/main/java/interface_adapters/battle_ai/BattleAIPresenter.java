@@ -68,14 +68,14 @@ public class BattleAIPresenter implements BattleAIOutputBoundary {
         if (battle.getPlayer1() != null && battle.getPlayer1().getOwnedPokemon() != null) {
             List<BattleAIViewModel.PokemonViewModel> player1ViewModels = new ArrayList<>();
             for (Pokemon pokemon : battle.getPlayer1().getOwnedPokemon()) {
-                player1ViewModels.add(new BattleAIViewModel.PokemonViewModel(pokemon));
+                player1ViewModels.add(createPokemonViewModel(pokemon));
             }
             viewModel.setPlayer1Team(player1ViewModels);
 
             // Set active Pokemon
             for (Pokemon pokemon : battle.getPlayer1().getOwnedPokemon()) {
                 if (!pokemon.isFainted()) {
-                    viewModel.setPlayer1Active(new BattleAIViewModel.PokemonViewModel(pokemon));
+                    viewModel.setPlayer1Active(createPokemonViewModel(pokemon));
                     break;
                 }
             }
@@ -85,17 +85,36 @@ public class BattleAIPresenter implements BattleAIOutputBoundary {
         if (battle.getPlayer2() != null && battle.getPlayer2().getOwnedPokemon() != null) {
             List<BattleAIViewModel.PokemonViewModel> player2ViewModels = new ArrayList<>();
             for (Pokemon pokemon : battle.getPlayer2().getOwnedPokemon()) {
-                player2ViewModels.add(new BattleAIViewModel.PokemonViewModel(pokemon));
+                player2ViewModels.add(createPokemonViewModel(pokemon));
             }
             viewModel.setPlayer2Team(player2ViewModels);
 
             // Set active Pokemon
             for (Pokemon pokemon : battle.getPlayer2().getOwnedPokemon()) {
                 if (!pokemon.isFainted()) {
-                    viewModel.setPlayer2Active(new BattleAIViewModel.PokemonViewModel(pokemon));
+                    viewModel.setPlayer2Active(createPokemonViewModel(pokemon));
                     break;
                 }
             }
         }
+    }
+
+    /**
+     * Creates a PokemonViewModel from a Pokemon entity.
+     * This method extracts primitive data from the entity for the view model.
+     */
+    private BattleAIViewModel.PokemonViewModel createPokemonViewModel(Pokemon pokemon) {
+        return new BattleAIViewModel.PokemonViewModel(
+                pokemon.getName(),
+                pokemon.getId(),
+                pokemon.getStats().getHp(),
+                pokemon.getStats().getMaxHp(),
+                new ArrayList<>(pokemon.getMoves()),
+                new ArrayList<>(pokemon.getTypes()),
+                pokemon.isFainted(),
+                pokemon.getSpriteUrl(),
+                pokemon.getFrontGIF(),
+                pokemon.getBackGIF()
+        );
     }
 }

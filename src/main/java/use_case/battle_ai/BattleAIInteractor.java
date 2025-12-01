@@ -1,7 +1,6 @@
 package use_case.battle_ai;
 
 import entities.*;
-import ai.graph.Decision;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -9,7 +8,7 @@ import java.util.List;
 
 /**
  * Interactor for the Battle AI use case.
- * Handles both battle setup and AI turn execution.
+ * Handles battle setup, player moves, and player switches.
  */
 public class BattleAIInteractor implements BattleAIInputBoundary {
 
@@ -26,13 +25,12 @@ public class BattleAIInteractor implements BattleAIInputBoundary {
     public void execute(BattleAIInputData inputData) {
         if (inputData.isSetupRequest()) {
             executeSetup(inputData);
-        } else if (inputData.isPlayerTurnRequest()) {
-            executePlayerTurn(inputData);
+        } else if (inputData.isPlayerMoveRequest()) {
+            executePlayerMove(inputData);
         } else if (inputData.isPlayerSwitchRequest()) {
             executePlayerSwitch(inputData);
         } else {
-            // Default to AI turn (handles validation for null battle/aiPlayer)
-            executeAITurn(inputData);
+            presenter.prepareFailView("Invalid request");
         }
     }
 
@@ -86,11 +84,11 @@ public class BattleAIInteractor implements BattleAIInputBoundary {
     }
 
     /**
-     * Executes a player's turn in the battle.
+     * Executes a player's move by index, then AI's turn.
      */
-    private void executePlayerTurn(BattleAIInputData inputData) {
+    private void executePlayerMove(BattleAIInputData inputData) {
         Battle battle = dataAccess.getBattle();
-        Turn turn = inputData.getTurn();
+        int moveIndex = inputData.getMoveIndex();
 
         // Validation
         if (battle == null) {
@@ -103,27 +101,41 @@ public class BattleAIInteractor implements BattleAIInputBoundary {
             return;
         }
 
-        if (!"IN_PROGRESS".equals(battle.getBattleStatus())) {
-            presenter.prepareFailView("Battle is not in progress");
-            return;
-        }
-
-        if (turn == null) {
-            presenter.prepareFailView("Turn is invalid");
-            return;
-        }
-
-        // Track AI's active Pokemon before turn
+        // Get current state
+        User currentUser = dataAccess.getUser();
         AIPlayer aiPlayer = dataAccess.getAIPlayer();
-        Pokemon aiPokemonBefore = aiPlayer != null ? aiPlayer.getActivePokemon() : null;
+        Pokemon playerPokemon = dataAccess.getPlayerActivePokemon();
 
-        // Execute the turn
-        turn.executeTurn();
-        String turnResult = turn.getResult();
+        if (currentUser == null || aiPlayer == null || playerPokemon == null) {
+            presenter.prepareFailView("Battle state not found");
+            return;
+        }
+
+        // Get move by index
+        List<String> moveNames = playerPokemon.getMoves();
+        if (moveNames == null || moveIndex >= moveNames.size() || moveIndex < 0) {
+            presenter.prepareFailView("Invalid move index");
+            return;
+        }
+
+        String moveName = moveNames.get(moveIndex);
+        Move selectedMove = findMoveByName(moveName);
+        if (selectedMove == null) {
+            selectedMove = new Move().setName(moveName).setPower(40);
+        }
+
+        // Track AI's Pokemon before player's turn
+        Pokemon aiPokemonBefore = aiPlayer.getActivePokemon();
+
+        // Create and execute player's turn
+        Player playerAdapter = new UserPlayerAdapter(currentUser);
+        MoveTurn playerTurn = new MoveTurn(1, playerAdapter, 1, selectedMove, aiPlayer);
+        playerTurn.executeTurn();
+        String playerResult = playerTurn.getResult();
 
         // Check if AI's Pokemon fainted and auto-switch
         Pokemon aiSwitchedTo = null;
-        if (aiPlayer != null && aiPokemonBefore != null && aiPokemonBefore.isFainted()) {
+        if (aiPokemonBefore != null && aiPokemonBefore.isFainted()) {
             for (Pokemon p : aiPlayer.getTeam()) {
                 if (!p.isFainted()) {
                     aiPlayer.switchPokemon(p);
@@ -133,40 +145,92 @@ public class BattleAIInteractor implements BattleAIInputBoundary {
             }
         }
 
-        // Check battle end
+        // Check if battle ended after player's turn
         User player1 = battle.getPlayer1();
         User player2 = battle.getPlayer2();
         boolean battleEnded = false;
 
-        boolean player1HasPokemon = hasAvailablePokemon(player1);
-        boolean player2HasPokemon = hasAvailablePokemon(player2);
-
-        if (!player1HasPokemon && !player2HasPokemon) {
-            battle.endBattle(null);
-            battleEnded = true;
-        } else if (!player1HasPokemon) {
-            battle.endBattle(player2);
-            awardCurrency(player2, player1);
-            battleEnded = true;
-        } else if (!player2HasPokemon) {
+        if (!hasAvailablePokemon(player2)) {
             battle.endBattle(player1);
             awardCurrency(player1, player2);
             battleEnded = true;
+            dataAccess.saveBattle(battle);
+            BattleAIOutputData outputData = new BattleAIOutputData(playerTurn, battle, playerResult, true, null, aiSwitchedTo);
+            presenter.prepareSuccessView(outputData);
+            return;
+        }
+
+        // Execute AI's turn
+        Move aiMove = aiPlayer.chooseMove(battle);
+        String aiResult = "";
+        Pokemon playerSwitchedTo = null;
+
+        if (aiMove != null) {
+            User aiUser = findAIUser(battle, aiPlayer);
+            User opponentUser = getOpponentUser(battle, aiUser);
+            Player targetPlayer = new UserPlayerAdapter(opponentUser);
+            MoveTurn aiTurn = new MoveTurn(1, aiPlayer, 1, aiMove, targetPlayer);
+            aiTurn.executeTurn();
+            aiResult = aiTurn.getResult();
+            aiPlayer.recordTurn(aiTurn);
+
+            // Check if player's Pokemon fainted and auto-switch
+            Pokemon playerActivePokemon = dataAccess.getPlayerActivePokemon();
+            if (playerActivePokemon != null && playerActivePokemon.isFainted()) {
+                List<Pokemon> playerTeam = dataAccess.getPlayerTeam();
+                List<Pokemon> ownedList = currentUser.getOwnedPokemon();
+                for (Pokemon p : playerTeam) {
+                    if (!p.isFainted()) {
+                        dataAccess.setPlayerActivePokemon(p);
+                        if (ownedList.contains(p)) {
+                            ownedList.remove(p);
+                            ownedList.add(0, p);
+                        }
+                        playerSwitchedTo = p;
+                        break;
+                    }
+                }
+            }
+
+            // Check battle end
+            if (!hasAvailablePokemon(player1)) {
+                battle.endBattle(player2);
+                awardCurrency(player2, player1);
+                battleEnded = true;
+            }
         }
 
         dataAccess.saveBattle(battle);
 
-        // Output
-        BattleAIOutputData outputData = new BattleAIOutputData(turn, battle, turnResult, battleEnded, null, aiSwitchedTo);
+        // Combine results
+        String fullResult = "YOU:\n" + playerResult;
+        if (aiSwitchedTo != null) {
+            fullResult += "\n\nAI sent out " + aiSwitchedTo.getName().toUpperCase() + "!";
+        }
+        if (!aiResult.isEmpty()) {
+            fullResult += "\n\nAI:\n" + aiResult;
+        }
+        if (playerSwitchedTo != null) {
+            fullResult += "\n\nYou sent out " + playerSwitchedTo.getName().toUpperCase() + "!";
+        }
+
+        BattleAIOutputData outputData = new BattleAIOutputData(playerTurn, battle, fullResult, battleEnded, playerSwitchedTo, aiSwitchedTo);
         presenter.prepareSuccessView(outputData);
     }
 
     /**
-     * Executes a player's switch and then AI's turn.
+     * Finds a move by name from the move database.
+     */
+    private Move findMoveByName(String moveName) {
+        return dataAccess.getMoveByName(moveName);
+    }
+
+    /**
+     * Executes a player's switch by Pokemon ID and then AI's turn.
      */
     private void executePlayerSwitch(BattleAIInputData inputData) {
         Battle battle = dataAccess.getBattle();
-        Pokemon switchTarget = inputData.getSwitchTarget();
+        int switchTargetId = inputData.getSwitchTargetId();
 
         // Validation
         if (battle == null) {
@@ -179,8 +243,23 @@ public class BattleAIInteractor implements BattleAIInputBoundary {
             return;
         }
 
+        // Find the Pokemon by ID in player's team
+        List<Pokemon> playerTeam = dataAccess.getPlayerTeam();
+        Pokemon switchTarget = null;
+        for (Pokemon p : playerTeam) {
+            if (p.getId() == switchTargetId) {
+                switchTarget = p;
+                break;
+            }
+        }
+
         if (switchTarget == null) {
-            presenter.prepareFailView("No switch target specified");
+            presenter.prepareFailView("Pokemon not found in team");
+            return;
+        }
+
+        if (switchTarget.isFainted()) {
+            presenter.prepareFailView("Cannot switch to fainted Pokemon");
             return;
         }
 
@@ -232,7 +311,6 @@ public class BattleAIInteractor implements BattleAIInputBoundary {
             Pokemon playerSwitchedTo = null;
             Pokemon playerActivePokemon = dataAccess.getPlayerActivePokemon();
             if (playerActivePokemon != null && playerActivePokemon.isFainted()) {
-                List<Pokemon> playerTeam = dataAccess.getPlayerTeam();
                 for (Pokemon p : playerTeam) {
                     if (!p.isFainted()) {
                         dataAccess.setPlayerActivePokemon(p);
@@ -273,9 +351,6 @@ public class BattleAIInteractor implements BattleAIInputBoundary {
 
     /**
      * Generates AI team based on difficulty level using total base stats.
-     * Easy: Pokemon with total stats < 350 (weak/unevolved)
-     * Medium: Pokemon with total stats 350-480 (mid-tier)
-     * Hard: Pokemon with total stats > 500 (strong fully-evolved)
      */
     private List<Pokemon> generateAITeam(String difficulty) {
         List<Pokemon> allPokemon = dataAccess.getAllPokemon();
@@ -289,20 +364,17 @@ public class BattleAIInteractor implements BattleAIInputBoundary {
 
             switch (difficulty.toLowerCase()) {
                 case "easy":
-                    // Weak Pokemon with total stats < 350
                     if (totalStats < 350 && p.getId() <= 251) {
                         candidates.add(p);
                     }
                     break;
                 case "hard":
-                    // Strong Pokemon with total stats > 500
                     if (totalStats > 500) {
                         candidates.add(p);
                     }
                     break;
                 case "medium":
                 default:
-                    // Mid-tier Pokemon with total stats 350-480
                     if (totalStats >= 350 && totalStats <= 480 && p.getId() <= 386) {
                         candidates.add(p);
                     }
@@ -316,122 +388,6 @@ public class BattleAIInteractor implements BattleAIInputBoundary {
         }
 
         return aiTeam;
-    }
-
-    /**
-     * Executes an AI player's turn in the battle.
-     */
-    private void executeAITurn(BattleAIInputData inputData) {
-        Battle battle = inputData.getBattle();
-        AIPlayer aiPlayer = inputData.getAiPlayer();
-        boolean forcedSwitch = inputData.isForcedSwitch();
-
-        // Validation
-        if (battle == null) {
-            presenter.prepareFailView("Battle not found");
-            return;
-        }
-
-        if ("COMPLETED".equals(battle.getBattleStatus())) {
-            presenter.prepareFailView("Battle is already completed");
-            return;
-        }
-
-        if (!"IN_PROGRESS".equals(battle.getBattleStatus())) {
-            presenter.prepareFailView("Battle is not in progress");
-            return;
-        }
-
-        if (aiPlayer == null) {
-            presenter.prepareFailView("AI player not found");
-            return;
-        }
-
-        // Check AI player is part of battle
-        User aiUser = findAIUser(battle, aiPlayer);
-        if (aiUser == null) {
-            presenter.prepareFailView("AI player is not part of this battle");
-            return;
-        }
-
-        if (!aiPlayer.hasAvailablePokemon()) {
-            presenter.prepareFailView("AI player has no available Pokemon");
-            return;
-        }
-
-        // AI Decision
-        Decision decision;
-        try {
-            if (forcedSwitch) {
-                Pokemon switchTarget = aiPlayer.decideSwitch(battle);
-                if (switchTarget == null) {
-                    presenter.prepareFailView("AI failed to choose a Pokemon to switch to");
-                    return;
-                }
-                decision = Decision.switchPokemon(switchTarget, "Forced switch", 1.0);
-            } else {
-                Move selectedMove = aiPlayer.chooseMove(battle);
-                if (selectedMove == null) {
-                    presenter.prepareFailView("AI failed to choose a move");
-                    return;
-                }
-                decision = Decision.move(selectedMove, "AI chose move", 1.0);
-            }
-        } catch (Exception e) {
-            presenter.prepareFailView("Error during AI decision: " + e.getMessage());
-            return;
-        }
-
-        // Execute Turn
-        User opponentUser = getOpponentUser(battle, aiUser);
-        Turn turn = createTurn(decision, aiPlayer, opponentUser);
-
-        if (turn == null) {
-            presenter.prepareFailView("Failed to create turn");
-            return;
-        }
-
-        turn.executeTurn();
-        String turnResult = turn.getResult();
-        aiPlayer.recordTurn(turn);
-
-        // Check if player's Pokemon fainted and auto-switch
-        Pokemon playerSwitchedTo = null;
-        Pokemon playerActivePokemon = dataAccess.getPlayerActivePokemon();
-        if (playerActivePokemon != null && playerActivePokemon.isFainted()) {
-            List<Pokemon> playerTeam = dataAccess.getPlayerTeam();
-            for (Pokemon p : playerTeam) {
-                if (!p.isFainted()) {
-                    dataAccess.setPlayerActivePokemon(p);
-                    // Also update user's owned list order
-                    List<Pokemon> ownedList = opponentUser.getOwnedPokemon();
-                    if (ownedList.contains(p)) {
-                        ownedList.remove(p);
-                        ownedList.add(0, p);
-                    }
-                    playerSwitchedTo = p;
-                    break;
-                }
-            }
-        }
-
-        // Check battle end and award currency
-        boolean battleEnded = false;
-        if (!hasAvailablePokemon(aiUser)) {
-            battle.endBattle(opponentUser);
-            awardCurrency(opponentUser, aiUser);
-            battleEnded = true;
-        } else if (!hasAvailablePokemon(opponentUser)) {
-            battle.endBattle(aiUser);
-            awardCurrency(aiUser, opponentUser);
-            battleEnded = true;
-        }
-
-        dataAccess.saveBattle(battle);
-
-        // Output
-        BattleAIOutputData outputData = new BattleAIOutputData(turn, battle, turnResult, battleEnded, playerSwitchedTo, null);
-        presenter.prepareSuccessView(outputData);
     }
 
     private User findAIUser(Battle battle, AIPlayer aiPlayer) {
@@ -458,16 +414,6 @@ public class BattleAIInteractor implements BattleAIInputBoundary {
             }
         }
         return false;
-    }
-
-    private Turn createTurn(Decision decision, Player player, User targetUser) {
-        if (decision.isMove()) {
-            Player targetPlayer = new UserPlayerAdapter(targetUser);
-            return new MoveTurn(1, player, 1, decision.getSelectedMove(), targetPlayer);
-        } else if (decision.isSwitch()) {
-            return new SwitchTurn(1, player, 1, player.getActivePokemon(), decision.getSwitchTarget());
-        }
-        return null;
     }
 
     private void awardCurrency(User winner, User loser) {

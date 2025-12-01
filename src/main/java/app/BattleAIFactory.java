@@ -4,6 +4,7 @@ import entities.User;
 import frameworks_and_drivers.DeckSelectionForBattleView;
 import frameworks_and_drivers.DeckSelectionView;
 import interface_adapters.battle_ai.*;
+import pokeapi.JSONLoader;
 import use_case.battle_ai.BattleAIInteractor;
 
 import javax.swing.JFrame;
@@ -32,7 +33,8 @@ public class BattleAIFactory {
      */
     public static JFrame createWithCallback(User user, Runnable returnCallback) {
         // Data Access Layer
-        BattleAIDataAccessObject dataAccess = new BattleAIDataAccessObject();
+        BattleAIDataAccessObject dataAccess = new BattleAIDataAccessObject(
+                JSONLoader.allPokemon, JSONLoader.allMoves);
 
         // Presenter & ViewModel
         BattleAIViewModel viewModel = new BattleAIViewModel();
@@ -41,7 +43,7 @@ public class BattleAIFactory {
         // Use Case Interactor
         BattleAIInteractor aiInteractor = new BattleAIInteractor(dataAccess, presenter);
 
-        // Controller 
+        // Controller
         BattleAIController controller = new BattleAIController(aiInteractor);
 
         // Check if user has any decks with enough Pokemon
@@ -66,7 +68,8 @@ public class BattleAIFactory {
      */
     public static DeckSelectionForBattleView createDeckBasedView(User user, Runnable returnCallback) {
         // Data Access Layer
-        BattleAIDataAccessObject dataAccess = new BattleAIDataAccessObject();
+        BattleAIDataAccessObject dataAccess = new BattleAIDataAccessObject(
+                JSONLoader.allPokemon, JSONLoader.allMoves);
 
         // Presenter & ViewModel
         BattleAIViewModel viewModel = new BattleAIViewModel();
