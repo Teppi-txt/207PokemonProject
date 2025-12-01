@@ -44,11 +44,6 @@ public class OpenPackInteractor implements OpenPackInputBoundary {
         // Deduct currency
         user.buyPack(PACK_COST);
 
-        // Add cards to collection
-//        for (Pokemon p : openedCards) {
-//            user.addPokemon(p);
-//        }
-
         userDataAccess.saveUser(user);
 
         OpenPackOutputData outputData = new OpenPackOutputData(
