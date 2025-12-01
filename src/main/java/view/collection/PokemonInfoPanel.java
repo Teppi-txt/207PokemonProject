@@ -57,18 +57,46 @@ public class PokemonInfoPanel extends JPanel {
     }
 
     public JLabel getSpriteLabel(Pokemon pokemon) {
-        try {
-            ImageIcon sprite = new ImageIcon(new URL(pokemon.getFrontGIF()));
-            sprite.setImage(sprite.getImage().getScaledInstance(160, 160, Image.SCALE_DEFAULT));
 
-            JLabel spriteLabel = new JLabel(sprite);
-            spriteLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-            spriteLabel.setPreferredSize(new Dimension(300, 300));
-            return spriteLabel;
-        } catch (Exception e) {
-            return new JLabel();
+        List<String> spriteUrls = new ArrayList<>();
+
+        if (pokemon.isShiny()) {
+            spriteUrls.add(pokemon.getShinyFrontGIF());
+            spriteUrls.add(pokemon.getShinySpriteURL());
+        } else {
+            spriteUrls.add(pokemon.getRegularFrontGIF());
+            spriteUrls.add(pokemon.getRegularSpriteURL());
         }
+
+        for (String url : spriteUrls) {
+            if (url == null || url.isEmpty()) continue;
+
+            try {
+                ImageIcon icon = new ImageIcon(new URL(url));
+
+                if (icon.getIconWidth() < 32) {
+                    continue;
+                }
+
+                icon.setImage(icon.getImage().getScaledInstance(160, 160, Image.SCALE_DEFAULT));
+
+                JLabel spriteLabel = new JLabel(icon);
+                spriteLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+                spriteLabel.setPreferredSize(new Dimension(300, 300));
+                return spriteLabel;
+
+            } catch (Exception ignored) { }
+        }
+
+        ImageIcon fallback = new ImageIcon("src/assets/sprites/no_image_icon.png");
+        fallback.setImage(fallback.getImage().getScaledInstance(160, 160, Image.SCALE_SMOOTH));
+
+        JLabel spriteLabel = new JLabel(fallback);
+        spriteLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        spriteLabel.setPreferredSize(new Dimension(300, 300));
+        return spriteLabel;
     }
+
 
     public JLabel getSpriteLabel(ImageIcon sprite) {
         try {
