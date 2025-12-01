@@ -12,19 +12,17 @@ public class PickMovesetInteractorTest extends TestCase {
 
     private TestPresenter presenter;
     private PickMovesetInteractor interactor;
+    private JSONLoader loader;
 
     @Override
     protected void setUp() {
         presenter = new TestPresenter();
         interactor = new PickMovesetInteractor(presenter);
-        JSONLoader.allPokemon.clear();
-        JSONLoader.allMoves.clear();
-        JSONLoader.loadPokemon();
-        JSONLoader.loadMoves();
+        loader = JSONLoader.getInstance();
     }
 
     public void testExecute_ReturnsCorrectMovesetMap() {
-        Pokemon pikachu = JSONLoader.allPokemon.get(25).copy();
+        Pokemon pikachu = loader.getAllPokemon().get(25).copy();
         pikachu.getMoves().clear();
         pikachu.getMoves().add("Thunderbolt");
         pikachu.getMoves().add("Surf");
@@ -36,11 +34,11 @@ public class PickMovesetInteractorTest extends TestCase {
         assertTrue(result.containsKey(pikachu));
         assertEquals(2, result.get(pikachu).size());
         assertEquals("thunderbolt", result.get(pikachu).get(0).getName());
-        assertEquals("Surf", result.get(pikachu).get(1).getName());
+        assertEquals("surf", result.get(pikachu).get(1).getName());
     }
 
     public void testExecute_InvalidMoveIgnored() {
-        Pokemon bulbasaur = JSONLoader.allPokemon.get(1).copy();
+        Pokemon bulbasaur = loader.getAllPokemon().get(1).copy();
         bulbasaur.getMoves().clear();
         bulbasaur.getMoves().add("NonExistentMove");
         Deck deck = new Deck(2, "InvalidMoveTest");
@@ -53,7 +51,7 @@ public class PickMovesetInteractorTest extends TestCase {
     }
 
     public void testExecute_EmptyMovesList() {
-        Pokemon charmander = JSONLoader.allPokemon.get(4).copy();
+        Pokemon charmander = loader.getAllPokemon().get(4).copy();
         charmander.getMoves().clear();
         Deck deck = new Deck(3, "EmptyMoves");
         deck.addPokemon(charmander);
@@ -65,8 +63,8 @@ public class PickMovesetInteractorTest extends TestCase {
 
 
     public void testExecute_MultiplePokemon() {
-        Pokemon pikachu = JSONLoader.allPokemon.get(25).copy();
-        Pokemon squirtle = JSONLoader.allPokemon.get(7).copy();
+        Pokemon pikachu = loader.getAllPokemon().get(25).copy();
+        Pokemon squirtle = loader.getAllPokemon().get(7).copy();
         pikachu.getMoves().clear();
         pikachu.getMoves().add("Thunderbolt");
         squirtle.getMoves().clear();
@@ -82,8 +80,8 @@ public class PickMovesetInteractorTest extends TestCase {
     }
 
     public void testExecute_NoAvailableMoves() {
-        JSONLoader.allMoves.clear();
-        Pokemon pikachu = JSONLoader.allPokemon.get(25).copy();
+        loader.getAllMoves().clear();
+        Pokemon pikachu = loader.getAllPokemon().get(25).copy();
         pikachu.getMoves().clear();
         pikachu.getMoves().add("Thunderbolt");
         Deck deck = new Deck(5, "NoMoveAvailable");
@@ -103,13 +101,13 @@ public class PickMovesetInteractorTest extends TestCase {
 
 
     public void testSaveMoves_Failure_NullMoves() {
-        Pokemon bulbasaur = JSONLoader.allPokemon.get(1).copy();
+        Pokemon bulbasaur = loader.getAllPokemon().get(1).copy();
         interactor.saveMoves(bulbasaur, null);
         assertEquals("You must choose at least 1 move.", presenter.failureMessage);
     }
 
     public void testSaveMoves_Failure_NoMoves() {
-        Pokemon bulbasaur = JSONLoader.allPokemon.get(1).copy();
+        Pokemon bulbasaur = loader.getAllPokemon().get(1).copy();
         interactor.saveMoves(bulbasaur, new ArrayList<>());
 
         assertEquals("You must choose at least 1 move.", presenter.failureMessage);
@@ -117,15 +115,15 @@ public class PickMovesetInteractorTest extends TestCase {
     }
 
     public void testSaveMoves_Failure_TooManyMoves() {
-        Pokemon bulbasaur = JSONLoader.allPokemon.get(1).copy();
-        List<Move> tooManyMoves = JSONLoader.allMoves.subList(0, 5);
+        Pokemon bulbasaur = loader.getAllPokemon().get(1).copy();
+        List<Move> tooManyMoves = loader.getAllMoves().subList(0, 5);
         interactor.saveMoves(bulbasaur, tooManyMoves);
         assertEquals("A Pokémon can only have up to 4 moves.", presenter.failureMessage);
         assertNull(presenter.successMessage);
     }
 
     public void testSaveMoves_NullMoveInsideList() {
-        Pokemon bulbasaur = JSONLoader.allPokemon.get(1).copy();
+        Pokemon bulbasaur = loader.getAllPokemon().get(1).copy();
         List<Move> moves = new ArrayList<>();
         moves.add(null);
         interactor.saveMoves(bulbasaur, moves);
@@ -133,8 +131,9 @@ public class PickMovesetInteractorTest extends TestCase {
     }
 
     public void testSaveMoves_Success() {
-        Pokemon bulbasaur = JSONLoader.allPokemon.get(1).copy();
-        List<Move> chosenMoves = JSONLoader.allMoves.subList(0, 2);
+        loader.loadMoves();
+        Pokemon bulbasaur = loader.getAllPokemon().get(1).copy();
+        List<Move> chosenMoves = loader.getAllMoves().subList(0, 2);
         interactor.saveMoves(bulbasaur, chosenMoves);
         assertEquals("Moveset saved for " + bulbasaur.getName(), presenter.successMessage);
         assertNull(presenter.failureMessage);
@@ -162,4 +161,5 @@ public class PickMovesetInteractorTest extends TestCase {
         }
     }
 }
+
 
