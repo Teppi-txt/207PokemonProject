@@ -171,4 +171,24 @@ public class BuildDeckInteractorTest extends TestCase {
         assertEquals("You cannot add more than 3 Pokémon.", presenter.error);
         assertNull(presenter.output);
     }
+
+    public void testRandomDeck() {
+        Pokemon a = p(1, "A");
+        Pokemon b = p(2, "B");
+        Pokemon c = p(3, "C");
+        User user = userWith(a, b, c);
+
+        InMemoryDeckGateway gw = new InMemoryDeckGateway(user);
+        RecordingPresenter presenter = new RecordingPresenter();
+
+        BuildDeckInputData input = new BuildDeckInputData(
+                -1, "Rnd", null, true, false
+        );
+
+        BuildDeckInteractor interactor = new BuildDeckInteractor(gw, presenter);
+        interactor.execute(input);
+
+        assertNull(presenter.error);
+        assertEquals(3, presenter.output.getDeck().getPokemons().size());
+    }
 }
