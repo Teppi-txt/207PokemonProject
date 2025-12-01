@@ -5,7 +5,6 @@ import entities.Battle;
 import entities.Move;
 import entities.Pokemon;
 import entities.User;
-import pokeapi.JSONLoader;
 import use_case.battle_ai.BattleAIUserDataAccessInterface;
 
 import java.util.ArrayList;
@@ -17,13 +16,18 @@ import java.util.List;
  */
 public class BattleAIDataAccessObject implements BattleAIUserDataAccessInterface {
 
+    private final List<Pokemon> allPokemon;
+    private final List<Move> allMoves;
+
     private User currentUser;
     private Battle currentBattle;
     private List<Pokemon> playerTeam;
     private AIPlayer aiPlayer;
     private Pokemon playerActivePokemon;
 
-    public BattleAIDataAccessObject() {
+    public BattleAIDataAccessObject(List<Pokemon> allPokemon, List<Move> allMoves) {
+        this.allPokemon = allPokemon;
+        this.allMoves = allMoves;
         this.currentUser = null;
         this.currentBattle = null;
         this.playerTeam = new ArrayList<>();
@@ -53,7 +57,7 @@ public class BattleAIDataAccessObject implements BattleAIUserDataAccessInterface
 
     @Override
     public List<Pokemon> getAllPokemon() {
-        return JSONLoader.allPokemon;
+        return allPokemon;
     }
 
     @Override
@@ -88,7 +92,7 @@ public class BattleAIDataAccessObject implements BattleAIUserDataAccessInterface
 
     @Override
     public Move getMoveByName(String moveName) {
-        for (Move move : JSONLoader.allMoves) {
+        for (Move move : allMoves) {
             if (move.getName().equalsIgnoreCase(moveName)) {
                 return move;
             }
