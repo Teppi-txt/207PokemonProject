@@ -22,7 +22,7 @@ public class BattlePlayerInteractor implements BattlePlayerInputBoundary {
     public void execute(BattlePlayerInputData inputData) {
         final Battle battle = battleDataAccess.getBattle();
         if (battle == null) {
-            battlePlayerPresenter.prepareFailView("battle not found");
+            battlePlayerPresenter.prepareFailView("battle not found"); 
             return;
         }
 
@@ -42,18 +42,22 @@ public class BattlePlayerInteractor implements BattlePlayerInputBoundary {
             return;
         }
 
+        //executes the turn
         turn.executeTurn();
         String turnResult = turn.getResult();
 
         boolean battleEnded = false;
         User winner = null;
 
+        //creates two Users to represent the two players
         User player1 = battle.getPlayer1();
         User player2 = battle.getPlayer2();
 
         boolean player1HasPokemon = hasAvailablePokemon(player1);
         boolean player2HasPokemon = hasAvailablePokemon(player2);
 
+
+        // checks if either player has no available pokemon left
         if (!player1HasPokemon && !player2HasPokemon) {
             battleEnded = true;
             winner = null; // draw
@@ -65,20 +69,20 @@ public class BattlePlayerInteractor implements BattlePlayerInputBoundary {
             winner = player1;
         }
 
+        // ends the battle if it has ended
         if (battleEnded) {
             battle.endBattle(winner);
             if (winner != null) {
-                winner.addCurrency(500);
                 battleDataAccess.saveUser(winner);
 
                 User loser = battle.getPlayer1().equals(winner) ? battle.getPlayer2() : battle.getPlayer1();
-                loser.addCurrency(100);
                 battleDataAccess.saveUser(loser);
             }
         }
 
         battleDataAccess.saveBattle(battle);
 
+        // prepares the output data
         BattlePlayerOutputData outputData = new BattlePlayerOutputData(
                 turn,
                 battle,
