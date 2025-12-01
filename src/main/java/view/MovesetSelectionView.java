@@ -307,8 +307,8 @@ public class MovesetSelectionView extends JFrame implements PropertyChangeListen
 
     // test ui
     public static void main(String[] args) {
-        JSONLoader.loadMoves();
-        JSONLoader.loadPokemon();
+        JSONLoader.getInstance().loadPokemon();
+        JSONLoader.getInstance().loadMoves();
         ArrayList<Pokemon> team = new ArrayList<>();
         try {
             team.add(pokeapi.PokeAPIFetcher.getPokemon("pikachu"));

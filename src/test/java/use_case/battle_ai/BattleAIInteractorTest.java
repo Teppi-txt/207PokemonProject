@@ -59,7 +59,6 @@ public class BattleAIInteractorTest extends TestCase {
         assertNull(presenter.outputData);
     }
 
-    // ==================== Player Move Tests ====================
 
     public void testPlayerMoveBattleNotFound() {
         RecordingPresenter presenter = new RecordingPresenter();
