@@ -2,15 +2,19 @@ package view.collection;
 
 import entities.Pokemon;
 import entities.Stats;
+import entities.PriceCalculator;
+import entities.User;
+import frameworks_and_drivers.JsonUserDataAccess;
 
 import javax.swing.*;
 import java.awt.*;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 public class PokemonInfoPanel extends JPanel {
+    private final BuyButtons buyButtons =
+            new BuyButtons(new JsonUserDataAccess("user.json"));
+
     public PokemonInfoPanel() {
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         setPreferredSize(new Dimension(300, 350));
@@ -31,6 +35,7 @@ public class PokemonInfoPanel extends JPanel {
         add(spriteLabel);
         add(nameLabel);
         add(statsPanel);
+        add(buyButtons.createBuyButtons(pokemon, this));
         add(Box.createVerticalGlue());
         this.revalidate();
         this.repaint();
