@@ -364,8 +364,19 @@ public class BattleAIInteractor implements BattleAIInputBoundary {
     }
 
     private void awardCurrency(User winner, User loser) {
-        winner.addCurrency(500);
-        loser.addCurrency(100);
-        dataAccess.saveUser(dataAccess.getUser());
+        // Get the original user (not the battle copy)
+        User originalUser = dataAccess.getUser();
+
+        // Player is always player1, AI is always player2
+        // Check if player won or lost by comparing with winner
+        boolean playerWon = winner.getId() == originalUser.getId();
+
+        if (playerWon) {
+            originalUser.addCurrency(500);
+        } else {
+            originalUser.addCurrency(100);
+        }
+
+        dataAccess.saveUser(originalUser);
     }
 }
