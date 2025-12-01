@@ -6,9 +6,9 @@ import java.util.List;
 
 public class BuildDeckOutputData {
     private final Deck deck;
-    private final List<Deck> allDecks; // <--- NEW
+    private final List<Deck> allDecks;
 
-    public BuildDeckOutputData(Deck deck, List<Deck> allDecks){ // <--- MODIFIED Constructor
+    public BuildDeckOutputData(Deck deck, List<Deck> allDecks){
         this.deck = deck;
         this.allDecks = allDecks;
     }
@@ -16,5 +16,5 @@ public class BuildDeckOutputData {
     public Deck getDeck() {
         return deck;
     }
-    public List<Deck> getAllDecks() { return allDecks; } // <--- NEW Getter
+    public List<Deck> getAllDecks() { return allDecks; }
 }
