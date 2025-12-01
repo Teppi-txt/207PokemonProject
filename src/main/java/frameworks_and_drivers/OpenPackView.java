@@ -19,7 +19,6 @@ public class OpenPackView extends JPanel {
     private final ViewManager viewManager;
 
     private final JPanel cardsPanel = new JPanel();
-    private final JButton openPackButton = new JButton("Open Pack");
     private final JButton nextButton = new JButton("Next");
     private final JLabel messageLabel = new JLabel("");
     private final JButton addCollectionButton = new JButton("Add to Collection");
@@ -35,7 +34,6 @@ public class OpenPackView extends JPanel {
         // Top
         JPanel topPanel = new JPanel(new FlowLayout());
 
-        topPanel.add(openPackButton);
         topPanel.add(backButton);
 
         add(topPanel, BorderLayout.NORTH);
@@ -71,11 +69,6 @@ public class OpenPackView extends JPanel {
     /** Wiring controller at runtime */
     public void setController(OpenPackController controller) {
         this.controller = controller;
-
-        for (var l : openPackButton.getActionListeners())
-            openPackButton.removeActionListener(l);
-
-        openPackButton.addActionListener(e -> controller.openPack());
     }
 
     private void revealNext() {
@@ -118,7 +111,6 @@ public class OpenPackView extends JPanel {
             messageLabel.setText(isDup ? "Duplicate! (+ $50)" : "NEW card!");
 
             nextButton.setEnabled(true);
-            openPackButton.setEnabled(false);
 
         } else {
             for (int i = 0; i < opened.size(); i++) {
@@ -130,7 +122,6 @@ public class OpenPackView extends JPanel {
             nextButton.setVisible(false);
             addCollectionButton.setVisible(true);
             messageLabel.setText("Pack summary");
-            openPackButton.setEnabled(false);
         }
 
         cardsPanel.revalidate();
