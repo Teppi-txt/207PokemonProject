@@ -52,10 +52,11 @@ public class BattleAIInteractor implements BattleAIInputBoundary {
         dataAccess.savePlayerTeam(playerTeam);
         dataAccess.setPlayerActivePokemon(playerTeam.get(0));
 
-        // Set player's owned Pokemon for battle
-        user.getOwnedPokemon().clear();
+        // Create a battle-specific user copy with only the selected team
+        // This avoids modifying the original user's owned Pokemon list
+        User battleUser = new User(user.getId(), user.getName(), user.getEmail(), user.getCurrency());
         for (Pokemon p : playerTeam) {
-            user.addPokemon(p);
+            battleUser.addPokemon(p);
         }
 
         // Create AI player with generated team based on difficulty
@@ -72,8 +73,8 @@ public class BattleAIInteractor implements BattleAIInputBoundary {
             aiUser.addPokemon(p);
         }
 
-        // Create and start battle
-        Battle battle = new Battle(0, user, aiUser);
+        // Create and start battle using the battle-specific user copy
+        Battle battle = new Battle(0, battleUser, aiUser);
         battle.startBattle();
         dataAccess.saveBattle(battle);
 
@@ -417,9 +418,22 @@ public class BattleAIInteractor implements BattleAIInputBoundary {
     }
 
     private void awardCurrency(User winner, User loser) {
+        // Get the original user from dataAccess (not the battle copy)
+        User originalUser = dataAccess.getUser();
+
+        // Award currency to battle participants
         winner.addCurrency(500);
         loser.addCurrency(100);
-        dataAccess.saveUser(winner);
-        dataAccess.saveUser(loser);
+
+        // If originalUser is a different object (battle copy scenario), also update the original
+        if (originalUser != null && originalUser != winner && originalUser != loser) {
+            if (originalUser.getId() == winner.getId()) {
+                originalUser.addCurrency(500);
+            } else if (originalUser.getId() == loser.getId()) {
+                originalUser.addCurrency(100);
+            }
+        }
+
+        dataAccess.saveUser(originalUser != null ? originalUser : winner);
     }
 }
