@@ -270,4 +270,201 @@ public class BuildDeckInteractorTest extends TestCase {
         assertEquals("Deck with ID 999 not found.", presenter.error);
         assertNull(presenter.output);
     }
+
+    public void testPureLoadExistingDeck_NoPokemonList() {
+        Pokemon a = p(1, "A");
+        User user = userWith(a);
+
+        InMemoryDeckGateway gw = new InMemoryDeckGateway(user);
+
+        Deck existing = new Deck(5, "OldName");
+        existing.addPokemon(a);
+        gw.saveDeck(existing);
+
+        RecordingPresenter presenter = new RecordingPresenter();
+
+        // no pokemon list, not random -> pure load path
+        BuildDeckInputData input = new BuildDeckInputData(
+                5, "NewName", null, false, false
+        );
+
+        BuildDeckInteractor interactor = new BuildDeckInteractor(gw, presenter);
+        interactor.execute(input);
+
+        assertNull(presenter.error);
+        assertNotNull(presenter.output);
+
+        Deck out = presenter.output.getDeck();
+        assertEquals("NewName", out.getName());
+        assertEquals(1, out.getPokemons().size());
+        assertEquals(5, out.getId());
+    }
+
+    public void testEditDeck_SaveWithEmptyPokemonListTriggersClear() {
+        Pokemon a = p(1, "A");
+        User user = userWith(a);
+
+        InMemoryDeckGateway gw = new InMemoryDeckGateway(user);
+
+        Deck existing = new Deck(7, "Before");
+        existing.addPokemon(a);
+        gw.saveDeck(existing);
+
+        RecordingPresenter presenter = new RecordingPresenter();
+
+        // Explicitly provide empty list -> save branch triggers
+        BuildDeckInputData input = new BuildDeckInputData(
+                7, "After", List.of(), false, false
+        );
+
+        BuildDeckInteractor interactor = new BuildDeckInteractor(gw, presenter);
+        interactor.execute(input);
+
+        assertNull(presenter.error);
+        assertNotNull(presenter.output);
+
+        Deck out = presenter.output.getDeck();
+        assertEquals("After", out.getName());
+        assertEquals(0, out.getPokemons().size()); // list was cleared
+    }
+
+    public void testOutputBoundarySuccessOnLoadOnly() {
+        Pokemon a = p(1, "A");
+        User user = userWith(a);
+
+        InMemoryDeckGateway gw = new InMemoryDeckGateway(user);
+
+        Deck existing = new Deck(10, "Deck10");
+        existing.addPokemon(a);
+        gw.saveDeck(existing);
+
+        RecordingPresenter presenter = new RecordingPresenter();
+
+        BuildDeckInputData input = new BuildDeckInputData(
+                10, "Deck10", null, false, false
+        );
+
+        BuildDeckInteractor interactor = new BuildDeckInteractor(gw, presenter);
+        interactor.execute(input);
+
+        assertNull(presenter.error);
+        assertNotNull(presenter.output);
+        assertEquals("Deck10", presenter.output.getDeck().getName());
+    }
+
+    public void testOutputDataGetAllDecks() {
+        Deck d1 = new Deck(1, "A");
+        Deck d2 = new Deck(2, "B");
+        List<Deck> decks = List.of(d1, d2);
+
+        BuildDeckOutputData out = new BuildDeckOutputData(d1, decks);
+
+        assertEquals(d1, out.getDeck());
+        assertEquals(2, out.getAllDecks().size());
+        assertSame(d2, out.getAllDecks().get(1));
+    }
+
+    public void testDeleteLastDeckCreatesNewEmptyDeck() {
+        User user = userWith();
+        InMemoryDeckGateway gw = new InMemoryDeckGateway(user);
+
+        // Only one deck -> after delete -> allDecks.isEmpty() = true
+        Deck d = new Deck(1, "Solo");
+        gw.saveDeck(d);
+
+        RecordingPresenter presenter = new RecordingPresenter();
+
+        BuildDeckInputData input = new BuildDeckInputData(
+                1, null, null, false, true
+        );
+
+        BuildDeckInteractor interactor = new BuildDeckInteractor(gw, presenter);
+        interactor.execute(input);
+
+        assertNull(presenter.error);
+        assertNotNull(presenter.output);
+
+        Deck newDeck = presenter.output.getDeck();
+        assertEquals("New Deck", newDeck.getName());
+        assertTrue(gw.getDecks().contains(newDeck));
+    }
+
+    public void testDeleteDeckLoadsFirstRemainingDeck() {
+        User user = userWith();
+        InMemoryDeckGateway gw = new InMemoryDeckGateway(user);
+
+        Deck d1 = new Deck(1, "First");
+        Deck d2 = new Deck(2, "Second");
+        gw.saveDeck(d1);
+        gw.saveDeck(d2);
+
+        RecordingPresenter presenter = new RecordingPresenter();
+
+        BuildDeckInputData input = new BuildDeckInputData(
+                2, null, null, false, true
+        );
+
+        BuildDeckInteractor interactor = new BuildDeckInteractor(gw, presenter);
+        interactor.execute(input);
+
+        assertNull(presenter.error);
+        assertNotNull(presenter.output);
+
+        Deck loaded = presenter.output.getDeck();
+        assertEquals("First", loaded.getName());
+    }
+
+    public void testUserNullFails() {
+        InMemoryDeckGateway gw = new InMemoryDeckGateway(null);
+        RecordingPresenter presenter = new RecordingPresenter();
+
+        BuildDeckInputData input = new BuildDeckInputData(
+                -1, "X", null, false, false
+        );
+
+        BuildDeckInteractor interactor = new BuildDeckInteractor(gw, presenter);
+        interactor.execute(input);
+
+        assertEquals("User not found.", presenter.error);
+        assertNull(presenter.output);
+    }
+
+    public void testNewDeckGetsAutoNameWhenNameNull() {
+        User user = userWith();
+        InMemoryDeckGateway gw = new InMemoryDeckGateway(user);
+        RecordingPresenter presenter = new RecordingPresenter();
+
+        BuildDeckInputData input = new BuildDeckInputData(
+                -1, null, null, false, false
+        );
+
+        BuildDeckInteractor interactor = new BuildDeckInteractor(gw, presenter);
+        interactor.execute(input);
+
+        assertNull(presenter.error);
+        assertTrue(presenter.output.getDeck().getName().startsWith("Team "));
+    }
+
+    public void testEditExistingDeckWithNameOnly() {
+        Pokemon a = p(1, "A");
+        User user = userWith(a);
+
+        InMemoryDeckGateway gw = new InMemoryDeckGateway(user);
+
+        Deck existing = new Deck(10, "Old");
+        existing.addPokemon(a);
+        gw.saveDeck(existing);
+
+        RecordingPresenter presenter = new RecordingPresenter();
+
+        BuildDeckInputData input = new BuildDeckInputData(
+                10, "Renamed", null, false, false
+        );
+
+        BuildDeckInteractor interactor = new BuildDeckInteractor(gw, presenter);
+        interactor.execute(input);
+
+        assertNull(presenter.error);
+        assertEquals("Renamed", presenter.output.getDeck().getName());
+    }
 }
