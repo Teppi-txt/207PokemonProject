@@ -49,13 +49,19 @@ public class BattleAIInteractor implements BattleAIInputBoundary {
 
         // Store player data
         dataAccess.saveUser(user);
-        dataAccess.savePlayerTeam(playerTeam);
-        dataAccess.setPlayerActivePokemon(playerTeam.get(0));
+
+        // Create copies of player's Pokemon for battle (so damage doesn't affect originals)
+        List<Pokemon> battleTeam = new ArrayList<>();
+        for (Pokemon p : playerTeam) {
+            battleTeam.add(p.copy());
+        }
+        dataAccess.savePlayerTeam(battleTeam);
+        dataAccess.setPlayerActivePokemon(battleTeam.get(0));
 
         // Create a battle-specific user copy with only the selected team
         // This avoids modifying the original user's owned Pokemon list
         User battleUser = new User(user.getId(), user.getName(), user.getEmail(), user.getCurrency());
-        for (Pokemon p : playerTeam) {
+        for (Pokemon p : battleTeam) {
             battleUser.addPokemon(p);
         }
 
@@ -179,13 +185,14 @@ public class BattleAIInteractor implements BattleAIInputBoundary {
             Pokemon playerActivePokemon = dataAccess.getPlayerActivePokemon();
             if (playerActivePokemon != null && playerActivePokemon.isFainted()) {
                 List<Pokemon> playerTeam = dataAccess.getPlayerTeam();
-                List<Pokemon> ownedList = currentUser.getOwnedPokemon();
+                // Update battle user's list order for presenter
+                List<Pokemon> battleUserList = player1.getOwnedPokemon();
                 for (Pokemon p : playerTeam) {
                     if (!p.isFainted()) {
                         dataAccess.setPlayerActivePokemon(p);
-                        if (ownedList.contains(p)) {
-                            ownedList.remove(p);
-                            ownedList.add(0, p);
+                        if (battleUserList.contains(p)) {
+                            battleUserList.remove(p);
+                            battleUserList.add(0, p);
                         }
                         playerSwitchedTo = p;
                         break;
@@ -277,11 +284,12 @@ public class BattleAIInteractor implements BattleAIInputBoundary {
         // Update active Pokemon
         dataAccess.setPlayerActivePokemon(switchTarget);
 
-        // Move switched Pokemon to front of user's list
-        List<Pokemon> ownedList = currentUser.getOwnedPokemon();
-        if (ownedList.contains(switchTarget)) {
-            ownedList.remove(switchTarget);
-            ownedList.add(0, switchTarget);
+        // Move switched Pokemon to front of battle user's list (so presenter shows correct active)
+        User battleUser = battle.getPlayer1();
+        List<Pokemon> battleUserList = battleUser.getOwnedPokemon();
+        if (battleUserList.contains(switchTarget)) {
+            battleUserList.remove(switchTarget);
+            battleUserList.add(0, switchTarget);
         }
 
         // Create and execute switch turn
@@ -315,9 +323,10 @@ public class BattleAIInteractor implements BattleAIInputBoundary {
                 for (Pokemon p : playerTeam) {
                     if (!p.isFainted()) {
                         dataAccess.setPlayerActivePokemon(p);
-                        if (ownedList.contains(p)) {
-                            ownedList.remove(p);
-                            ownedList.add(0, p);
+                        // Update battle user's list order for presenter
+                        if (battleUserList.contains(p)) {
+                            battleUserList.remove(p);
+                            battleUserList.add(0, p);
                         }
                         playerSwitchedTo = p;
                         break;
