@@ -10,6 +10,7 @@ public class ViewCollectionOutputData {
     private List<Pokemon> pokemonOnPage;
     private Pokemon selectedPokemon;
     private List<Pokemon> ownedPokemon;
+    private boolean hasNextPage;
 
     public ViewCollectionOutputData() {}
 
@@ -41,5 +42,13 @@ public class ViewCollectionOutputData {
 
     public void setOwnedPokemon(List<Pokemon> ownedPokemon) {
         this.ownedPokemon = ownedPokemon;
+    }
+
+    public boolean isHasNextPage() {
+        return hasNextPage;
+    }
+
+    public void setHasNextPage(boolean hasNextPage) {
+        this.hasNextPage = hasNextPage;
     }
 }

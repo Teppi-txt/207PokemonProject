@@ -18,6 +18,7 @@ public class ViewCollectionPresenter implements ViewCollectionOutputBoundary {
         viewCollectionState.setSelectedPokemon(outputData.getSelectedPokemon());
         viewCollectionState.setPokemonOnPage(outputData.getPokemonOnPage());
         viewCollectionState.setOwnedPokemon(outputData.getOwnedPokemon());
+        viewCollectionState.setHasNextPage(outputData.isHasNextPage());
         this.viewCollectionViewModel.firePropertyChanged();
     }
 

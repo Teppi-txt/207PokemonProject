@@ -10,6 +10,7 @@ public class ViewCollectionState {
     private Pokemon selectedPokemon;
     private String errorMessage;
     private List<Pokemon> ownedPokemon;
+    private boolean hasNextPage;
 
     public Pokemon getSelectedPokemon() {
         return selectedPokemon;
@@ -41,5 +42,13 @@ public class ViewCollectionState {
 
     public void setOwnedPokemon(List<Pokemon> ownedPokemon) {
         this.ownedPokemon = ownedPokemon;
+    }
+
+    public boolean isHasNextPage() {
+        return hasNextPage;
+    }
+
+    public void setHasNextPage(boolean hasNextPage) {
+        this.hasNextPage = hasNextPage;
     }
 }
