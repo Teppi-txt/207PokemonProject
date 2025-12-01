@@ -132,4 +132,43 @@ public class BuildDeckInteractorTest extends TestCase {
         assertEquals("Team", presenter.output.getDeck().getName());
         assertEquals(1, gw.getDecks().size());
     }
+
+    public void testPokemonNotOwnedFails() {
+        User user = userWith(); // user owns nothing, so they shouldnt be allowed to add pokemon
+        Pokemon x = p(50, "X");
+
+        InMemoryDeckGateway gw = new InMemoryDeckGateway(user);
+        RecordingPresenter presenter = new RecordingPresenter();
+
+        BuildDeckInputData input = new BuildDeckInputData(
+                -1, "BadDeck", List.of(x), false, false
+        );
+
+        BuildDeckInteractor interactor = new BuildDeckInteractor(gw, presenter);
+        interactor.execute(input);
+
+        assertEquals("You do not own the Pokémon X", presenter.error);
+        assertNull(presenter.output);
+    }
+
+    public void testOverDeckLimitFails() {
+        Pokemon a = p(1, "A");
+        Pokemon b = p(2, "B");
+        Pokemon c = p(3, "C");
+        Pokemon d = p(4, "D"); // too many pokemon for the deck limit, pokemon d shouldnt be added
+        User user = userWith(a, b, c, d);
+
+        InMemoryDeckGateway gw = new InMemoryDeckGateway(user);
+        RecordingPresenter presenter = new RecordingPresenter();
+
+        BuildDeckInputData input = new BuildDeckInputData(
+                -1, "TooBig", List.of(a, b, c, d), false, false
+        );
+
+        BuildDeckInteractor interactor = new BuildDeckInteractor(gw, presenter);
+        interactor.execute(input);
+
+        assertEquals("You cannot add more than 3 Pokémon.", presenter.error);
+        assertNull(presenter.output);
+    }
 }
