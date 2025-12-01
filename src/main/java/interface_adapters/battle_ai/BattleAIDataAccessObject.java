@@ -1,45 +1,43 @@
 package interface_adapters.battle_ai;
 
+import entities.AIPlayer;
 import entities.Battle;
+import entities.Move;
+import entities.Pokemon;
 import entities.User;
 import use_case.battle_ai.BattleAIUserDataAccessInterface;
-import use_case.battle_player.BattlePlayerUserDataAccessInterface;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Data Access Object for Battle AI use cases.
- * Implements both BattleAIUserDataAccessInterface and BattlePlayerUserDataAccessInterface.
- * Manages current user and battle state in memory.
+ * Manages current user, battle state, and team data in memory.
  */
-public class BattleAIDataAccessObject implements BattleAIUserDataAccessInterface,
-        BattlePlayerUserDataAccessInterface {
+public class BattleAIDataAccessObject implements BattleAIUserDataAccessInterface {
+
+    private final List<Pokemon> allPokemon;
+    private final List<Move> allMoves;
 
     private User currentUser;
     private Battle currentBattle;
+    private List<Pokemon> playerTeam;
+    private AIPlayer aiPlayer;
+    private Pokemon playerActivePokemon;
 
-    public BattleAIDataAccessObject() {
+    public BattleAIDataAccessObject(List<Pokemon> allPokemon, List<Move> allMoves) {
+        this.allPokemon = allPokemon;
+        this.allMoves = allMoves;
         this.currentUser = null;
         this.currentBattle = null;
-    }
-
-    /**
-     * Sets the current user for the session.
-     */
-    public void setCurrentUser(User user) {
-        this.currentUser = user;
-    }
-
-    /**
-     * Sets the current battle for the session.
-     */
-    public void setCurrentBattle(Battle battle) {
-        this.currentBattle = battle;
+        this.playerTeam = new ArrayList<>();
+        this.aiPlayer = null;
+        this.playerActivePokemon = null;
     }
 
     @Override
     public void saveBattle(Battle battle) {
         this.currentBattle = battle;
-        // Note: For now, battles are only saved in memory.
-        // Future enhancement: persist to JSON file via JSONSaver
     }
 
     @Override
@@ -50,12 +48,55 @@ public class BattleAIDataAccessObject implements BattleAIUserDataAccessInterface
     @Override
     public void saveUser(User user) {
         this.currentUser = user;
-        // Note: For now, users are only saved in memory.
-        // Future enhancement: persist to JSON file via JSONSaver
     }
 
     @Override
     public User getUser() {
         return currentUser;
+    }
+
+    @Override
+    public List<Pokemon> getAllPokemon() {
+        return allPokemon;
+    }
+
+    @Override
+    public void saveAIPlayer(AIPlayer aiPlayer) {
+        this.aiPlayer = aiPlayer;
+    }
+
+    @Override
+    public AIPlayer getAIPlayer() {
+        return aiPlayer;
+    }
+
+    @Override
+    public void savePlayerTeam(List<Pokemon> team) {
+        this.playerTeam = team;
+    }
+
+    @Override
+    public List<Pokemon> getPlayerTeam() {
+        return playerTeam;
+    }
+
+    @Override
+    public void setPlayerActivePokemon(Pokemon pokemon) {
+        this.playerActivePokemon = pokemon;
+    }
+
+    @Override
+    public Pokemon getPlayerActivePokemon() {
+        return playerActivePokemon;
+    }
+
+    @Override
+    public Move getMoveByName(String moveName) {
+        for (Move move : allMoves) {
+            if (move.getName().equalsIgnoreCase(moveName)) {
+                return move;
+            }
+        }
+        return null;
     }
 }

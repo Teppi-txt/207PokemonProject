@@ -1,10 +1,7 @@
 package frameworks_and_drivers;
 
+import app.BattlePlayerFactory;
 import entities.*;
-import interface_adapters.battle_player.BattlePlayerController;
-import interface_adapters.battle_player.BattlePlayerPresenter;
-import interface_adapters.battle_player.BattlePlayerViewModel;
-import use_case.battle_player.BattlePlayerInteractor;
 import view.BattleMovesetSelectionView;
 
 import javax.swing.*;
@@ -401,29 +398,11 @@ public class BattleSetupViewIntegrated extends JFrame {
         Battle battle = new Battle(1, user1, user2);
         battle.startBattle();
 
-        BattlePlayerDataAccessObject dataAccess = new BattlePlayerDataAccessObject();
-        dataAccess.saveBattle(battle);
-        dataAccess.saveUser(user1);
-        dataAccess.saveUser(user2);
-
-        BattlePlayerViewModel viewModel = new BattlePlayerViewModel();
-        BattlePlayerPresenter presenter = new BattlePlayerPresenter(viewModel);
-        BattlePlayerInteractor interactor = new BattlePlayerInteractor(dataAccess, presenter);
-        BattlePlayerController controller = new BattlePlayerController(interactor);
-
         Runnable playAgain = () -> {
             if (returnCallback != null) returnCallback.run();
         };
 
-        BattlePlayerView battleView = new BattlePlayerView(controller, viewModel, dataAccess, playAgain);
-
-        interface_adapters.battle_player.BattlePlayerState initialState =
-            new interface_adapters.battle_player.BattlePlayerState();
-        initialState.setBattle(battle);
-        initialState.setBattleStatus(battle.getBattleStatus());
-        initialState.setBattleEnded(false);
-        initialState.setTurnResult("Battle started! Select a move or switch Pokemon.");
-        viewModel.setState(initialState);
+        BattlePlayerView battleView = BattlePlayerFactory.createBattleView(battle, playAgain);
 
         battleView.setVisible(true);
         dispose();

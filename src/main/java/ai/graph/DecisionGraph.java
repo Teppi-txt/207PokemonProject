@@ -57,6 +57,9 @@ public class DecisionGraph {
      * Execute the decision graph using LangGraph4j and return the final decision.
      */
     public Decision execute(BattleDecisionState initialState) throws Exception {
+        System.out.println("[DecisionGraph] Starting graph execution...");
+        System.out.println("[DecisionGraph] Difficulty: " + initialState.getDifficulty());
+
         // Convert state to initial data map for LangGraph4j
         java.util.Map<String, Object> initialData = stateToMap(initialState);
 
@@ -64,6 +67,7 @@ public class DecisionGraph {
         java.util.Optional<BattleDecisionState> resultOpt = compiledGraph.invoke(initialData);
 
         if (!resultOpt.isPresent()) {
+            System.out.println("[DecisionGraph] ERROR: Graph execution failed - no result returned");
             throw new Exception("Graph execution failed - no result returned");
         }
 
@@ -74,6 +78,9 @@ public class DecisionGraph {
         if (finalDecision == null) {
             finalDecision = (Decision) finalState.getMetadata().get("currentDecision");
         }
+
+        System.out.println("[DecisionGraph] Graph execution complete. Decision: " +
+            (finalDecision != null ? finalDecision.toString() : "null"));
 
         return finalDecision;
     }

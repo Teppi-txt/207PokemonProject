@@ -24,6 +24,8 @@ public class Pokemon implements Serializable {
         this.moves = moves;
     }
 
+    public Pokemon() {}
+
     public static Pokemon fromJSON(JSONObject jsonObject) {
         String name = jsonObject.getString("name");
         Integer id = jsonObject.getInt("id");
@@ -47,6 +49,10 @@ public class Pokemon implements Serializable {
 
     public String getName() {
         return name;
+    }
+
+    public void setName(String name) {
+         this.name = name;
     }
 
     public int getId() {
@@ -83,7 +89,7 @@ public class Pokemon implements Serializable {
                 this.name,
                 this.id,
                 new ArrayList<>(this.types),
-                this.stats,
+                this.stats.copy(),  // Copy stats so HP changes don't affect original
                 new ArrayList<>(this.moves)
         );
         clone.setShiny(this.shiny);
@@ -178,5 +184,9 @@ public class Pokemon implements Serializable {
 
     public void setTypes(ArrayList<String> types) {
         this.types = types;
+    }
+
+    public void setID(int id) {
+        this.id = id;
     }
 }

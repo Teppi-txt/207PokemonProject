@@ -16,6 +16,8 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -52,7 +54,11 @@ public class BuildDeckView extends JPanel implements PropertyChangeListener {
         this.deckSelector = new JComboBox<>();
         this.deckSelector.addActionListener(deckSelectListener);
 
-        this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+        this.setLayout(new BorderLayout());
+
+        // Top panel with title and back button
+        JPanel topPanel = new JPanel();
+        topPanel.setLayout(new BoxLayout(topPanel, BoxLayout.Y_AXIS));
 
         final JLabel title = new JLabel("Build Your Deck");
         title.setFont(new Font(title.getFont().getFontName(), Font.BOLD, 46));
@@ -109,20 +115,20 @@ public class BuildDeckView extends JPanel implements PropertyChangeListener {
         controlsPanel.add(Box.createHorizontalGlue());
         controlsPanel.add(actionPanel);
 
+        topPanel.add(title);
+        topPanel.add(returnButton);
+        topPanel.add(errorMessageLabel);
+        topPanel.add(controlsPanel);
+
         // main content panel (deck display and selection)
-        JPanel contentPanel = new JPanel();
-        contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.X_AXIS));
+        JPanel contentPanel = new JPanel(new BorderLayout(20, 0));
         contentPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
 
-        contentPanel.add(deckDisplayPanel);
-        contentPanel.add(Box.createHorizontalStrut(20));
-        contentPanel.add(selectionPanel);
+        contentPanel.add(deckDisplayPanel, BorderLayout.WEST);
+        contentPanel.add(selectionPanel, BorderLayout.CENTER);
 
-        this.add(title);
-        this.add(returnButton);
-        this.add(errorMessageLabel);
-        this.add(controlsPanel);
-        this.add(contentPanel);
+        this.add(topPanel, BorderLayout.NORTH);
+        this.add(contentPanel, BorderLayout.CENTER);
 
         //  initial load
         Deck initialDeck = viewModel.getState().getDeck();
@@ -421,20 +427,19 @@ public class BuildDeckView extends JPanel implements PropertyChangeListener {
         private final JPanel pokemonGrid;
 
         public OwnedPokemonSelectionPanel() {
-            this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+            this.setLayout(new BorderLayout());
             this.setBorder(BorderFactory.createTitledBorder("Owned Pokémon (Click to Add/Remove)"));
+            this.setMinimumSize(new Dimension(400, 300));
 
-            pokemonGrid = new JPanel(new GridLayout(0, 5, 5, 5));
-
-            for (Pokemon pokemon : ownedPokemon) {
-                pokemonGrid.add(createPokemonButton(pokemon));
-            }
+            pokemonGrid = new JPanel(new GridLayout(0, 4, 8, 8));
+            pokemonGrid.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
             JScrollPane scrollPane = new JScrollPane(pokemonGrid);
-            scrollPane.setPreferredSize(new Dimension(350, 300));
+            scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
             scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+            scrollPane.getVerticalScrollBar().setUnitIncrement(16);
 
-            this.add(scrollPane);
+            this.add(scrollPane, BorderLayout.CENTER);
         }
 
         private JButton createPokemonButton(Pokemon pokemon) {
@@ -455,23 +460,33 @@ public class BuildDeckView extends JPanel implements PropertyChangeListener {
         }
 
         public void updateSelectionStatus(Deck deck) {
-            for (Component component : pokemonGrid.getComponents()) {
-                if (component instanceof JButton) {
-                    JButton button = (JButton) component;
-                    Pokemon pokemon = (Pokemon) button.getClientProperty("pokemon");
-                    if (deck.getPokemons().contains(pokemon)) {
-                        button.setBorder(BorderFactory.createLineBorder(Color.BLUE, 3));
-                        button.setBackground(new Color(170, 200, 255));
-                        button.setToolTipText("In Deck - Click to Remove");
-                    } else {
-                        button.setBorder(UIManager.getBorder("Button.border"));
-                        button.setBackground(UIManager.getColor("Button.background"));
-                        button.setToolTipText("Not In Deck - Click to Add");
-                    }
+            pokemonGrid.removeAll();
+
+            for (Pokemon pokemon : getUniqueOwnedPokemon()) {
+                JButton button = createPokemonButton(pokemon);
+                if (deck != null && deck.getPokemons().contains(pokemon)) {
+                    button.setBorder(BorderFactory.createLineBorder(Color.BLUE, 3));
+                    button.setBackground(new Color(170, 200, 255));
+                    button.setToolTipText("In Deck - Click to Remove");
+                } else {
+                    button.setBorder(UIManager.getBorder("Button.border"));
+                    button.setBackground(UIManager.getColor("Button.background"));
+                    button.setToolTipText("Not In Deck - Click to Add");
                 }
+                pokemonGrid.add(button);
             }
             pokemonGrid.revalidate();
             pokemonGrid.repaint();
+        }
+
+        private List<Pokemon> getUniqueOwnedPokemon() {
+            Map<String, Pokemon> unique = new LinkedHashMap<>();
+            for (Pokemon pokemon : ownedPokemon) {
+                // dedupe by Pokémon ID and shiny status so variants still show separately
+                String key = pokemon.getID() + "-" + pokemon.isShiny();
+                unique.putIfAbsent(key, pokemon);
+            }
+            return new ArrayList<>(unique.values());
         }
     }
 

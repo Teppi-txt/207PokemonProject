@@ -38,11 +38,13 @@ public class LLMDecisionNode implements NodeAction<BattleDecisionState> {
 
     @Override
     public Map<String, Object> apply(BattleDecisionState state) throws Exception {
+        System.out.println("[LLMDecisionNode] Node executing...");
         Map<String, Object> updates = new HashMap<>();
 
         // Check if we should use fallback based on difficulty
         DifficultyConfig config = DifficultyConfig.forLevel(state.getDifficulty());
         if (config.shouldUseFallback()) {
+            System.out.println("[LLMDecisionNode] Using fallback (difficulty-based skip)");
             updates.put("useFallback", true);
             updates.put("fallbackReason", "Intentional fallback for difficulty level");
             Decision fallbackDecision = makeFallbackDecision(state);
@@ -56,23 +58,33 @@ public class LLMDecisionNode implements NodeAction<BattleDecisionState> {
 
             // Determine if this is a move or switch decision
             boolean isSwitch = "switch".equals(state.getMetadata().get("decisionType"));
+            System.out.println("[LLMDecisionNode] Decision type: " + (isSwitch ? "SWITCH" : "MOVE"));
 
             // Build messages for LLM
             List<Message> messages = buildMessages(state.getDifficulty(), context, isSwitch);
 
             // Call Groq API
+            System.out.println("[LLMDecisionNode] >>> Calling Groq LLM API...");
+            long startTime = System.currentTimeMillis();
             GroqAPIClient.ChatCompletionResponse response = groqClient.createChatCompletion(messages);
+            long endTime = System.currentTimeMillis();
+            System.out.println("[LLMDecisionNode] <<< LLM API response received in " + (endTime - startTime) + "ms");
+            System.out.println("[LLMDecisionNode] Model: " + response.getModel() + ", Tokens: " + response.getTotalTokens());
+
             String llmResponse = response.getContent();
+            System.out.println("[LLMDecisionNode] LLM Response: " + llmResponse.substring(0, Math.min(100, llmResponse.length())) + "...");
 
             // Parse response into Decision
             Decision decision = LLMResponseParser.parseDecision(llmResponse, state);
 
             if (decision != null) {
+                System.out.println("[LLMDecisionNode] Parsed decision: " + decision.toString());
                 updates.put("currentDecision", decision);
                 updates.put("llmResponse", llmResponse);
                 updates.put("useFallback", false);
             } else {
                 // Failed to parse - use fallback
+                System.out.println("[LLMDecisionNode] Failed to parse LLM response, using fallback");
                 updates.put("useFallback", true);
                 updates.put("fallbackReason", "Failed to parse LLM response");
                 Decision fallbackDecision = makeFallbackDecision(state);
@@ -81,6 +93,7 @@ public class LLMDecisionNode implements NodeAction<BattleDecisionState> {
 
         } catch (GroqAPIClient.GroqAPIException e) {
             // API error - use fallback
+            System.out.println("[LLMDecisionNode] API ERROR: " + e.getMessage() + ", using fallback");
             updates.put("useFallback", true);
             updates.put("fallbackReason", "API error: " + e.getMessage());
             updates.put("errorMessage", e.getMessage());

@@ -1,7 +1,5 @@
 package interface_adapters.battle_ai;
 
-import entities.Pokemon;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,6 +30,8 @@ public class BattleAIViewModel {
     private String winnerName;
     private int currencyAwarded;
     private boolean battleEnded;
+    private String playerSwitchedToName;
+    private String aiSwitchedToName;
 
     // Listeners for observer pattern
     private final List<ViewModelListener> listeners;
@@ -48,6 +48,8 @@ public class BattleAIViewModel {
         this.winnerName = null;
         this.currencyAwarded = 0;
         this.battleEnded = false;
+        this.playerSwitchedToName = null;
+        this.aiSwitchedToName = null;
         this.listeners = new ArrayList<>();
     }
 
@@ -120,6 +122,14 @@ public class BattleAIViewModel {
         return battleEnded;
     }
 
+    public String getPlayerSwitchedToName() {
+        return playerSwitchedToName;
+    }
+
+    public String getAiSwitchedToName() {
+        return aiSwitchedToName;
+    }
+
     // Setters with notification
     public void setBattleStatus(String battleStatus) {
         this.battleStatus = battleStatus;
@@ -186,6 +196,16 @@ public class BattleAIViewModel {
         notifyListeners();
     }
 
+    public void setPlayerSwitchedToName(String playerSwitchedToName) {
+        this.playerSwitchedToName = playerSwitchedToName;
+        notifyListeners();
+    }
+
+    public void setAiSwitchedToName(String aiSwitchedToName) {
+        this.aiSwitchedToName = aiSwitchedToName;
+        notifyListeners();
+    }
+
     /**
      * Nested class representing a simplified Pokemon view model.
      */
@@ -198,21 +218,13 @@ public class BattleAIViewModel {
         private final List<String> types;
         private final boolean isFainted;
         private final String spriteUrl;
-
-        public PokemonViewModel(Pokemon pokemon) {
-            this.name = pokemon.getName();
-            this.id = pokemon.getId();
-            this.currentHP = pokemon.getStats().getHp();
-            this.maxHP = pokemon.getStats().getHp(); // Assuming max HP is initial HP
-            this.moveNames = new ArrayList<>(pokemon.getMoves());
-            this.types = new ArrayList<>(pokemon.getTypes());
-            this.isFainted = pokemon.isFainted();
-            this.spriteUrl = pokemon.getSpriteUrl();
-        }
+        private final String frontGifUrl;
+        private final String backGifUrl;
 
         public PokemonViewModel(String name, int id, int currentHP, int maxHP,
                                 List<String> moveNames, List<String> types,
-                                boolean isFainted, String spriteUrl) {
+                                boolean isFainted, String spriteUrl,
+                                String frontGifUrl, String backGifUrl) {
             this.name = name;
             this.id = id;
             this.currentHP = currentHP;
@@ -221,6 +233,8 @@ public class BattleAIViewModel {
             this.types = types;
             this.isFainted = isFainted;
             this.spriteUrl = spriteUrl;
+            this.frontGifUrl = frontGifUrl;
+            this.backGifUrl = backGifUrl;
         }
 
         // Getters
@@ -254,6 +268,14 @@ public class BattleAIViewModel {
 
         public String getSpriteUrl() {
             return spriteUrl;
+        }
+
+        public String getFrontGifUrl() {
+            return frontGifUrl;
+        }
+
+        public String getBackGifUrl() {
+            return backGifUrl;
         }
 
         public float getHPPercent() {

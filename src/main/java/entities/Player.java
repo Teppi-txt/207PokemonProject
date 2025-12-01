@@ -1,6 +1,5 @@
 package entities;
 
-import entities.Deck;
 import java.util.List;
 
 public interface Player {

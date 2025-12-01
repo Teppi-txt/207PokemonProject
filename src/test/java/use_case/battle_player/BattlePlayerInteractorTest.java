@@ -228,6 +228,35 @@ public class BattlePlayerInteractorTest extends TestCase {
         assertTrue(turn.wasExecuted());
     }
 
+    public void testPlayerWithNullPokemonListCountsAsNoPokemon() {
+        User player1 = new NullOwnedPokemonUser("Ash", 210);
+        User player2 = userWithPokemon("Gary", 180, pokemonWithHp("Squirtle", 35));
+        Battle battle = battleInProgress(player1, player2);
+
+        RecordingPresenter presenter = new RecordingPresenter();
+        InMemoryBattleGateway gateway = new InMemoryBattleGateway(battle);
+        BattlePlayerInteractor interactor = new BattlePlayerInteractor(gateway, presenter);
+
+        int player1Start = player1.getCurrency();
+        int player2Start = player2.getCurrency();
+        FixedTurn turn = new FixedTurn("null list finishing blow");
+
+        interactor.execute(new BattlePlayerInputData(turn));
+
+        assertNull(presenter.errorMessage);
+        assertNotNull(presenter.outputData);
+        assertTrue(presenter.outputData.isBattleEnded());
+        assertEquals("COMPLETED", presenter.outputData.getBattleStatus());
+        assertSame(player2, battle.getWinner());
+        assertEquals(player2Start + 500, player2.getCurrency());
+        assertEquals(player1Start + 100, player1.getCurrency());
+        assertEquals(2, gateway.savedUsers.size());
+        assertSame(player2, gateway.savedUsers.get(0));
+        assertSame(player1, gateway.savedUsers.get(1));
+        assertSame(battle, gateway.savedBattle);
+        assertTrue(turn.wasExecuted());
+    }
+
     private Pokemon pokemonWithHp(String name, int hp) {
         Stats stats = new Stats(hp, 10, 10, 10, 10, 10);
         ArrayList<String> types = new ArrayList<>();
@@ -247,6 +276,17 @@ public class BattlePlayerInteractorTest extends TestCase {
         Battle battle = new Battle(99, player1, player2);
         battle.startBattle();
         return battle;
+    }
+
+    private static class NullOwnedPokemonUser extends User {
+        NullOwnedPokemonUser(String name, int currency) {
+            super(name.hashCode(), name, name + "@example.com", currency);
+        }
+
+        @Override
+        public List<Pokemon> getOwnedPokemon() {
+            return null;
+        }
     }
 
     private static class FixedTurn extends Turn {

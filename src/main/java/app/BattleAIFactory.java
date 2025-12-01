@@ -4,14 +4,13 @@ import entities.User;
 import frameworks_and_drivers.DeckSelectionForBattleView;
 import frameworks_and_drivers.DeckSelectionView;
 import interface_adapters.battle_ai.*;
+import pokeapi.JSONLoader;
 import use_case.battle_ai.BattleAIInteractor;
-import use_case.battle_player.BattlePlayerInteractor;
 
 import javax.swing.JFrame;
 
 /**
- * Factory for creating and wiring Battle AI components with dependency injection.
- * Follows Clean Architecture principles.
+ * Factory for creating and wiring Battle AI components
  */
 public class BattleAIFactory {
 
@@ -26,7 +25,6 @@ public class BattleAIFactory {
     }
 
     /**
-     * Creates a fully-wired DeckSelectionView with a callback for returning to menu.
      * Uses deck-based selection if user has decks, otherwise falls back to manual selection.
      *
      * @param user The user who will be battling
@@ -35,19 +33,18 @@ public class BattleAIFactory {
      */
     public static JFrame createWithCallback(User user, Runnable returnCallback) {
         // Data Access Layer
-        BattleAIDataAccessObject dataAccess = new BattleAIDataAccessObject();
+        BattleAIDataAccessObject dataAccess = new BattleAIDataAccessObject(
+                JSONLoader.allPokemon, JSONLoader.allMoves);
 
         // Presenter & ViewModel
         BattleAIViewModel viewModel = new BattleAIViewModel();
         BattleAIPresenter presenter = new BattleAIPresenter(viewModel);
 
-        // Use Case Interactors
+        // Use Case Interactor
         BattleAIInteractor aiInteractor = new BattleAIInteractor(dataAccess, presenter);
-        BattlePlayerInteractor playerInteractor = new BattlePlayerInteractor(dataAccess, presenter);
 
         // Controller
-        BattleAIController controller = new BattleAIController(
-                playerInteractor, aiInteractor, dataAccess, presenter, viewModel);
+        BattleAIController controller = new BattleAIController(aiInteractor);
 
         // Check if user has any decks with enough Pokemon
         boolean hasValidDecks = user.getDecks().values().stream()
@@ -55,10 +52,10 @@ public class BattleAIFactory {
 
         if (hasValidDecks) {
             // Use deck-based selection
-            return new DeckSelectionForBattleView(controller, user, returnCallback);
+            return new DeckSelectionForBattleView(controller, dataAccess, viewModel, user, returnCallback);
         } else {
-            // Fall back to manual selection (user has no valid decks yet)
-            return new DeckSelectionView(controller, user, returnCallback);
+            // Fuser has no valid decks yet
+            return new DeckSelectionView(controller, dataAccess, viewModel, user, returnCallback);
         }
     }
 
@@ -71,20 +68,19 @@ public class BattleAIFactory {
      */
     public static DeckSelectionForBattleView createDeckBasedView(User user, Runnable returnCallback) {
         // Data Access Layer
-        BattleAIDataAccessObject dataAccess = new BattleAIDataAccessObject();
+        BattleAIDataAccessObject dataAccess = new BattleAIDataAccessObject(
+                JSONLoader.allPokemon, JSONLoader.allMoves);
 
         // Presenter & ViewModel
         BattleAIViewModel viewModel = new BattleAIViewModel();
         BattleAIPresenter presenter = new BattleAIPresenter(viewModel);
 
-        // Use Case Interactors
+        // Use Case Interactor
         BattleAIInteractor aiInteractor = new BattleAIInteractor(dataAccess, presenter);
-        BattlePlayerInteractor playerInteractor = new BattlePlayerInteractor(dataAccess, presenter);
 
-        // Controller
-        BattleAIController controller = new BattleAIController(
-                playerInteractor, aiInteractor, dataAccess, presenter, viewModel);
+        // Controller 
+        BattleAIController controller = new BattleAIController(aiInteractor);
 
-        return new DeckSelectionForBattleView(controller, user, returnCallback);
+        return new DeckSelectionForBattleView(controller, dataAccess, viewModel, user, returnCallback);
     }
 }

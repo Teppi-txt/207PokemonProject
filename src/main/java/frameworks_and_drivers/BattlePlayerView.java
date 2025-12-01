@@ -24,7 +24,6 @@ import javax.imageio.ImageIO;
 public class BattlePlayerView extends JFrame implements PropertyChangeListener {
     private final BattlePlayerController battlePlayerController;
     private final BattlePlayerViewModel battlePlayerViewModel;
-    private final BattlePlayerUserDataAccessInterface dataAccess;
     private final Runnable playAgainHandler;
 
     // UI Components - Player 1
@@ -32,9 +31,6 @@ public class BattlePlayerView extends JFrame implements PropertyChangeListener {
     private JLabel player1PokemonImageLabel;
     private JProgressBar player1HPBar;
     private JLabel player1HPLabel;
-    private int player1CurrentHP = 100;
-    private int player1MaxHP = 100;
-    private JPanel player1MovesPanel;
     private JButton[] player1MoveButtons = new JButton[4];
     private JPanel player1TeamPanel;
 
@@ -43,9 +39,6 @@ public class BattlePlayerView extends JFrame implements PropertyChangeListener {
     private JLabel player2PokemonImageLabel;
     private JProgressBar player2HPBar;
     private JLabel player2HPLabel;
-    private int player2CurrentHP = 100;
-    private int player2MaxHP = 100;
-    private JPanel player2MovesPanel;
     private JButton[] player2MoveButtons = new JButton[4];
     private JPanel player2TeamPanel;
 
@@ -73,7 +66,6 @@ public class BattlePlayerView extends JFrame implements PropertyChangeListener {
                            Runnable playAgainHandler) {
         this.battlePlayerController = battlePlayerController;
         this.battlePlayerViewModel = battlePlayerViewModel;
-        this.dataAccess = dataAccess;
         this.playAgainHandler = playAgainHandler;
 
         battlePlayerViewModel.addPropertyChangeListener(this);
@@ -355,10 +347,8 @@ public class BattlePlayerView extends JFrame implements PropertyChangeListener {
 
         if (isPlayer1) {
             player1MoveButtons = buttons;
-            player1MovesPanel = movesPanel;
         } else {
             player2MoveButtons = buttons;
-            player2MovesPanel = movesPanel;
         }
         panel.add(movesPanel);
 
@@ -482,8 +472,6 @@ public class BattlePlayerView extends JFrame implements PropertyChangeListener {
 
     private void executeSwitchForPlayer(boolean isPlayer1, Pokemon newPokemon) {
         Player actingPlayer = isPlayer1 ? currentUserAdapter : opponentPlayer;
-        Player targetPlayer = isPlayer1 ? opponentPlayer : currentUserAdapter;
-
         if (actingPlayer == null) return;
         if (currentBattle == null || !"IN_PROGRESS".equals(currentBattle.getBattleStatus())) return;
         if (processingTurn || isPlayer1 != player1Turn) return;
@@ -614,11 +602,7 @@ public class BattlePlayerView extends JFrame implements PropertyChangeListener {
             }
 
             if (isPlayer1) {
-                player1CurrentHP = currentHP;
-                player1MaxHP = maxHP;
             } else {
-                player2CurrentHP = currentHP;
-                player2MaxHP = maxHP;
             }
 
             hpLabel.setText(currentHP + " / " + maxHP);

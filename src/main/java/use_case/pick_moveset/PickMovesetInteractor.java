@@ -11,6 +11,7 @@ public class PickMovesetInteractor implements PickMovesetInputBoundary {
 
     private final PickMovesetOutputBoundary presenter;
 
+
     public PickMovesetInteractor(PickMovesetOutputBoundary presenter) {
         this.presenter = presenter;
     }
@@ -47,5 +48,4 @@ public class PickMovesetInteractor implements PickMovesetInputBoundary {
 
         presenter.presentSuccess("Moveset saved for " + pokemon.getName());
     }
-
 }

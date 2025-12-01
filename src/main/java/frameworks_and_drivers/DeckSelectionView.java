@@ -3,6 +3,8 @@ package frameworks_and_drivers;
 import entities.Pokemon;
 import entities.User;
 import interface_adapters.battle_ai.BattleAIController;
+import interface_adapters.battle_ai.BattleAIDataAccessObject;
+import interface_adapters.battle_ai.BattleAIViewModel;
 import view.BattleMovesetSelectionView;
 
 import javax.swing.*;
@@ -16,20 +18,21 @@ import java.util.List;
 public class DeckSelectionView extends JFrame {
 
     private final BattleAIController controller;
+    private final BattleAIDataAccessObject dataAccess;
+    private final BattleAIViewModel viewModel;
     private final User user;
     private final List<Pokemon> selectedDeck;
     private JPanel selectedPokemonPanel;
     private JLabel deckHeaderLabel;
     private JButton startButton;
     private final JComboBox<String> difficultyCombo;
-    private Runnable returnCallback;
+    private final Runnable returnCallback;
 
-    public DeckSelectionView(BattleAIController controller, User user) {
-        this(controller, user, null);
-    }
-
-    public DeckSelectionView(BattleAIController controller, User user, Runnable returnCallback) {
+    public DeckSelectionView(BattleAIController controller, BattleAIDataAccessObject dataAccess,
+                             BattleAIViewModel viewModel, User user, Runnable returnCallback) {
         this.controller = controller;
+        this.dataAccess = dataAccess;
+        this.viewModel = viewModel;
         this.user = user;
         this.selectedDeck = new ArrayList<>();
         this.returnCallback = returnCallback;
@@ -279,9 +282,11 @@ public class DeckSelectionView extends JFrame {
         }
 
         Runnable onMovesetComplete = () -> {
-            controller.startBattle(user, battleDeck, difficulty);
-            BattleAIView battleView = new BattleAIView(controller, returnCallback);
-            battleView.setViewModel(controller.getViewModel());
+            // Set up battle via controller (proper Clean Architecture)
+            controller.setupBattle(user, battleDeck, difficulty);
+
+            // Create battle view
+            BattleAIView battleView = new BattleAIView(controller, viewModel, returnCallback);
             battleView.setVisible(true);
         };
 

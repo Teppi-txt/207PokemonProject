@@ -4,6 +4,8 @@ import entities.Deck;
 import entities.Pokemon;
 import entities.User;
 import interface_adapters.battle_ai.BattleAIController;
+import interface_adapters.battle_ai.BattleAIDataAccessObject;
+import interface_adapters.battle_ai.BattleAIViewModel;
 import view.BattleMovesetSelectionView;
 
 import javax.swing.*;
@@ -18,6 +20,8 @@ import java.util.List;
 public class DeckSelectionForBattleView extends JFrame {
 
     private final BattleAIController controller;
+    private final BattleAIDataAccessObject dataAccess;
+    private final BattleAIViewModel viewModel;
     private final User user;
     private final Runnable returnCallback;
 
@@ -29,8 +33,11 @@ public class DeckSelectionForBattleView extends JFrame {
 
     private Deck selectedDeck;
 
-    public DeckSelectionForBattleView(BattleAIController controller, User user, Runnable returnCallback) {
+    public DeckSelectionForBattleView(BattleAIController controller, BattleAIDataAccessObject dataAccess,
+                                       BattleAIViewModel viewModel, User user, Runnable returnCallback) {
         this.controller = controller;
+        this.dataAccess = dataAccess;
+        this.viewModel = viewModel;
         this.user = user;
         this.returnCallback = returnCallback;
 
@@ -368,9 +375,11 @@ public class DeckSelectionForBattleView extends JFrame {
         }
 
         Runnable onMovesetComplete = () -> {
-            controller.startBattle(user, battleDeck, difficulty);
-            BattleAIView battleView = new BattleAIView(controller, returnCallback);
-            battleView.setViewModel(controller.getViewModel());
+            // Set up battle via controller (proper Clean Architecture)
+            controller.setupBattle(user, battleDeck, difficulty);
+
+            // Create battle view
+            BattleAIView battleView = new BattleAIView(controller, viewModel, returnCallback);
             battleView.setVisible(true);
         };
 

@@ -103,6 +103,10 @@ public class GroqAPIClient {
 
     public ChatCompletionResponse createChatCompletion(List<Message> messages, String model) throws GroqAPIException {
         try {
+            System.out.println("[GroqAPIClient] Preparing API request to: " + API_ENDPOINT);
+            System.out.println("[GroqAPIClient] Model: " + model);
+            System.out.println("[GroqAPIClient] Messages count: " + messages.size());
+
             JSONObject requestBody = buildRequestBody(messages, model);
             Request request = new Request.Builder()
                     .url(API_ENDPOINT)
@@ -111,16 +115,21 @@ public class GroqAPIClient {
                     .post(RequestBody.create(requestBody.toString(), JSON))
                     .build();
 
+            System.out.println("[GroqAPIClient] Sending HTTP request...");
             try (Response response = client.newCall(request).execute()) {
+                System.out.println("[GroqAPIClient] HTTP response code: " + response.code());
                 if (!response.isSuccessful()) {
                     String errorBody = response.body() != null ? response.body().string() : "Unknown error";
+                    System.out.println("[GroqAPIClient] ERROR response: " + errorBody);
                     throw new GroqAPIException("API request failed with code " + response.code() + ": " + errorBody);
                 }
 
                 String responseBody = response.body().string();
+                System.out.println("[GroqAPIClient] Response received successfully");
                 return parseResponse(responseBody);
             }
         } catch (IOException | JSONException e) {
+            System.out.println("[GroqAPIClient] Exception: " + e.getMessage());
             throw new GroqAPIException("Error communicating with Groq API", e);
         }
     }
