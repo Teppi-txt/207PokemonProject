@@ -27,7 +27,7 @@ public class PickMovesetController {
     }
 
     public Move fetchMoveDetail(String name) {
-        for (Move m : JSONLoader.allMoves) {
+        for (Move m : JSONLoader.getInstance().getAllMoves()) {
             if (m.getName().equalsIgnoreCase(name)) {
                 return m;
             }

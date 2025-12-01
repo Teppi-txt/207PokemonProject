@@ -363,8 +363,8 @@ public class BattleMovesetSelectionView extends JFrame {
     }
 
     private Move findMoveDetail(String moveName) {
-        if (JSONLoader.allMoves == null) return null;
-        for (Move m : JSONLoader.allMoves) {
+        if (JSONLoader.getInstance().getAllMoves() == null) return null;
+        for (Move m : JSONLoader.getInstance().getAllMoves()) {
             if (m.getName().equalsIgnoreCase(moveName)) {
                 return m;
             }

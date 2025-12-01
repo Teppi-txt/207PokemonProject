@@ -1,9 +1,6 @@
 package app;
 
-import entities.Deck;
-import entities.Pack;
-import entities.Pokemon;
-import entities.User;
+import entities.*;
 import frameworks_and_drivers.*;
 import interface_adapters.NavigationController;
 import interface_adapters.ViewManagerModel;
@@ -100,37 +97,32 @@ public class AppBuilder {
     public AppBuilder createDefaultUser() {
         user = new User(1, "Trainer", "trainer@pokemon.com", 5000);
 
-        // Add specific Gen 1 starter Pokémon by ID
-        int[] starterIds = {6, 9, 3};  // Charizard, Blastoise, Venusaur
-        for (int id : starterIds) {
-            Pokemon pokemon = findPokemonById(id);
-            if (pokemon != null) {
-                user.addPokemon(pokemon.copy());
-            }
+        // Add starter Pokémon
+        int starterCount = Math.min(6, JSONLoader.getInstance().getAllPokemon().size());
+        for (int i = 0; i < starterCount; i++) {
+            Pokemon pokemon = JSONLoader.getInstance().getAllPokemon().get(i).copy();
+            user.addPokemon(pokemon);
         }
 
-        // Starter deck with the 3 starters
+        // Add additional Pokémon
+        int additionalCount = Math.min(20, JSONLoader.getInstance().getAllPokemon().size());
+        for (int i = 6; i < additionalCount; i++) {
+            Pokemon pokemon = JSONLoader.getInstance().getAllPokemon().get(i).copy();
+            if (i % 5 == 0) pokemon.setShiny(true);
+            user.addPokemon(pokemon);
+        }
+
+        // Starter deck
         Deck starterDeck = new Deck(1, "Starter Deck");
-        for (Pokemon p : user.getOwnedPokemon()) {
-            starterDeck.addPokemon(p);
+        int deckSize = Math.min(5, user.getOwnedPokemon().size());
+        for (int i = 0; i < deckSize; i++) {
+            starterDeck.addPokemon(user.getOwnedPokemon().get(i));
         }
         user.addDeck(starterDeck);
 
         userDA.saveUser(user);
 
         return this;
-    }
-
-    /**
-     * Finds a Pokemon by its ID from the loaded Pokemon list.
-     */
-    private Pokemon findPokemonById(int id) {
-        for (Pokemon p : JSONLoader.allPokemon) {
-            if (p.getID() == id) {
-                return p;
-            }
-        }
-        return null;
     }
 
 
@@ -214,7 +206,7 @@ public class AppBuilder {
         InMemoryOpenPackDataAccess dataAccess =
                 new InMemoryOpenPackDataAccess(user, userDA);
 
-        Pack pack = new Pack(1, "Pokemon Pack", JSONLoader.allPokemon);
+        Pack pack = new Pack(1, "Pokemon Pack", JSONLoader.getInstance().getAllPokemon());
 
         OpenPackOutputBoundary presenter =
                 new OpenPackPresenter(openPackViewModel, viewManager);
@@ -330,8 +322,21 @@ public class AppBuilder {
             navigationController.navigateToMainMenu();
         };
 
-        javax.swing.JFrame setupView = BattlePlayerFactory.createSetupView(user, returnToMenu);
-        setupView.setVisible(true);
+        // Check if user has any decks with enough Pokemon
+        boolean hasValidDecks = user.getDecks().values().stream()
+                .anyMatch(deck -> deck.getPokemons() != null && deck.getPokemons().size() >= 3);
+
+        if (hasValidDecks) {
+            // Use deck-based selection
+            frameworks_and_drivers.BattleSetupDeckView setupView =
+                new frameworks_and_drivers.BattleSetupDeckView(user, returnToMenu);
+            setupView.setVisible(true);
+        } else {
+            // Fall back to manual selection
+            frameworks_and_drivers.BattleSetupViewIntegrated setupView =
+                new frameworks_and_drivers.BattleSetupViewIntegrated(user, returnToMenu);
+            setupView.setVisible(true);
+        }
     }
 
     /**
