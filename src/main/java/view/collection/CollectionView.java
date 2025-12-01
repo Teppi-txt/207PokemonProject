@@ -28,6 +28,7 @@ public class CollectionView extends JPanel implements PropertyChangeListener {
     private List<Pokemon> ownedPokemon;
     private String filter = "all";
     private int currentPage = 0;
+    private boolean hasNextPage;
 
     public CollectionView(final ViewCollectionViewModel collectionViewModel) {
         collectionViewModel.addPropertyChangeListener(this);
@@ -79,6 +80,7 @@ public class CollectionView extends JPanel implements PropertyChangeListener {
         final ViewCollectionState state = (ViewCollectionState) evt.getNewValue();
         this.pokemonOnPage = state.getPokemonOnPage();
         this.ownedPokemon = state.getOwnedPokemon();
+        this.hasNextPage = state.isHasNextPage();
         updatePanel(state);
     }
 
@@ -143,6 +145,7 @@ public class CollectionView extends JPanel implements PropertyChangeListener {
         private JPanel pageButtonPanel;
         private JButton backButton;
         private Label pageLabel;
+        private JButton nextButton;
 
         public PokemonCollectionPanel() {
             setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
@@ -173,7 +176,7 @@ public class CollectionView extends JPanel implements PropertyChangeListener {
             pageLabel.setAlignment(Label.CENTER);
             pageButtonPanel.add(pageLabel);
 
-            JButton nextButton = createButton("Next", true, e -> {
+            nextButton = createButton("Next", true, e -> {
                 currentPage++;
                 updatePageNumbers();
                 controller.execute(pokemonOnPage, currentPage, filter);
@@ -191,6 +194,7 @@ public class CollectionView extends JPanel implements PropertyChangeListener {
         private void updatePageNumbers() {
             backButton.setEnabled(currentPage != 0);
             pageLabel.setText(String.valueOf(currentPage));
+            nextButton.setEnabled(hasNextPage);
         }
 
         private void loadPage(List<Pokemon> pokemons, List<Pokemon> ownedPokemon) {
@@ -206,6 +210,8 @@ public class CollectionView extends JPanel implements PropertyChangeListener {
 
                 try {
                     pokeIcon = new ImageIcon(new URL(pokemons.get(i).getSpriteUrl()));
+                    pokeIcon.setImage(pokeIcon.getImage().getScaledInstance(POKEMON_SPRITE_SIZE.width,
+                            POKEMON_SPRITE_SIZE.height, Image.SCALE_DEFAULT));
 
                     if (!pokemonIsInList(pokemons.get(i), ownedPokemon)) {
                         pokeIcon.setImage(GrayFilter.createDisabledImage(pokeIcon.getImage()));
@@ -236,6 +242,7 @@ public class CollectionView extends JPanel implements PropertyChangeListener {
             button.setVerticalTextPosition(SwingConstants.BOTTOM);
             button.setHorizontalTextPosition(SwingConstants.CENTER);
             button.addActionListener(CollectionView.this::onPokemonSelection);
+            button.setPreferredSize(POKEMON_BUTTON_SIZE);
             return button;
         }
 

@@ -4,10 +4,7 @@ import entities.Pokemon;
 import entities.User;
 import pokeapi.JSONLoader;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 public class ViewCollectionInteractor implements ViewCollectionInputBoundary {
     private ViewCollectionOutputBoundary viewCollectionPresenter;
@@ -26,7 +23,10 @@ public class ViewCollectionInteractor implements ViewCollectionInputBoundary {
 
         ViewCollectionOutputData outputData = new ViewCollectionOutputData();
 
-        List<Pokemon> result = getPokemonList(filter);
+        List<Pokemon> result = new ArrayList<>(getPokemonList(filter));
+        //sort the page
+        result.sort(Comparator.comparingInt(Pokemon::getID));
+
         int from = currentPage * PAGE_SIZE;
         int to = Math.min(from + PAGE_SIZE, result.size());
         if (from < result.size()) {
@@ -34,6 +34,8 @@ public class ViewCollectionInteractor implements ViewCollectionInputBoundary {
         } else {
             outputData.setPokemonOnPage(new ArrayList<>());
         }
+
+        outputData.setHasNextPage(to < result.size());
 
         // check if displaying makes sense or if the fail view should be used
         if (!outputData.getPokemonOnPage().isEmpty()) {
