@@ -1,4 +1,4 @@
-package frameworks_and_drivers;
+package frameworks_and_drivers.battle;
 
 import interface_adapters.battle_player.BattlePlayerController;
 import interface_adapters.battle_player.BattlePlayerState;

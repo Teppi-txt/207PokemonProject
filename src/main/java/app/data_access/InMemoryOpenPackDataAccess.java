@@ -1,4 +1,4 @@
-package app;
+package app.data_access;
 
 import entities.User;
 import frameworks_and_drivers.JsonUserDataAccess;

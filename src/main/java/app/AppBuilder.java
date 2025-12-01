@@ -1,15 +1,21 @@
 package app;
 
+import app.battle.BattleAIFactory;
+import app.data_access.InMemoryBuildDeckDataAccess;
+import app.data_access.InMemoryOpenPackDataAccess;
 import entities.*;
 import frameworks_and_drivers.*;
+import frameworks_and_drivers.battle.BattlePlayerDataAccessObject;
+import frameworks_and_drivers.battle.BattleSetupDeckView;
+import frameworks_and_drivers.battle.BattleSetupViewIntegrated;
+import frameworks_and_drivers.open_pack.OpenPackView;
+import frameworks_and_drivers.open_pack.PreOpenPackView;
 import interface_adapters.NavigationController;
 import interface_adapters.ViewManagerModel;
 import interface_adapters.battle_ai.BattleAIController;
 import interface_adapters.battle_ai.BattleAIDataAccessObject;
-import interface_adapters.battle_ai.BattleAIPresenter;
 import interface_adapters.battle_ai.BattleAIViewModel;
 import interface_adapters.battle_player.BattlePlayerController;
-import interface_adapters.battle_player.BattlePlayerPresenter;
 import interface_adapters.battle_player.BattlePlayerViewModel;
 import interface_adapters.build_deck.BuildDeckController;
 import interface_adapters.build_deck.BuildDeckPresenter;
@@ -22,15 +28,12 @@ import interface_adapters.open_pack.OpenPackPresenter;
 import interface_adapters.open_pack.OpenPackViewModel;
 import pokeapi.JSONLoader;
 import use_case.build_deck.BuildDeckInteractor;
-import use_case.battle_ai.BattleAIInteractor;
-import use_case.battle_player.BattlePlayerInteractor;
 import use_case.collection.ViewCollectionInteractor;
 import use_case.open_pack.OpenPackInputBoundary;
 import use_case.open_pack.OpenPackInteractor;
 import use_case.open_pack.OpenPackOutputBoundary;
-import view.BuildDeckView;
-import view.collection.CollectionView;
-import view.MainMenuView;
+import frameworks_and_drivers.deck.BuildDeckView;
+import frameworks_and_drivers.collection.CollectionView;
 import view.ViewManager;
 
 import javax.swing.*;
@@ -328,13 +331,13 @@ public class AppBuilder {
 
         if (hasValidDecks) {
             // Use deck-based selection
-            frameworks_and_drivers.BattleSetupDeckView setupView =
-                new frameworks_and_drivers.BattleSetupDeckView(user, returnToMenu);
+            BattleSetupDeckView setupView =
+                new BattleSetupDeckView(user, returnToMenu);
             setupView.setVisible(true);
         } else {
             // Fall back to manual selection
-            frameworks_and_drivers.BattleSetupViewIntegrated setupView =
-                new frameworks_and_drivers.BattleSetupViewIntegrated(user, returnToMenu);
+            BattleSetupViewIntegrated setupView =
+                new BattleSetupViewIntegrated(user, returnToMenu);
             setupView.setVisible(true);
         }
     }

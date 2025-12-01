@@ -1,4 +1,4 @@
-package view;
+package frameworks_and_drivers.deck;
 
 import entities.Deck;
 import entities.Pokemon;

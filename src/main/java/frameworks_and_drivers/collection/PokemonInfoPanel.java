@@ -1,4 +1,4 @@
-package view.collection;
+package frameworks_and_drivers.collection;
 
 import entities.Pokemon;
 import entities.Stats;
@@ -6,8 +6,6 @@ import entities.Stats;
 import javax.swing.*;
 import java.awt.*;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 public class PokemonInfoPanel extends JPanel {

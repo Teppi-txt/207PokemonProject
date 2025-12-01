@@ -1,8 +1,8 @@
-package frameworks_and_drivers;
+package frameworks_and_drivers.battle;
 
-import app.BattlePlayerFactory;
+import app.battle.BattlePlayerFactory;
 import entities.*;
-import view.BattleMovesetSelectionView;
+import frameworks_and_drivers.moveset.BattleMovesetSelectionView;
 
 import javax.swing.*;
 import java.awt.*;

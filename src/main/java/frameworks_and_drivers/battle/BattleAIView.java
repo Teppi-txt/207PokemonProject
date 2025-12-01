@@ -1,4 +1,4 @@
-package frameworks_and_drivers;
+package frameworks_and_drivers.battle;
 
 import interface_adapters.battle_ai.BattleAIController;
 import interface_adapters.battle_ai.BattleAIViewModel;
@@ -14,7 +14,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
+
 import pokeapi.JSONLoader;
 
 public class BattleAIView extends JFrame implements BattleAIViewModel.ViewModelListener {

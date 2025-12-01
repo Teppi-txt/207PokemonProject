@@ -1,7 +1,8 @@
-package frameworks_and_drivers;
+package frameworks_and_drivers.battle;
 
 import entities.Move;
 import entities.Pokemon;
+import frameworks_and_drivers.SpriteLoader;
 import pokeapi.JSONLoader;
 import interface_adapters.battle_ai.BattleAIController;
 import interface_adapters.battle_ai.BattleAIViewModel;

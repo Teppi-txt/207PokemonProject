@@ -1,4 +1,4 @@
-package view;
+package frameworks_and_drivers.moveset;
 
 import entities.Deck;
 import entities.Move;
