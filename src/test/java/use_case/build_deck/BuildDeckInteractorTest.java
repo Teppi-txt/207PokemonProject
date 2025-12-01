@@ -238,4 +238,36 @@ public class BuildDeckInteractorTest extends TestCase {
         assertEquals(1, gw.deletedId);
         assertFalse(gw.getDecks().isEmpty());
     }
+
+    public void testDeleteUnsavedDeckFails() {
+        User user = userWith();
+        InMemoryDeckGateway gw = new InMemoryDeckGateway(user);
+        RecordingPresenter presenter = new RecordingPresenter();
+
+        BuildDeckInputData input = new BuildDeckInputData(
+                -1, null, null, false, true
+        );
+
+        BuildDeckInteractor interactor = new BuildDeckInteractor(gw, presenter);
+        interactor.execute(input);
+
+        assertEquals("Cannot delete an unsaved deck.", presenter.error);
+        assertNull(presenter.output);
+    }
+
+    public void testDeckNotFoundFails() {
+        User user = userWith();
+        InMemoryDeckGateway gw = new InMemoryDeckGateway(user);
+        RecordingPresenter presenter = new RecordingPresenter();
+
+        BuildDeckInputData input = new BuildDeckInputData(
+                999, "Name", null, false, false
+        );
+
+        BuildDeckInteractor interactor = new BuildDeckInteractor(gw, presenter);
+        interactor.execute(input);
+
+        assertEquals("Deck with ID 999 not found.", presenter.error);
+        assertNull(presenter.output);
+    }
 }
