@@ -12,7 +12,6 @@ public class PreOpenPackView extends JPanel {
 
     private OpenPackController controller;
 
-    //private final JLabel currencyLabel = new JLabel("Currency: 0", SwingConstants.LEFT);
     private JButton openPackButton;
 
     public PreOpenPackView(OpenPackViewModel viewModel,
@@ -31,13 +30,9 @@ public class PreOpenPackView extends JPanel {
         JPanel topBar = new JPanel(new BorderLayout());
         topBar.setOpaque(false);
 
-        //currencyLabel.setFont(new Font("SansSerif", Font.BOLD, 16));
-        //currencyLabel.setBorder(BorderFactory.createEmptyBorder(10, 15, 10, 10));
-
         JButton backButton = new JButton("Back");
         backButton.addActionListener(e -> viewManager.closeWindow());
 
-        //topBar.add(currencyLabel, BorderLayout.WEST);
         topBar.add(backButton, BorderLayout.EAST);
 
         JPanel cardsContainer = new JPanel(new GridBagLayout());
@@ -72,6 +67,10 @@ public class PreOpenPackView extends JPanel {
         add(bottomPanel, BorderLayout.SOUTH);
     }
 
+    private void updateCurrency(int remainingCurrency) {
+        // TODO document why this method is empty
+    }
+
     /** NEW: controller injection */
     public void setController(OpenPackController controller) {
         this.controller = controller;
@@ -92,7 +91,4 @@ public class PreOpenPackView extends JPanel {
         return card;
     }
 
-    public void updateCurrency(int amount) {
-        //currencyLabel.setText("Currency: " + amount);
-    }
 }
