@@ -1,4 +1,4 @@
-package entities;
+package entities.battle;
 
 /**
  * Ability represents a Pokémon's inherent trait or skill that can

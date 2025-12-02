@@ -1,8 +1,8 @@
 package use_case.build_deck;
 
-import entities.Deck;
+import entities.battle.Deck;
 import entities.Pokemon;
-import entities.User;
+import entities.user.User;
 import junit.framework.TestCase;
 
 import java.util.ArrayList;

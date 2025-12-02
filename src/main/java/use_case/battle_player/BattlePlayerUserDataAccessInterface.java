@@ -1,7 +1,7 @@
 package use_case.battle_player;
 
-import entities.Battle;
-import entities.User;
+import entities.battle.Battle;
+import entities.user.User;
 
 public interface BattlePlayerUserDataAccessInterface {
 

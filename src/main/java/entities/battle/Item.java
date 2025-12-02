@@ -1,4 +1,4 @@
-package entities;
+package entities.battle;
 
 import java.io.Serializable;
 

@@ -1,7 +1,7 @@
 package view.collection;
 
 import entities.Pokemon;
-import entities.Stats;
+import entities.battle.Stats;
 
 import javax.swing.*;
 import java.awt.*;

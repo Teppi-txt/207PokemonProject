@@ -1,6 +1,6 @@
 package ai.graph;
 
-import entities.Move;
+import entities.battle.Move;
 import entities.Pokemon;
 import java.io.Serializable;
 

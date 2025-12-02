@@ -1,8 +1,8 @@
 package use_case.battle_ai;
 
-import entities.Battle;
+import entities.battle.Battle;
 import entities.Pokemon;
-import entities.Turn;
+import entities.battle.Turn;
 
 /**
  * Output data from executing an AI player's turn.

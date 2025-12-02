@@ -1,6 +1,9 @@
 package use_case.battle_ai;
 
 import entities.*;
+import entities.battle.*;
+import entities.user.User;
+import entities.user.UserPlayerAdapter;
 
 import java.util.ArrayList;
 import java.util.Collections;

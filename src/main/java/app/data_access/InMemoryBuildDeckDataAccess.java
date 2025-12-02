@@ -1,7 +1,7 @@
 package app.data_access;
 
-import entities.Deck;
-import entities.User;
+import entities.battle.Deck;
+import entities.user.User;
 import use_case.build_deck.BuildDeckUserDataAccessInterface;
 
 import java.util.ArrayList;

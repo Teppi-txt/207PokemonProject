@@ -3,8 +3,9 @@ package ai;
 import ai.graph.BattleDecisionState;
 import ai.graph.Decision;
 import ai.graph.DecisionGraph;
-import entities.Deck;
+import entities.battle.*;
 import entities.*;
+import entities.user.User;
 
 import java.util.ArrayList;
 import java.util.Arrays;

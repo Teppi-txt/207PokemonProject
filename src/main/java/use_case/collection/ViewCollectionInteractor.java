@@ -1,7 +1,7 @@
 package use_case.collection;
 
 import entities.Pokemon;
-import entities.User;
+import entities.user.User;
 import pokeapi.JSONLoader;
 
 import java.util.*;

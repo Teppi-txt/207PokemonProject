@@ -1,6 +1,6 @@
 package use_case.build_deck;
 
-import entities.Deck;
+import entities.battle.Deck;
 
 import java.util.List;
 

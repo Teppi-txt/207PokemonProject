@@ -1,7 +1,7 @@
 package interface_adapters.battle_ai;
 
 import entities.Pokemon;
-import entities.User;
+import entities.user.User;
 import use_case.battle_ai.BattleAIInputBoundary;
 import use_case.battle_ai.BattleAIInputData;
 

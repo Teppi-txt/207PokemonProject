@@ -1,5 +1,7 @@
-package entities;
+package entities.user;
 
+import entities.Pokemon;
+import entities.battle.Deck;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import java.io.Serializable;
