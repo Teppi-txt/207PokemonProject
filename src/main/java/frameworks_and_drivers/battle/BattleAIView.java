@@ -1,4 +1,4 @@
-package frameworks_and_drivers;
+package frameworks_and_drivers.battle;
 
 import interface_adapters.battle_ai.BattleAIController;
 import interface_adapters.battle_ai.BattleAIViewModel;
