@@ -23,6 +23,9 @@ public class PreOpenPackView extends JPanel {
         viewModel.addPropertyChangeListener(evt -> {
             if ("state".equals(evt.getPropertyName())) {
                 OpenPackState state = (OpenPackState) evt.getNewValue();
+                if (state.getErrorMessage() != null) {
+                    JOptionPane.showMessageDialog(this, state.getErrorMessage());
+                }
                 updateCurrency(state.getRemainingCurrency());
             }
         });
