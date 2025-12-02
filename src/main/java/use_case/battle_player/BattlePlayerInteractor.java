@@ -73,9 +73,11 @@ public class BattlePlayerInteractor implements BattlePlayerInputBoundary {
         if (battleEnded) {
             battle.endBattle(winner);
             if (winner != null) {
+                winner.addCurrency(500);
                 battleDataAccess.saveUser(winner);
 
                 User loser = battle.getPlayer1().equals(winner) ? battle.getPlayer2() : battle.getPlayer1();
+                loser.addCurrency(100);
                 battleDataAccess.saveUser(loser);
             }
         }
