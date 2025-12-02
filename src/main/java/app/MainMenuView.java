@@ -1,4 +1,4 @@
-package view;
+package app;
 
 import entities.User;
 import interface_adapters.ViewManagerModel;

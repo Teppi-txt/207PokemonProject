@@ -1,6 +1,6 @@
 package frameworks_and_drivers;
 
-import app.BattlePlayerFactory;
+import app.battle.BattlePlayerFactory;
 import entities.*;
 import view.BattleMovesetSelectionView;
 
