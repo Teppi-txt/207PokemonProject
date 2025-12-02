@@ -2,10 +2,10 @@ package app.battle;
 
 import entities.battle.Battle;
 import entities.user.User;
-import frameworks_and_drivers.BattlePlayerDataAccessObject;
-import frameworks_and_drivers.BattlePlayerView;
-import frameworks_and_drivers.BattleSetupDeckView;
-import frameworks_and_drivers.BattleSetupViewIntegrated;
+import frameworks_and_drivers.battle.BattlePlayerDataAccessObject;
+import frameworks_and_drivers.battle.BattlePlayerView;
+import frameworks_and_drivers.battle.BattleSetupDeckView;
+import frameworks_and_drivers.battle.BattleSetupViewIntegrated;
 import interface_adapters.battle_player.BattlePlayerController;
 import interface_adapters.battle_player.BattlePlayerPresenter;
 import interface_adapters.battle_player.BattlePlayerState;

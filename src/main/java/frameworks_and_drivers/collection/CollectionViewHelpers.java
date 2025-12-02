@@ -1,4 +1,4 @@
-package view.collection;
+package frameworks_and_drivers.collection;
 
 import entities.Pokemon;
 

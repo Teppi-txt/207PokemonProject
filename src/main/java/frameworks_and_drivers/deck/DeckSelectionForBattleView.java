@@ -1,12 +1,13 @@
-package frameworks_and_drivers;
+package frameworks_and_drivers.deck;
 
 import entities.battle.Deck;
 import entities.Pokemon;
 import entities.user.User;
+import frameworks_and_drivers.battle.BattleAIView;
 import interface_adapters.battle_ai.BattleAIController;
 import interface_adapters.battle_ai.BattleAIDataAccessObject;
 import interface_adapters.battle_ai.BattleAIViewModel;
-import view.BattleMovesetSelectionView;
+import frameworks_and_drivers.moveset.BattleMovesetSelectionView;
 
 import javax.swing.*;
 import java.awt.*;
