@@ -1,4 +1,4 @@
-package app;
+package app.battle;
 
 import entities.Deck;
 import entities.Pokemon;

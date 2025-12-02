@@ -1,4 +1,4 @@
-package app;
+package app.battle;
 
 import entities.Battle;
 import entities.User;

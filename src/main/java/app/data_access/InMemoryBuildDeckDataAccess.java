@@ -1,8 +1,7 @@
-package app;
+package app.data_access;
 
 import entities.Deck;
 import entities.User;
-import frameworks_and_drivers.JsonUserDataAccess;
 import use_case.build_deck.BuildDeckUserDataAccessInterface;
 
 import java.util.ArrayList;

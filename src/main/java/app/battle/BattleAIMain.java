@@ -1,4 +1,4 @@
-package app;
+package app.battle;
 
 import entities.Pokemon;
 import entities.User;

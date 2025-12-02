@@ -1,4 +1,4 @@
-package app;
+package app.battle;
 
 import entities.User;
 import frameworks_and_drivers.DeckSelectionForBattleView;
