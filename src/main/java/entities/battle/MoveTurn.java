@@ -1,4 +1,7 @@
-package entities;
+package entities.battle;
+
+import entities.Player;
+import entities.Pokemon;
 
 public class MoveTurn extends Turn {
     private Move move;

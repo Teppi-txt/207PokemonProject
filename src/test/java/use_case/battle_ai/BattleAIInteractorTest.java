@@ -1,6 +1,11 @@
 package use_case.battle_ai;
 
 import entities.*;
+import entities.battle.AIPlayer;
+import entities.battle.Battle;
+import entities.battle.Move;
+import entities.battle.Stats;
+import entities.user.User;
 import junit.framework.TestCase;
 import java.util.*;
 

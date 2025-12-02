@@ -1,9 +1,9 @@
 package use_case.battle_player;
 
-import entities.Battle;
+import entities.battle.Battle;
 import entities.Pokemon;
-import entities.User;
-import entities.Turn;
+import entities.user.User;
+import entities.battle.Turn;
 
 // interactor implementing the battle player use case
 

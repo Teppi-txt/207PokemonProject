@@ -1,8 +1,8 @@
 package entities;
 
 import java.io.Serializable;
-import java.lang.reflect.Array;
 
+import entities.battle.Stats;
 import org.json.JSONObject;
 import pokeapi.JSONUtility;
 

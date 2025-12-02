@@ -1,8 +1,8 @@
 package frameworks_and_drivers;
 
-import entities.Deck;
+import entities.battle.Deck;
 import entities.Pokemon;
-import entities.User;
+import entities.user.User;
 import interface_adapters.battle_ai.BattleAIController;
 import interface_adapters.battle_ai.BattleAIDataAccessObject;
 import interface_adapters.battle_ai.BattleAIViewModel;

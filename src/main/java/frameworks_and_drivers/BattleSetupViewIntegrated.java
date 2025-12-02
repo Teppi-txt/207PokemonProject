@@ -2,6 +2,8 @@ package frameworks_and_drivers;
 
 import app.battle.BattlePlayerFactory;
 import entities.*;
+import entities.battle.Battle;
+import entities.user.User;
 import view.BattleMovesetSelectionView;
 
 import javax.swing.*;

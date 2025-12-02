@@ -1,8 +1,8 @@
 package pokeapi;
 
-import entities.Move;
+import entities.battle.Move;
 import entities.Pokemon;
-import entities.Stats;
+import entities.battle.Stats;
 import interface_adapters.PokemonBuilder;
 import okhttp3.Call;
 import okhttp3.OkHttpClient;

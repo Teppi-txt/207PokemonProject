@@ -1,4 +1,6 @@
-package entities;
+package entities.battle;
+
+import entities.Player;
 
 import java.io.Serializable;
 

@@ -1,6 +1,6 @@
 package use_case.open_pack;
 
-import entities.User;
+import entities.user.User;
 
 public interface OpenPackUserDataAccessInterface {
 

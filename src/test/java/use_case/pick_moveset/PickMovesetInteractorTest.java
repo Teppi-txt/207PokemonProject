@@ -1,7 +1,7 @@
 package use_case.pick_moveset;
 
-import entities.Deck;
-import entities.Move;
+import entities.battle.Deck;
+import entities.battle.Move;
 import entities.Pokemon;
 import junit.framework.TestCase;
 import pokeapi.JSONLoader;

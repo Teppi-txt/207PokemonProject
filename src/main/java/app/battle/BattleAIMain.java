@@ -1,7 +1,7 @@
 package app.battle;
 
 import entities.Pokemon;
-import entities.User;
+import entities.user.User;
 import pokeapi.JSONLoader;
 
 import javax.swing.*;

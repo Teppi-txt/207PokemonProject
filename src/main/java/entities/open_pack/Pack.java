@@ -1,7 +1,8 @@
-package entities;
+package entities.open_pack;
+
+import entities.Pokemon;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 

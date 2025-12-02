@@ -1,6 +1,6 @@
 package interface_adapters.battle_player;
 
-import entities.Turn;
+import entities.battle.Turn;
 import use_case.battle_player.BattlePlayerInputData;
 import use_case.battle_player.BattlePlayerInputBoundary;
 

@@ -1,4 +1,6 @@
-package entities;
+package entities.battle;
+
+import entities.Pokemon;
 
 import java.util.HashMap;
 import java.util.Map;

@@ -1,5 +1,11 @@
 package frameworks_and_drivers;
 
+import entities.battle.Battle;
+import entities.battle.Move;
+import entities.battle.MoveTurn;
+import entities.battle.SwitchTurn;
+import entities.user.User;
+import entities.user.UserPlayerAdapter;
 import interface_adapters.battle_player.BattlePlayerController;
 import interface_adapters.battle_player.BattlePlayerState;
 import interface_adapters.battle_player.BattlePlayerViewModel;

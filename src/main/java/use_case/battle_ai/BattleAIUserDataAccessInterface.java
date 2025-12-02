@@ -1,10 +1,10 @@
 package use_case.battle_ai;
 
-import entities.AIPlayer;
-import entities.Battle;
-import entities.Move;
+import entities.battle.AIPlayer;
+import entities.battle.Battle;
+import entities.battle.Move;
 import entities.Pokemon;
-import entities.User;
+import entities.user.User;
 
 import java.util.List;
 

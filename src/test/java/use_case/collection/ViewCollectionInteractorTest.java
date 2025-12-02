@@ -1,17 +1,12 @@
 
 package use_case.collection;
 import entities.Pokemon;
-import entities.User;
-import interface_adapters.collection.ViewCollectionPresenter;
-import interface_adapters.collection.ViewCollectionState;
-import org.junit.jupiter.api.BeforeEach;
+import entities.user.User;
 import org.junit.jupiter.api.Test;
 import pokeapi.JSONLoader;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 
-import static org.json.XMLTokener.entity;
 import static org.junit.jupiter.api.Assertions.*;
 
 class ViewCollectionInteractorTest {

@@ -1,6 +1,6 @@
 package use_case.build_deck;
-import entities.Deck;
-import entities.User;
+import entities.battle.Deck;
+import entities.user.User;
 import java.util.List;
 
 public interface BuildDeckUserDataAccessInterface {
