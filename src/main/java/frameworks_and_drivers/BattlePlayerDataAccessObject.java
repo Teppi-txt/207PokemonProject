@@ -1,4 +1,4 @@
-package frameworks_and_drivers.battle;
+package frameworks_and_drivers;
 
 import entities.battle.Battle;
 import entities.user.User;

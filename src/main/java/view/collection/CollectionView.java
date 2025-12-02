@@ -1,6 +1,6 @@
-package frameworks_and_drivers.collection;
+package view.collection;
 
-import static frameworks_and_drivers.collection.CollectionViewHelpers.*;
+import static view.collection.CollectionViewHelpers.*;
 
 import entities.Pokemon;
 import interface_adapters.collection.ViewCollectionController;

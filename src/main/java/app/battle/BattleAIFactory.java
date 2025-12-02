@@ -1,8 +1,8 @@
 package app.battle;
 
 import entities.user.User;
-import frameworks_and_drivers.deck.DeckSelectionForBattleView;
-import frameworks_and_drivers.deck.DeckSelectionView;
+import frameworks_and_drivers.DeckSelectionForBattleView;
+import frameworks_and_drivers.DeckSelectionView;
 import interface_adapters.battle_ai.*;
 import pokeapi.JSONLoader;
 import use_case.battle_ai.BattleAIInteractor;

@@ -1,4 +1,4 @@
-package frameworks_and_drivers.open_pack;
+package frameworks_and_drivers;
 
 import interface_adapters.open_pack.OpenPackController;
 import interface_adapters.open_pack.OpenPackState;

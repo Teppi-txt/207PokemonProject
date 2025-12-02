@@ -1,4 +1,4 @@
-package frameworks_and_drivers.moveset;
+package view;
 
 import entities.battle.Move;
 import entities.Pokemon;
