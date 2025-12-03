@@ -1,11 +1,12 @@
 package interface_adapters.open_pack;
 
-import entities.Pokemon;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import entities.Pokemon;
+
 /**
- * The state for the open pack view model
+ * The state for the open pack view model.
  */
 
 public class OpenPackState {
@@ -34,15 +35,33 @@ public class OpenPackState {
         this.errorMessage = other.errorMessage;
     }
 
-    public int getRemainingCurrency() { return remainingCurrency; }
-    public List<Pokemon> getOpenedCards() { return openedCards; }
-    public List<Boolean> getDuplicateFlags() { return duplicateFlags; }
-    public boolean isRevealMode() { return revealMode; }
-    public int getRevealIndex() { return revealIndex; }
-    public String getErrorMessage() { return errorMessage; }
+    public int getRemainingCurrency() {
+        return remainingCurrency;
+    }
 
+    public List<Pokemon> getOpenedCards() {
+        return openedCards;
+    }
 
-    public void setRemainingCurrency(int amount) { this.remainingCurrency = amount; }
+    public List<Boolean> getDuplicateFlags() {
+        return duplicateFlags;
+    }
+
+    public boolean isRevealMode() {
+        return revealMode;
+    }
+
+    public int getRevealIndex() {
+        return revealIndex;
+    }
+
+    public String getErrorMessage() {
+        return errorMessage;
+    }
+
+    public void setRemainingCurrency(int amount) {
+        this.remainingCurrency = amount;
+    }
 
     public void setOpenedCards(List<Pokemon> cards) {
         this.openedCards = cards == null ? new ArrayList<>() : new ArrayList<>(cards);
@@ -52,8 +71,15 @@ public class OpenPackState {
         this.duplicateFlags = flags == null ? new ArrayList<>() : new ArrayList<>(flags);
     }
 
-    public void setRevealMode(boolean b) { this.revealMode = b; }
-    public void setRevealIndex(int idx) { this.revealIndex = idx; }
-    public void setErrorMessage(String msg) { this.errorMessage = msg; }
+    public void setRevealMode(boolean b) {
+        this.revealMode = b;
+    }
 
+    public void setRevealIndex(int idx) {
+        this.revealIndex = idx;
+    }
+
+    public void setErrorMessage(String msg) {
+        this.errorMessage = msg;
+    }
 }

@@ -2,8 +2,9 @@ package interface_adapters.open_pack;
 
 import use_case.open_pack.OpenPackInputBoundary;
 import use_case.open_pack.OpenPackInputData;
-/*
-The controller for the open pack use case
+
+/**
+ * The controller for the open pack use case.
  */
 
 public class OpenPackController {
@@ -14,9 +15,11 @@ public class OpenPackController {
         this.openPackUseCaseInteractor = openPackUseCaseInteractor;
     }
 
-    public void openPack(){
-        OpenPackInputData openPackInputData = new OpenPackInputData();
+    /**
+     * Opens a pack.
+     */
+    public void openPack() {
+        final OpenPackInputData openPackInputData = new OpenPackInputData();
         openPackUseCaseInteractor.execute(openPackInputData);
     }
-
 }

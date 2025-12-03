@@ -5,7 +5,7 @@ import use_case.open_pack.OpenPackOutputBoundary;
 import use_case.open_pack.OpenPackOutputData;
 
 /**
- * The presenter for the open pack use case
+ * The presenter for the open pack use case.
  */
 
 public class OpenPackPresenter implements OpenPackOutputBoundary {
@@ -23,7 +23,7 @@ public class OpenPackPresenter implements OpenPackOutputBoundary {
             return;
         }
 
-        OpenPackState newState = new OpenPackState();
+        final OpenPackState newState = new OpenPackState();
 
         newState.setOpenedCards(outputData.getOpenedCards());
         newState.setDuplicateFlags(outputData.getDuplicateFlags());
@@ -41,7 +41,7 @@ public class OpenPackPresenter implements OpenPackOutputBoundary {
 
     @Override
     public void prepareFailView(String errorMessage) {
-        OpenPackState newState = new OpenPackState();
+        final OpenPackState newState = new OpenPackState();
         newState.setErrorMessage(errorMessage);
         newState.setRevealMode(false);
 

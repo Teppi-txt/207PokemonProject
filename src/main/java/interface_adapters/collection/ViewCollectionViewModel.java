@@ -3,7 +3,7 @@ package interface_adapters.collection;
 import interface_adapters.ViewModel;
 
 /**
- * ViewModel for the Collection use case
+ * ViewModel for the Collection use case.
  */
 
 public class ViewCollectionViewModel extends ViewModel<ViewCollectionState> {

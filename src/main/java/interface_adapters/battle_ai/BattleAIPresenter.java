@@ -1,17 +1,18 @@
 package interface_adapters.battle_ai;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import entities.battle.Battle;
 import entities.Pokemon;
 import use_case.battle_ai.BattleAIOutputBoundary;
 import use_case.battle_ai.BattleAIOutputData;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * Presenter for Battle AI use case.
  * Transforms use case output data into view model format.
  */
+
 public class BattleAIPresenter implements BattleAIOutputBoundary {
 
     private final BattleAIViewModel viewModel;
@@ -41,12 +42,14 @@ public class BattleAIPresenter implements BattleAIOutputBoundary {
         // Update switch notifications
         if (outputData.getPlayerSwitchedTo() != null) {
             viewModel.setPlayerSwitchedToName(outputData.getPlayerSwitchedTo().getName());
-        } else {
+        }
+        else {
             viewModel.setPlayerSwitchedToName(null);
         }
         if (outputData.getAiSwitchedTo() != null) {
             viewModel.setAiSwitchedToName(outputData.getAiSwitchedTo().getName());
-        } else {
+        }
+        else {
             viewModel.setAiSwitchedToName(null);
         }
 
@@ -102,6 +105,8 @@ public class BattleAIPresenter implements BattleAIOutputBoundary {
     /**
      * Creates a PokemonViewModel from a Pokemon entity.
      * This method extracts primitive data from the entity for the view model.
+     * @param pokemon get the view of the Pokemon for the one Pokemon in battle.
+     * @return BattleAIViewModel for view.
      */
     private BattleAIViewModel.PokemonViewModel createPokemonViewModel(Pokemon pokemon) {
         return new BattleAIViewModel.PokemonViewModel(

@@ -1,14 +1,14 @@
 package interface_adapters.build_deck;
 
+import java.util.ArrayList;
+
 import use_case.build_deck.BuildDeckOutputBoundary;
 import use_case.build_deck.BuildDeckOutputData;
-
-import java.util.ArrayList;
 
 /**
  * The Presenter for the Build Deck Use Case.
  */
-public class BuildDeckPresenter implements BuildDeckOutputBoundary{
+public class BuildDeckPresenter implements BuildDeckOutputBoundary {
     private final BuildDeckViewModel viewModel;
 
     public BuildDeckPresenter(BuildDeckViewModel viewModel) {
@@ -17,7 +17,7 @@ public class BuildDeckPresenter implements BuildDeckOutputBoundary{
 
     @Override
     public void prepareSuccessView(BuildDeckOutputData outputData) {
-        BuildDeckState buildDeckState = new BuildDeckState();
+        final BuildDeckState buildDeckState = new BuildDeckState();
         buildDeckState.setDeck(outputData.getDeck());
         buildDeckState.setAllDecks(outputData.getAllDecks());
         buildDeckState.setErrorMessage(null);
@@ -27,7 +27,7 @@ public class BuildDeckPresenter implements BuildDeckOutputBoundary{
 
     @Override
     public void prepareFailView(String errorMessage) {
-        BuildDeckState state = new BuildDeckState();
+        final BuildDeckState state = new BuildDeckState();
         state.setDeck(null);
         state.setAllDecks(new ArrayList<>());
         state.setErrorMessage(errorMessage);
