@@ -1,10 +1,10 @@
 package use_case.collection;
 
+import java.util.*;
+
 import entities.Pokemon;
 import entities.user.User;
 import pokeapi.JSONLoader;
-
-import java.util.*;
 
 public class ViewCollectionInteractor implements ViewCollectionInputBoundary {
     private ViewCollectionOutputBoundary viewCollectionPresenter;
@@ -18,20 +18,21 @@ public class ViewCollectionInteractor implements ViewCollectionInputBoundary {
 
     @Override
     public void execute(ViewCollectionInputData viewCollectionInputData) {
-        String filter = viewCollectionInputData.getFilter();
-        int currentPage = Math.max(viewCollectionInputData.getCurrentPage(), 0);
+        final String filter = viewCollectionInputData.getFilter();
+        final int currentPage = Math.max(viewCollectionInputData.getCurrentPage(), 0);
 
-        ViewCollectionOutputData outputData = new ViewCollectionOutputData();
+        final ViewCollectionOutputData outputData = new ViewCollectionOutputData();
 
-        List<Pokemon> result = new ArrayList<>(getPokemonList(filter));
-        //sort the page
+        final List<Pokemon> result = new ArrayList<>(getPokemonList(filter));
+        // sort the page
         result.sort(Comparator.comparingInt(Pokemon::getID));
 
-        int from = currentPage * PAGE_SIZE;
-        int to = Math.min(from + PAGE_SIZE, result.size());
+        final int from = currentPage * PAGE_SIZE;
+        final int to = Math.min(from + PAGE_SIZE, result.size());
         if (from < result.size()) {
             outputData.setPokemonOnPage(new ArrayList<>(result.subList(from, to)));
-        } else {
+        }
+        else {
             outputData.setPokemonOnPage(new ArrayList<>());
         }
 
@@ -42,14 +43,15 @@ public class ViewCollectionInteractor implements ViewCollectionInputBoundary {
             outputData.setOwnedPokemon(user.getOwnedPokemon());
             outputData.setSelectedPokemon(outputData.getPokemonOnPage().get(0));
             viewCollectionPresenter.prepareSuccessView(outputData);
-        } else {
-            String errorMessage = "You do not have any " + filter + " pokemon.";
+        }
+        else {
+            final String errorMessage = "You do not have any " + filter + " pokemon.";
             viewCollectionPresenter.prepareFailView(errorMessage, outputData);
         }
     }
 
     private List<Pokemon> getPokemonList(String filter) {
-        List<Pokemon> result;
+        final List<Pokemon> result;
         switch (filter) {
             case "all":
                 result = JSONLoader.getInstance().getAllPokemon();
@@ -67,7 +69,7 @@ public class ViewCollectionInteractor implements ViewCollectionInputBoundary {
     }
 
     private List<Pokemon> getShinies(List<Pokemon> ownedPokemon) {
-        List<Pokemon> shinyPokemon = new ArrayList<>();
+        final List<Pokemon> shinyPokemon = new ArrayList<>();
         for (Pokemon pokemon : ownedPokemon) {
             if (pokemon.isShiny()) {
                 shinyPokemon.add(pokemon);
@@ -76,6 +78,9 @@ public class ViewCollectionInteractor implements ViewCollectionInputBoundary {
         return shinyPokemon;
     }
 
+    /**
+     * Switches the application back to the home view.
+     */
     public void switchToHomeView() {
         viewCollectionPresenter.switchToHomeView();
     }

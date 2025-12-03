@@ -1,6 +1,8 @@
 package use_case.open_pack;
-import entities.Pokemon;
+
 import java.util.List;
+
+import entities.Pokemon;
 
 public class OpenPackOutputData {
 
@@ -27,6 +29,4 @@ public class OpenPackOutputData {
     public int getRemainingCurrency() {
         return remainingCurrency;
     }
-
-
 }
