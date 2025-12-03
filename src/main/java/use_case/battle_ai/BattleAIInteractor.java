@@ -18,6 +18,10 @@ public class BattleAIInteractor implements BattleAIInputBoundary {
     private static final int LOSS_REWARD = 100;
     private static final int WIN_REWARD = 500;
 
+    private static final int AI_TEAM_SIZE = 3;
+    private static final int LOSS_REWARD = 100;
+    private static final int WIN_REWARD = 500;
+
     private final BattleAIUserDataAccessInterface dataAccess;
     private final BattleAIOutputBoundary presenter;
 
