@@ -3,6 +3,7 @@ package pokeapi;
 import entities.battle.Move;
 import entities.Pokemon;
 import entities.battle.Stats;
+import interface_adapters.MoveBuilder;
 import interface_adapters.PokemonBuilder;
 import okhttp3.Call;
 import okhttp3.OkHttpClient;
@@ -103,16 +104,16 @@ public class PokeAPIFetcher {
         try {
             Response response = call.execute();
             final JSONObject responseBody = new JSONObject(response.body().string());
-            Move returnMove = new Move()
-                    .setName(responseBody.optString("name"))
-                    .setAccuracy(responseBody.optInt("accuracy"))
-                    .setPriority(responseBody.optInt("priority"))
-                    .setPower(responseBody.optInt("power"))
-                    .setType(getNestedString(responseBody, "type", "name"))
-                    .setEffect(getNestedString(responseBody, "meta", "ailment", "name"))
-                    .setDamageClass(getNestedString(responseBody, "damage_class", "name"));
+            MoveBuilder builder = new MoveBuilder()
+                    .addName(responseBody.optString("name"))
+                    .addAccuracy(responseBody.optInt("accuracy"))
+                    .addPriority(responseBody.optInt("priority"))
+                    .addPower(responseBody.optInt("power"))
+                    .addType(getNestedString(responseBody, "type", "name"))
+                    .addEffect(getNestedString(responseBody, "meta", "ailment", "name"))
+                    .addDamageClass(getNestedString(responseBody, "damage_class", "name"));
 
-            return returnMove;
+            return builder.build();
 
         } catch (IOException | JSONException exception) {
             System.out.println(exception.getMessage());
