@@ -1,15 +1,15 @@
 package use_case.pick_moveset;
 
-import entities.battle.Move;
-import entities.Pokemon;
-import pokeapi.JSONLoader;
-
 import java.util.*;
+
+import entities.Pokemon;
+import entities.battle.Move;
+import pokeapi.JSONLoader;
 
 public class PickMovesetInteractor implements PickMovesetInputBoundary {
 
     private final PickMovesetOutputBoundary presenter;
-
+    private final int max = 4;
 
     public PickMovesetInteractor(PickMovesetOutputBoundary presenter) {
         this.presenter = presenter;
@@ -17,9 +17,9 @@ public class PickMovesetInteractor implements PickMovesetInputBoundary {
 
     @Override
     public void execute(PickMovesetInputData inputData) {
-        Map<Pokemon, List<Move>> outputMap = new HashMap<>();
+        final Map<Pokemon, List<Move>> outputMap = new HashMap<>();
         for (Pokemon p : inputData.getDeck().getPokemons()) {
-            List<Move> moves = new ArrayList<>();
+            final List<Move> moves = new ArrayList<>();
             for (String mvName : p.getMoves()) {
                 for (Move m : JSONLoader.getInstance().getAllMoves()) {
                     if (m.getName().equalsIgnoreCase(mvName)) {
@@ -32,7 +32,6 @@ public class PickMovesetInteractor implements PickMovesetInputBoundary {
         presenter.present(new PickMovesetOutputData(outputMap));
     }
 
-
     @Override
     public void saveMoves(Pokemon pokemon, List<Move> chosenMoves) {
         if (chosenMoves == null || chosenMoves.isEmpty()) {
@@ -40,7 +39,7 @@ public class PickMovesetInteractor implements PickMovesetInputBoundary {
             return;
         }
 
-        if (chosenMoves.size() > 4) {
+        if (chosenMoves.size() > max) {
             presenter.presentFailure("A Pokémon can only have up to 4 moves.");
             return;
         }

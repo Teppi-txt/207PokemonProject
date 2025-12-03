@@ -1,19 +1,23 @@
 package use_case.battle_ai;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 import entities.*;
 import entities.battle.*;
 import entities.user.User;
 import entities.user.UserPlayerAdapter;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 /**
  * Interactor for the Battle AI use case.
  * Handles battle setup, player moves, and player switches.
  */
 public class BattleAIInteractor implements BattleAIInputBoundary {
+
+    private static final int AI_TEAM_SIZE = 3;
+    private static final int LOSS_REWARD = 100;
+    private static final int WIN_REWARD = 500;
 
     private final BattleAIUserDataAccessInterface dataAccess;
     private final BattleAIOutputBoundary presenter;
@@ -28,22 +32,26 @@ public class BattleAIInteractor implements BattleAIInputBoundary {
     public void execute(BattleAIInputData inputData) {
         if (inputData.isSetupRequest()) {
             executeSetup(inputData);
-        } else if (inputData.isPlayerMoveRequest()) {
+        }
+        else if (inputData.isPlayerMoveRequest()) {
             executePlayerMove(inputData);
-        } else if (inputData.isPlayerSwitchRequest()) {
+        }
+        else if (inputData.isPlayerSwitchRequest()) {
             executePlayerSwitch(inputData);
-        } else {
+        }
+        else {
             presenter.prepareFailView("Invalid request");
         }
     }
 
     /**
      * Sets up a new battle with AI opponent.
+     * @param inputData the input data containing the user, team, and difficulty settings
      */
     private void executeSetup(BattleAIInputData inputData) {
-        User user = inputData.getUser();
-        List<Pokemon> playerTeam = inputData.getPlayerTeam();
-        String difficulty = inputData.getDifficulty();
+        final User user = inputData.getUser();
+        final List<Pokemon> playerTeam = inputData.getPlayerTeam();
+        final String difficulty = inputData.getDifficulty();
 
         if (user == null || playerTeam == null || playerTeam.isEmpty()) {
             presenter.prepareFailView("Invalid setup: user and team required");
@@ -54,7 +62,7 @@ public class BattleAIInteractor implements BattleAIInputBoundary {
         dataAccess.saveUser(user);
 
         // Create copies of player's Pokemon for battle (so damage doesn't affect originals)
-        List<Pokemon> battleTeam = new ArrayList<>();
+        final List<Pokemon> battleTeam = new ArrayList<>();
         for (Pokemon p : playerTeam) {
             battleTeam.add(p.copy());
         }
@@ -63,42 +71,43 @@ public class BattleAIInteractor implements BattleAIInputBoundary {
 
         // Create a battle-specific user copy with only the selected team
         // This avoids modifying the original user's owned Pokemon list
-        User battleUser = new User(user.getId(), user.getName(), user.getEmail(), user.getCurrency());
+        final User battleUser = new User(user.getId(), user.getName(), user.getEmail(), user.getCurrency());
         for (Pokemon p : battleTeam) {
             battleUser.addPokemon(p);
         }
 
         // Create AI player with generated team based on difficulty
-        String diff = difficulty != null ? difficulty : "medium";
-        AIPlayer aiPlayer = new AIPlayer("AI Trainer", diff);
-        List<Pokemon> aiTeam = generateAITeam(diff);
+        final String diff = difficulty != null ? difficulty : "medium";
+        final AIPlayer aiPlayer = new AIPlayer("AI Trainer", diff);
+        final List<Pokemon> aiTeam = generateAITeam(diff);
         aiPlayer.setTeam(aiTeam);
         aiPlayer.setActivePokemon(aiTeam.get(0));
         dataAccess.saveAIPlayer(aiPlayer);
 
         // Create AI user wrapper
-        User aiUser = new User(0, aiPlayer.getName(), "", 0);
+        final User aiUser = new User(0, aiPlayer.getName(), "", 0);
         for (Pokemon p : aiTeam) {
             aiUser.addPokemon(p);
         }
 
         // Create and start battle using the battle-specific user copy
-        Battle battle = new Battle(0, battleUser, aiUser);
+        final Battle battle = new Battle(0, battleUser, aiUser);
         battle.startBattle();
         dataAccess.saveBattle(battle);
 
         // Return success
-        BattleAIOutputData outputData = new BattleAIOutputData(
+        final BattleAIOutputData outputData = new BattleAIOutputData(
                 null, battle, "Battle started! Choose your move.", false);
         presenter.prepareSuccessView(outputData);
     }
 
     /**
      * Executes a player's move by index, then AI's turn.
+     * @param inputData  the input data containing the move index requested by the player
      */
     private void executePlayerMove(BattleAIInputData inputData) {
-        Battle battle = dataAccess.getBattle();
-        int moveIndex = inputData.getMoveIndex();
+        final Battle battle = dataAccess.getBattle();
+        final int moveIndex = inputData.getMoveIndex();
 
         // Validation
         if (battle == null) {
@@ -112,9 +121,9 @@ public class BattleAIInteractor implements BattleAIInputBoundary {
         }
 
         // Get current state
-        User currentUser = dataAccess.getUser();
-        AIPlayer aiPlayer = dataAccess.getAIPlayer();
-        Pokemon playerPokemon = dataAccess.getPlayerActivePokemon();
+        final User currentUser = dataAccess.getUser();
+        final AIPlayer aiPlayer = dataAccess.getAIPlayer();
+        final Pokemon playerPokemon = dataAccess.getPlayerActivePokemon();
 
         if (currentUser == null || aiPlayer == null || playerPokemon == null) {
             presenter.prepareFailView("Battle state not found");
@@ -122,26 +131,26 @@ public class BattleAIInteractor implements BattleAIInputBoundary {
         }
 
         // Get move by index
-        List<String> moveNames = playerPokemon.getMoves();
+        final List<String> moveNames = playerPokemon.getMoves();
         if (moveIndex < 0 || moveIndex >= moveNames.size()) {
             presenter.prepareFailView("Invalid move index");
             return;
         }
 
-        String moveName = moveNames.get(moveIndex);
+        final String moveName = moveNames.get(moveIndex);
         Move selectedMove = findMoveByName(moveName);
         if (selectedMove == null) {
             selectedMove = new Move().setName(moveName).setPower(40);
         }
 
         // Track AI's Pokemon before player's turn
-        Pokemon aiPokemonBefore = aiPlayer.getActivePokemon();
+        final Pokemon aiPokemonBefore = aiPlayer.getActivePokemon();
 
         // Create and execute player's turn
-        Player playerAdapter = new UserPlayerAdapter(currentUser);
-        MoveTurn playerTurn = new MoveTurn(1, playerAdapter, 1, selectedMove, aiPlayer);
+        final Player playerAdapter = new UserPlayerAdapter(currentUser);
+        final MoveTurn playerTurn = new MoveTurn(1, playerAdapter, 1, selectedMove, aiPlayer);
         playerTurn.executeTurn();
-        String playerResult = playerTurn.getResult();
+        final String playerResult = playerTurn.getResult();
 
         // Check if AI's Pokemon fainted and auto-switch
         Pokemon aiSwitchedTo = null;
@@ -156,8 +165,8 @@ public class BattleAIInteractor implements BattleAIInputBoundary {
         }
 
         // Check if battle ended after player's turn
-        User player1 = battle.getPlayer1();
-        User player2 = battle.getPlayer2();
+        final User player1 = battle.getPlayer1();
+        final User player2 = battle.getPlayer2();
         boolean battleEnded = false;
 
         if (!hasAvailablePokemon(player2)) {
@@ -165,28 +174,28 @@ public class BattleAIInteractor implements BattleAIInputBoundary {
             awardCurrency(player1, player2);
             battleEnded = true;
             dataAccess.saveBattle(battle);
-            BattleAIOutputData outputData = new BattleAIOutputData(playerTurn, battle, playerResult, true, null, aiSwitchedTo);
+            final BattleAIOutputData outputData = new BattleAIOutputData(playerTurn, battle, playerResult, true, null, aiSwitchedTo);
             presenter.prepareSuccessView(outputData);
             return;
         }
 
         // Execute AI's turn (AI always has a move available)
-        Move aiMove = aiPlayer.chooseMove(battle);
+        final Move aiMove = aiPlayer.chooseMove(battle);
         Pokemon playerSwitchedTo = null;
 
         // AI is always player2, player is always player1
-        Player targetPlayer = new UserPlayerAdapter(player1);
-        MoveTurn aiTurn = new MoveTurn(1, aiPlayer, 1, aiMove, targetPlayer);
+        final Player targetPlayer = new UserPlayerAdapter(player1);
+        final MoveTurn aiTurn = new MoveTurn(1, aiPlayer, 1, aiMove, targetPlayer);
         aiTurn.executeTurn();
-        String aiResult = aiTurn.getResult();
+        final String aiResult = aiTurn.getResult();
         aiPlayer.recordTurn(aiTurn);
 
         // Check if player's Pokemon fainted and auto-switch
-        Pokemon playerActivePokemon = dataAccess.getPlayerActivePokemon();
+        final Pokemon playerActivePokemon = dataAccess.getPlayerActivePokemon();
         if (playerActivePokemon.isFainted()) {
-            List<Pokemon> playerTeam = dataAccess.getPlayerTeam();
+            final List<Pokemon> playerTeam = dataAccess.getPlayerTeam();
             // Update battle user's list order for presenter
-            List<Pokemon> battleUserList = player1.getOwnedPokemon();
+            final List<Pokemon> battleUserList = player1.getOwnedPokemon();
             for (Pokemon p : playerTeam) {
                 if (!p.isFainted()) {
                     dataAccess.setPlayerActivePokemon(p);
@@ -217,7 +226,7 @@ public class BattleAIInteractor implements BattleAIInputBoundary {
             fullResult += "\n\nYou sent out " + playerSwitchedTo.getName().toUpperCase() + "!";
         }
 
-        BattleAIOutputData outputData = new BattleAIOutputData(playerTurn, battle, fullResult, battleEnded, playerSwitchedTo, aiSwitchedTo);
+        final BattleAIOutputData outputData = new BattleAIOutputData(playerTurn, battle, fullResult, battleEnded, playerSwitchedTo, aiSwitchedTo);
         presenter.prepareSuccessView(outputData);
     }
 
@@ -232,8 +241,8 @@ public class BattleAIInteractor implements BattleAIInputBoundary {
      * Executes a player's switch by Pokemon ID and then AI's turn.
      */
     private void executePlayerSwitch(BattleAIInputData inputData) {
-        Battle battle = dataAccess.getBattle();
-        int switchTargetId = inputData.getSwitchTargetId();
+        final Battle battle = dataAccess.getBattle();
+        final int switchTargetId = inputData.getSwitchTargetId();
 
         // Validation
         if (battle == null) {
@@ -247,7 +256,7 @@ public class BattleAIInteractor implements BattleAIInputBoundary {
         }
 
         // Find the Pokemon by ID in player's team
-        List<Pokemon> playerTeam = dataAccess.getPlayerTeam();
+        final List<Pokemon> playerTeam = dataAccess.getPlayerTeam();
         Pokemon switchTarget = null;
         for (Pokemon p : playerTeam) {
             if (p.getId() == switchTargetId) {
@@ -267,9 +276,9 @@ public class BattleAIInteractor implements BattleAIInputBoundary {
         }
 
         // Get current state
-        User currentUser = dataAccess.getUser();
-        AIPlayer aiPlayer = dataAccess.getAIPlayer();
-        Pokemon previousPokemon = dataAccess.getPlayerActivePokemon();
+        final User currentUser = dataAccess.getUser();
+        final AIPlayer aiPlayer = dataAccess.getAIPlayer();
+        final Pokemon previousPokemon = dataAccess.getPlayerActivePokemon();
 
         if (currentUser == null || aiPlayer == null) {
             presenter.prepareFailView("Battle state not found");
@@ -280,37 +289,37 @@ public class BattleAIInteractor implements BattleAIInputBoundary {
         dataAccess.setPlayerActivePokemon(switchTarget);
 
         // Move switched Pokemon to front of battle user's list (so presenter shows correct active)
-        User battleUser = battle.getPlayer1();
-        List<Pokemon> battleUserList = battleUser.getOwnedPokemon();
+        final User battleUser = battle.getPlayer1();
+        final List<Pokemon> battleUserList = battleUser.getOwnedPokemon();
         battleUserList.remove(switchTarget);
         battleUserList.add(0, switchTarget);
 
         // Create and execute switch turn
-        Player playerAdapter = new UserPlayerAdapter(currentUser);
-        SwitchTurn switchTurn = new SwitchTurn(1, playerAdapter, 1, previousPokemon, switchTarget);
+        final Player playerAdapter = new UserPlayerAdapter(currentUser);
+        final SwitchTurn switchTurn = new SwitchTurn(1, playerAdapter, 1, previousPokemon, switchTarget);
         switchTurn.executeTurn();
-        String switchResult = "You switched to " + switchTarget.getName() + "!";
+        final String switchResult = "You switched to " + switchTarget.getName() + "!";
 
         // Check if battle ended after switch
         if ("COMPLETED".equals(battle.getBattleStatus())) {
-            BattleAIOutputData outputData = new BattleAIOutputData(switchTurn, battle, switchResult, true);
+            final BattleAIOutputData outputData = new BattleAIOutputData(switchTurn, battle, switchResult, true);
             presenter.prepareSuccessView(outputData);
             return;
         }
 
         // Execute AI's turn (AI always has a move available)
-        Move aiMove = aiPlayer.chooseMove(battle);
+        final Move aiMove = aiPlayer.chooseMove(battle);
         // AI is always player2, player is always player1
-        User aiUser = battle.getPlayer2();
-        Player targetPlayer = new UserPlayerAdapter(battleUser);
-        MoveTurn aiTurn = new MoveTurn(1, aiPlayer, 1, aiMove, targetPlayer);
+        final User aiUser = battle.getPlayer2();
+        final Player targetPlayer = new UserPlayerAdapter(battleUser);
+        final MoveTurn aiTurn = new MoveTurn(1, aiPlayer, 1, aiMove, targetPlayer);
         aiTurn.executeTurn();
-        String aiResult = aiTurn.getResult();
+        final String aiResult = aiTurn.getResult();
         aiPlayer.recordTurn(aiTurn);
 
         // Check if player's Pokemon fainted and auto-switch
         Pokemon playerSwitchedTo = null;
-        Pokemon playerActivePokemon = dataAccess.getPlayerActivePokemon();
+        final Pokemon playerActivePokemon = dataAccess.getPlayerActivePokemon();
         if (playerActivePokemon.isFainted()) {
             for (Pokemon p : playerTeam) {
                 if (!p.isFainted()) {
@@ -329,7 +338,8 @@ public class BattleAIInteractor implements BattleAIInputBoundary {
             battle.endBattle(battleUser);
             awardCurrency(battleUser, aiUser);
             battleEnded = true;
-        } else if (!hasAvailablePokemon(battleUser)) {
+        }
+        else if (!hasAvailablePokemon(battleUser)) {
             battle.endBattle(aiUser);
             awardCurrency(aiUser, battleUser);
             battleEnded = true;
@@ -338,8 +348,9 @@ public class BattleAIInteractor implements BattleAIInputBoundary {
         dataAccess.saveBattle(battle);
 
         // Combine results
-        String fullResult = switchResult + "\n\nAI: " + aiResult;
-        BattleAIOutputData outputData = new BattleAIOutputData(aiTurn, battle, fullResult, battleEnded, playerSwitchedTo, null);
+        final String fullResult = switchResult + "\n\nAI: " + aiResult;
+        final BattleAIOutputData outputData = new
+                BattleAIOutputData(aiTurn, battle, fullResult, battleEnded, playerSwitchedTo, null);
         presenter.prepareSuccessView(outputData);
     }
 
@@ -347,10 +358,10 @@ public class BattleAIInteractor implements BattleAIInputBoundary {
      * Generates a random AI team of up to 3 Pokemon.
      */
     private List<Pokemon> generateAITeam(String difficulty) {
-        List<Pokemon> allPokemon = new ArrayList<>(dataAccess.getAllPokemon());
+        final List<Pokemon> allPokemon = new ArrayList<>(dataAccess.getAllPokemon());
         Collections.shuffle(allPokemon);
-        List<Pokemon> aiTeam = new ArrayList<>();
-        int limit = Math.min(3, allPokemon.size());
+        final List<Pokemon> aiTeam = new ArrayList<>();
+        final int limit = Math.min(AI_TEAM_SIZE, allPokemon.size());
         for (int i = 0; i < limit; i++) {
             aiTeam.add(allPokemon.get(i).copy());
         }
@@ -368,18 +379,18 @@ public class BattleAIInteractor implements BattleAIInputBoundary {
 
     private void awardCurrency(User winner, User loser) {
         // Get the original user (not the battle copy)
-        User originalUser = dataAccess.getUser();
+        final User originalUser = dataAccess.getUser();
 
         // Player is always player1, AI is always player2
         // Check if player won or lost by comparing with winner
-        boolean playerWon = winner.getId() == originalUser.getId();
+        final boolean playerWon = winner.getId() == originalUser.getId();
 
         if (playerWon) {
-            originalUser.addCurrency(500);
-        } else {
-            originalUser.addCurrency(100);
+            originalUser.addCurrency(WIN_REWARD);
         }
-
+        else {
+            originalUser.addCurrency(LOSS_REWARD);
+        }
         dataAccess.saveUser(originalUser);
     }
 }

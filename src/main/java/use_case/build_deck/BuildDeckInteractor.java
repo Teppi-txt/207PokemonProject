@@ -1,12 +1,12 @@
 package use_case.build_deck;
 
-import entities.battle.Deck;
-import entities.Pokemon;
-import entities.user.User;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import entities.Pokemon;
+import entities.battle.Deck;
+import entities.user.User;
 
 public class BuildDeckInteractor implements BuildDeckInputBoundary {
     private static final int DECK_LIMIT = 3;
@@ -28,11 +28,11 @@ public class BuildDeckInteractor implements BuildDeckInputBoundary {
             return null;
         }
 
-        List<Pokemon> result = new ArrayList<>();
+        final List<Pokemon> result = new ArrayList<>();
 
         for (Pokemon pokemon : input.getPokemon()) {
             // Ensures the user actually owns the Pokémon being added
-            Pokemon found = user.getPokemonById(pokemon.getID());
+            final Pokemon found = user.getPokemonById(pokemon.getID());
 
             if (found == null) {
                 presenter.prepareFailView("You do not own the Pokémon " + pokemon.getName());
@@ -55,17 +55,18 @@ public class BuildDeckInteractor implements BuildDeckInputBoundary {
             }
             dataAccess.deleteDeck(inputData.getDeckId());
             // after deleting, load all decks and create a fresh empty deck
-            List<Deck> allDecks = dataAccess.getDecks();
-            Deck newEmptyDeck;
+            final List<Deck> allDecks = dataAccess.getDecks();
+            final Deck newEmptyDeck;
             if (allDecks.isEmpty()) {
                 // no decks left, return a brand new empty deck
-                int id = dataAccess.getNextDeckId();
+                final int id = dataAccess.getNextDeckId();
                 newEmptyDeck = new Deck(id, "New Deck");
                 dataAccess.saveDeck(newEmptyDeck);
                 allDecks.add(newEmptyDeck);
-            } else {
+            }
+            else {
                 // load the first remaining deck
-                Deck first = allDecks.get(0);
+                final Deck first = allDecks.get(0);
                 newEmptyDeck = new Deck(first);
             }
             presenter.prepareSuccessView(
@@ -74,48 +75,62 @@ public class BuildDeckInteractor implements BuildDeckInputBoundary {
             return;
         }
 
-        User user = dataAccess.getUser();
+        final User user = dataAccess.getUser();
         if (user == null) {
             presenter.prepareFailView("User not found.");
             return;
         }
 
-        Deck deck;
-        boolean isNewDeck = (inputData.getDeckId() == -1);
+        final Deck deck;
+        final boolean isNewDeck = (inputData.getDeckId() == -1);
         if (isNewDeck) {
             // Case 1: new Deck
-            int deckId = dataAccess.getNextDeckId(); // Correctly gets a new ID
-            String name = (inputData.getDeckName() == null || inputData.getDeckName().isEmpty())
+            final int deckId = dataAccess.getNextDeckId();
+            // Correctly gets a new ID
+            final String name = (inputData.getDeckName() == null || inputData.getDeckName().isEmpty())
                     ? ("Team " + deckId) : inputData.getDeckName();
-            deck = new Deck(deckId, name); // Uses the new ID
-            dataAccess.saveDeck(deck); // Ensure the new deck appears in the deck list
-        } else {
+            deck = new Deck(deckId, name);
+            // Uses the new ID
+            dataAccess.saveDeck(deck);
+            // Ensure the new deck appears in the deck list
+        }
+        else {
             // Case 2: load and/or edit existing Deck
-            Deck sourceDeck = dataAccess.getDeckById(inputData.getDeckId());
+            final Deck sourceDeck = dataAccess.getDeckById(inputData.getDeckId());
             if (sourceDeck == null) {
                 presenter.prepareFailView("Deck with ID " + inputData.getDeckId() + " not found.");
                 return;
             }
             // create a copy of the deck
             deck = new Deck(sourceDeck);
-            // always update the name from inputData (even when just loading, as the name might have been changed in the view)
+            // always update the name from inputData
+            // (even when just loading, as the name might have been changed in the view)
             if (inputData.getDeckName() != null) {
-                deck.setName(inputData.getDeckName()); // update the name on the copy
+                deck.setName(inputData.getDeckName());
+                // update the name on the copy
             }
         }
         // handling random team generation or explicit list saving
         List<Pokemon> newPokemons = null;
-        boolean shouldSave = false; // flag to track if we need to save/persist changes
+        boolean shouldSave = false;
+        // flag to track if we need to save/persist changes
 
         if (inputData.isRandom()) {
             newPokemons = generateRandomDeck(user);
-            shouldSave = true; // randomizing requires a save
-        } else if (inputData.getPokemon() != null) {
+            shouldSave = true;
+            // randomizing requires a save
+        }
+        else if (inputData.getPokemon() != null) {
             // user explicitly provided a list (This happens on the 'Save Deck' button click)
             newPokemons = validateAndFetchSelectedPokemons(inputData, user);
-            if (newPokemons == null) return; // validation failed
-            shouldSave = true; // explicit list requires a save
-        } else {
+            if (newPokemons == null) {
+                return;
+            }
+            // validation failed
+            shouldSave = true;
+            // explicit list requires a save
+        }
+        else {
             // Case: pure load (inputData.getPokemon() == null AND isRandom() == false)
             // The 'deck' object (which is a copy of the persistent state) already holds the correct Pokémon.
         }
@@ -134,10 +149,10 @@ public class BuildDeckInteractor implements BuildDeckInputBoundary {
     }
 
     private List<Pokemon> generateRandomDeck(User user) {
-        List<Pokemon> owned = new ArrayList<>(user.getOwnedPokemon());
+        final List<Pokemon> owned = new ArrayList<>(user.getOwnedPokemon());
         Collections.shuffle(owned);
 
-        int size = Math.min(DECK_LIMIT, owned.size());
+        final int size = Math.min(DECK_LIMIT, owned.size());
         return owned.subList(0, size);
     }
 }

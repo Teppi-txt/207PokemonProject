@@ -1,7 +1,7 @@
 package use_case.battle_ai;
 
-import entities.battle.Battle;
 import entities.Pokemon;
+import entities.battle.Battle;
 import entities.battle.Turn;
 
 /**
@@ -9,12 +9,12 @@ import entities.battle.Turn;
  */
 public class BattleAIOutputData {
 
-    private final Turn executedTurn;
-    private final Battle battle;
-    private final String turnResult;
-    private final boolean battleEnded;
-    private final Pokemon playerSwitchedTo;
     private final Pokemon aiSwitchedTo;
+    private final Battle battle;
+    private final boolean battleEnded;
+    private final Turn executedTurn;
+    private final Pokemon playerSwitchedTo;
+    private final String turnResult;
 
     public BattleAIOutputData(Turn executedTurn, Battle battle, String turnResult, boolean battleEnded) {
         this(executedTurn, battle, turnResult, battleEnded, null, null);

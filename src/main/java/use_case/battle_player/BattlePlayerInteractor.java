@@ -1,14 +1,16 @@
 package use_case.battle_player;
 
-import entities.battle.Battle;
 import entities.Pokemon;
-import entities.user.User;
+import entities.battle.Battle;
 import entities.battle.Turn;
+import entities.user.User;
 
 // interactor implementing the battle player use case
 
 public class BattlePlayerInteractor implements BattlePlayerInputBoundary {
 
+    private static final int LOSS_REWARD = 100;
+    private static final int WIN_REWARD = 500;
     private final BattlePlayerUserDataAccessInterface battleDataAccess;
     private final BattlePlayerOutputBoundary battlePlayerPresenter;
 
@@ -42,29 +44,31 @@ public class BattlePlayerInteractor implements BattlePlayerInputBoundary {
             return;
         }
 
-        //executes the turn
+        // executes the turn
         turn.executeTurn();
-        String turnResult = turn.getResult();
+        final String turnResult = turn.getResult();
 
         boolean battleEnded = false;
         User winner = null;
 
-        //creates two Users to represent the two players
-        User player1 = battle.getPlayer1();
-        User player2 = battle.getPlayer2();
+        // creates two Users to represent the two players
+        final User player1 = battle.getPlayer1();
+        final User player2 = battle.getPlayer2();
 
-        boolean player1HasPokemon = hasAvailablePokemon(player1);
-        boolean player2HasPokemon = hasAvailablePokemon(player2);
-
+        final boolean player1HasPokemon = hasAvailablePokemon(player1);
+        final boolean player2HasPokemon = hasAvailablePokemon(player2);
 
         // checks if either player has no available pokemon left
         if (!player1HasPokemon && !player2HasPokemon) {
             battleEnded = true;
-            winner = null; // draw
-        } else if (!player1HasPokemon) {
+            winner = null;
+            // draw
+        }
+        else if (!player1HasPokemon) {
             battleEnded = true;
             winner = player2;
-        } else if (!player2HasPokemon) {
+        }
+        else if (!player2HasPokemon) {
             battleEnded = true;
             winner = player1;
         }
@@ -73,11 +77,11 @@ public class BattlePlayerInteractor implements BattlePlayerInputBoundary {
         if (battleEnded) {
             battle.endBattle(winner);
             if (winner != null) {
-                winner.addCurrency(500);
+                winner.addCurrency(WIN_REWARD);
                 battleDataAccess.saveUser(winner);
 
-                User loser = battle.getPlayer1().equals(winner) ? battle.getPlayer2() : battle.getPlayer1();
-                loser.addCurrency(100);
+                final User loser = battle.getPlayer1().equals(winner) ? battle.getPlayer2() : battle.getPlayer1();
+                loser.addCurrency(LOSS_REWARD);
                 battleDataAccess.saveUser(loser);
             }
         }
@@ -85,7 +89,7 @@ public class BattlePlayerInteractor implements BattlePlayerInputBoundary {
         battleDataAccess.saveBattle(battle);
 
         // prepares the output data
-        BattlePlayerOutputData outputData = new BattlePlayerOutputData(
+        final BattlePlayerOutputData outputData = new BattlePlayerOutputData(
                 turn,
                 battle,
                 turnResult,

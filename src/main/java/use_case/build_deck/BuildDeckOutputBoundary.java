@@ -6,14 +6,14 @@ package use_case.build_deck;
 
 public interface BuildDeckOutputBoundary {
     /**
-     * Prepares the success view for the Build Deck Use Case
-     * @param outputData the output data
+     * Prepares the success view for the Build Deck Use Case.
+     * @param outputData the output data.
      */
     void prepareSuccessView(BuildDeckOutputData outputData);
 
     /**
-     * Prepares the failure view for the Build Deck Use Case
-     * @param errorMessage the explanation of the failure
+     * Prepares the failure view for the Build Deck Use Case.
+     * @param errorMessage the explanation of the failure.
      */
     void prepareFailView(String errorMessage);
 }
