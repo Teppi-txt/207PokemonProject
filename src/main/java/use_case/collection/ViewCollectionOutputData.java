@@ -1,9 +1,8 @@
 package use_case.collection;
 
-import entities.Pokemon;
-
-import java.util.ArrayList;
 import java.util.List;
+
+import entities.Pokemon;
 
 public class ViewCollectionOutputData {
 
@@ -12,7 +11,8 @@ public class ViewCollectionOutputData {
     private List<Pokemon> ownedPokemon;
     private boolean hasNextPage;
 
-    public ViewCollectionOutputData() {}
+    public ViewCollectionOutputData() {
+    }
 
     public ViewCollectionOutputData(List<Pokemon> pokemonOnPage, Pokemon selectedPokemon, List<Pokemon> ownedPokemon) {
         this.pokemonOnPage = pokemonOnPage;

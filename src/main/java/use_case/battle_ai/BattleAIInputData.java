@@ -1,9 +1,9 @@
 package use_case.battle_ai;
 
+import java.util.List;
+
 import entities.Pokemon;
 import entities.user.User;
-
-import java.util.List;
 
 /**
  * Input data for the Battle AI use case.
@@ -27,6 +27,9 @@ public class BattleAIInputData {
 
     /**
      * Constructor for setting up a new battle.
+     * @param user the user initiating the battle
+     * @param playerTeam the team of Pokemon selected by the player
+     * @param difficulty the difficulty level for the AI opponent
      */
     public BattleAIInputData(User user, List<Pokemon> playerTeam, String difficulty) {
         this.user = user;
@@ -38,6 +41,8 @@ public class BattleAIInputData {
 
     /**
      * Private constructor for player switching Pokemon by ID.
+     * @param switchTargetId the target Pokemon ID to switch to
+     * @param isSwitch flag indicating this constructor is for a switch request
      */
     private BattleAIInputData(int switchTargetId, boolean isSwitch) {
         this.user = null;
@@ -49,6 +54,7 @@ public class BattleAIInputData {
 
     /**
      * Constructor for player using a move by index.
+     * @param moveIndex the index of the move selected by the player
      */
     public BattleAIInputData(int moveIndex) {
         this.user = null;
@@ -60,6 +66,8 @@ public class BattleAIInputData {
 
     /**
      * Factory method to create input data for switching by Pokemon ID.
+     * @param pokemonId the ID of the Pokemon the player wants to switch to
+     * @return a new BattleAiInputData instance representing a switch request
      */
     public static BattleAIInputData forSwitchById(int pokemonId) {
         return new BattleAIInputData(pokemonId, true);
@@ -87,6 +95,7 @@ public class BattleAIInputData {
 
     /**
      * Returns true if this is a setup request.
+     * @return true if this is a setup request, false otherwise
      */
     public boolean isSetupRequest() {
         return user != null && playerTeam != null;
@@ -94,6 +103,7 @@ public class BattleAIInputData {
 
     /**
      * Returns true if this is a player move request.
+     * @return true if the request is for executing a move, false otherwise
      */
     public boolean isPlayerMoveRequest() {
         return moveIndex >= 0;
@@ -101,6 +111,7 @@ public class BattleAIInputData {
 
     /**
      * Returns true if this is a player switch request (by ID).
+     * @return true if the request is for switching Pokemon, false otherwise
      */
     public boolean isPlayerSwitchRequest() {
         return switchTargetId >= 0;

@@ -1,7 +1,9 @@
 package use_case.build_deck;
+
+import java.util.List;
+
 import entities.battle.Deck;
 import entities.user.User;
-import java.util.List;
 
 public interface BuildDeckUserDataAccessInterface {
     /**
@@ -11,11 +13,10 @@ public interface BuildDeckUserDataAccessInterface {
     void saveDeck(Deck deck);
 
     /**
-     * deletes the deck.
+     * Deletes the deck.
      * @param deckId the deck to delete
      */
     void deleteDeck(int deckId);
-
 
     /**
      * Gets all decks for the user.
@@ -35,8 +36,15 @@ public interface BuildDeckUserDataAccessInterface {
      */
     User getUser();
 
+    /**
+     * Saves the current user state.
+     */
     void saveUser();
 
+    /**
+     * Generates and returns the next available deck ID.
+     * @return the next unique deck ID
+     */
     int getNextDeckId();
 
     /**

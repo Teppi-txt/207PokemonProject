@@ -10,7 +10,8 @@ public class BattlePlayerOutputData {
     private final boolean battleEnded;
     private final String battleStatus;
 
-    public BattlePlayerOutputData(Turn turn, Battle battle, String turnResult, boolean battleEnded, String battleStatus) {
+    public BattlePlayerOutputData(
+            Turn turn, Battle battle, String turnResult, boolean battleEnded, String battleStatus) {
         this.turn = turn;
         this.battle = battle;
         this.turnResult = turnResult;
