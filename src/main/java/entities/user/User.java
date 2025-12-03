@@ -10,6 +10,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Entity representing one user of the pokemon app.
+ */
+
 public class User implements Serializable {
     private static final long serialVersionUID = 1L;
 

@@ -12,7 +12,7 @@ public class Main {
     public static void main(String[] args) {
         // Set up Swing look and feel
         try {
-            // UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (Exception e) {
             // Use default look and feel
         }

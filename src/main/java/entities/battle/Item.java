@@ -2,6 +2,10 @@ package entities.battle;
 
 import java.io.Serializable;
 
+/**
+ * Entity representing a static Item in the game
+ */
+
 public class Item implements Serializable {
     private static final long serialVersionUID = 1L;
     private String name;

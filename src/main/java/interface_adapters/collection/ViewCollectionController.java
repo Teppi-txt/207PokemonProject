@@ -6,6 +6,10 @@ import use_case.collection.ViewCollectionInputData;
 
 import java.util.List;
 
+/**
+ * Class responsible for feeding input data to the Collection interactor
+ */
+
 public class ViewCollectionController {
     private final ViewCollectionInputBoundary interactor;
 

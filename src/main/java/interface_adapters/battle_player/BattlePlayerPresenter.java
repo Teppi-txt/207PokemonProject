@@ -3,6 +3,10 @@ package interface_adapters.battle_player;
 import use_case.battle_player.BattlePlayerOutputBoundary;
 import use_case.battle_player.BattlePlayerOutputData;
 
+/**
+ * the presenter for the Battle Player use case
+ */
+
 public class BattlePlayerPresenter implements BattlePlayerOutputBoundary {
     private final BattlePlayerViewModel viewModel;
 

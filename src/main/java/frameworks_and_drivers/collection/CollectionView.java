@@ -18,6 +18,10 @@ import java.util.List;
 import javax.swing.*;
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * Class representing a JPanel displaying the Pokemon Collection GUI
+ */
+
 public class CollectionView extends JPanel implements PropertyChangeListener {
     private final PokemonInfoPanel pokemonInfoPanel;
     private final PokemonCollectionPanel pokemonCollectionPanel;

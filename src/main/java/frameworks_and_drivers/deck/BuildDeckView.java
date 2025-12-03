@@ -21,6 +21,10 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * View for the build deck use case
+ */
+
 public class BuildDeckView extends JPanel implements PropertyChangeListener {
     private final BuildDeckViewModel viewModel;
     private BuildDeckController controller;

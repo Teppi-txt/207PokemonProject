@@ -4,6 +4,10 @@ import view.ViewManager;
 import use_case.open_pack.OpenPackOutputBoundary;
 import use_case.open_pack.OpenPackOutputData;
 
+/**
+ * The presenter for the open pack use case
+ */
+
 public class OpenPackPresenter implements OpenPackOutputBoundary {
     private final OpenPackViewModel viewModel;
     private final ViewManager viewManager;

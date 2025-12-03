@@ -2,6 +2,10 @@ package interface_adapters.open_pack;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 
+/**
+ * View Model for the open pack use case
+ */
+
 public class OpenPackViewModel {
 
     private final PropertyChangeSupport support = new PropertyChangeSupport(this);

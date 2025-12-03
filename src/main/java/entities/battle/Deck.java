@@ -7,6 +7,10 @@ import org.json.JSONObject;
 import java.io.Serializable;
 import java.util.ArrayList;
 
+/**
+ * Entity representing a deck owned by a user
+ */
+
 public class Deck implements Serializable {
     private static final long serialVersionUID = 1L;
     public static final int DECK_LIMIT = 3; //idk tbh we can change as needed

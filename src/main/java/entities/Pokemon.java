@@ -8,6 +8,10 @@ import pokeapi.JSONUtility;
 
 import java.util.ArrayList;
 
+/**
+ * Pokemon entity for the project
+ */
+
 public class Pokemon implements Serializable {
     private static final long serialVersionUID = 1L;
     private String name;    // private so no other classes can modify/access
