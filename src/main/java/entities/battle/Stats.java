@@ -13,7 +13,8 @@ import java.util.Map;
 public class Stats implements Serializable {
     private static final long serialVersionUID = 1L;
     private int hp;
-    private int maxHp; // Track max HP for reset after battles
+    private int maxHp;
+    // Track max HP for reset after battles
     private int attack;
     private int defense;
     private int spAttack;
@@ -55,7 +56,7 @@ public class Stats implements Serializable {
     }
 
     public static Stats fromJSON(JSONObject stats) {
-        Stats statsObj = new Stats();
+        final Stats statsObj = new Stats();
         statsObj.hp = stats.getInt("hp");
         statsObj.maxHp = stats.getInt("hp"); // Track max HP
         statsObj.attack = stats.getInt("attack");
@@ -79,28 +80,57 @@ public class Stats implements Serializable {
         return statMap;
     }
 
-    public int getHp() { return hp; }
-    public void setHp(int hp) { this.hp = hp; }
+    public int getHp() {
+        return hp;
+    }
 
-    public int getAttack() { return attack; }
-    public void setAttack(int attack) { this.attack = attack; }
+    public void setHp(int hp) {
+        this.hp = hp;
+    }
 
-    public int getDefense() { return defense; }
-    public void setDefense(int defense) { this.defense = defense; }
+    public int getAttack() {
+        return attack;
+    }
 
-    public int getSpAttack() { return spAttack; }
-    public void setSpAttack(int spAttack) { this.spAttack = spAttack; }
+    public void setAttack(int attack) {
+        this.attack = attack;
+    }
 
-    public int getSpDefense() { return spDefense; }
-    public void setSpDefense(int spDefense) { this.spDefense = spDefense; }
+    public int getDefense() {
+        return defense;
+    }
 
-    public int getSpeed() { return speed; }
-    public void setSpeed(int speed) { this.speed = speed; }
+    public void setDefense(int defense) {
+        this.defense = defense;
+    }
+
+    public int getSpAttack() {
+        return spAttack;
+    }
+
+    public void setSpAttack(int spAttack) {
+        this.spAttack = spAttack;
+    }
+
+    public int getSpDefense() {
+        return spDefense;
+    }
+
+    public void setSpDefense(int spDefense) {
+        this.spDefense = spDefense;
+    }
+
+    public int getSpeed() {
+        return speed;
+    }
+
+    public void setSpeed(int speed) {
+        this.speed = speed;
+    }
 
     public double getMultiplier(int level) {
         return STAT_LEVEL.get(level);
     }
-
 
     public Stats copy() {
         Stats copied = new Stats(hp, attack, defense, spAttack, spDefense, speed);
@@ -211,7 +241,8 @@ public class Stats implements Serializable {
     }
 
     public String toJSONString() {
-        return String.format("{\"hp\": %d, \"attack\": %d, \"defense\": %d, \"sp_attack\": %d, \"sp_defense\": %d, \"speed\": %d}",
+        return
+                String.format("{\"hp\": %d, \"attack\": %d, \"defense\": %d, \"sp_attack\": %d, \"sp_defense\": %d, \"speed\": %d}",
                 hp, attack, defense, spAttack, spDefense, speed);
     }
 

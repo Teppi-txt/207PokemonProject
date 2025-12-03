@@ -1,8 +1,8 @@
 package entities.battle;
 
-import entities.user.User;
-
 import java.io.Serializable;
+
+import entities.user.User;
 
 /**
  * Entity representing a battle in the pokemon game.
@@ -24,7 +24,7 @@ public class Battle implements Serializable {
         this.winner = null;
     }
 
-    public void startBattle(){
+    public void startBattle() {
         if ("IN_PROGRESS".equals(status) || "COMPLETED".equals(status)) {
             return;
         }
@@ -32,16 +32,16 @@ public class Battle implements Serializable {
         this.winner = null;
     }
 
-    public void endBattle(User winner){
+    public void endBattle(User winner) {
         this.winner = winner;
         this.status = "COMPLETED";
     }
 
-    public String getBattleStatus(){
+    public String getBattleStatus() {
         return this.status;
     }
 
-    //added the getters and setters for the battle
+    // added the getters and setters for the battle
 
     public User getPlayer1() {
         return player1;

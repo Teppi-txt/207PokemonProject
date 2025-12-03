@@ -14,7 +14,6 @@ import entities.user.UserPlayerAdapter;
  * Handles battle setup, player moves, and player switches.
  */
 public class BattleAIInteractor implements BattleAIInputBoundary {
-
     private static final int AI_TEAM_SIZE = 3;
     private static final int LOSS_REWARD = 100;
     private static final int WIN_REWARD = 500;

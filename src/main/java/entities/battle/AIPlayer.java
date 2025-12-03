@@ -1,14 +1,14 @@
 package entities.battle;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+
 import ai.graph.BattleDecisionState;
 import ai.graph.Decision;
 import ai.graph.DecisionGraph;
 import entities.*;
 import entities.user.User;
-
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
 
 public class AIPlayer implements Player, Serializable {
     private static final long serialVersionUID = 1L;
@@ -65,22 +65,23 @@ public class AIPlayer implements Player, Serializable {
         }
 
         // Get opponent player
-        Player opponent = getOpponent(battle);
+        final Player opponent = getOpponent(battle);
 
         // Create initial state
-        BattleDecisionState initialState = new BattleDecisionState(
+        final BattleDecisionState initialState = new BattleDecisionState(
             battle, this, opponent, battleHistory, difficulty
         );
 
         try {
             // Execute decision graph using LangGraph4j
-            Decision decision = decisionGraph.execute(initialState);
+            final Decision decision = decisionGraph.execute(initialState);
 
             // Extract and return the move
             if (decision != null && decision.isMove()) {
                 return decision.getSelectedMove();
             }
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             System.err.println("Error executing decision graph: " + e.getMessage());
             e.printStackTrace();
         }
@@ -314,10 +315,10 @@ public class AIPlayer implements Player, Serializable {
         }
 
         // Get opponent player
-        Player opponent = getOpponent(battle);
+        final Player opponent = getOpponent(battle);
 
         // Create initial state
-        BattleDecisionState initialState = new BattleDecisionState(
+        final BattleDecisionState initialState = new BattleDecisionState(
             battle, this, opponent, battleHistory, difficulty
         );
 
@@ -326,13 +327,14 @@ public class AIPlayer implements Player, Serializable {
 
         try {
             // Execute decision graph using LangGraph4j
-            Decision decision = decisionGraph.execute(initialState);
+            final Decision decision = decisionGraph.execute(initialState);
 
             // Extract and return the Pokemon to switch to
             if (decision != null && decision.isSwitch()) {
                 return decision.getSwitchTarget();
             }
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             System.err.println("Error executing decision graph for switch: " + e.getMessage());
             e.printStackTrace();
         }
@@ -374,7 +376,7 @@ public class AIPlayer implements Player, Serializable {
     }
 
     private static Deck createDefaultDeck(String ownerName) {
-        String deckName = (ownerName == null || ownerName.isEmpty()) ? "AI Deck" : ownerName + " Deck";
+        final String deckName = (ownerName == null || ownerName.isEmpty()) ? "AI Deck" : ownerName + " Deck";
         return new Deck(DEFAULT_DECK_ID, deckName);
     }
 }

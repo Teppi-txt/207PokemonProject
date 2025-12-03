@@ -1,14 +1,14 @@
 package entities.battle;
 
-import entities.Pokemon;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
+import entities.Pokemon;
+
 /**
- * Calculates damage using the Generation I Pokemon damage formula:
- * Damage = ((((2 × Level × Critical / 5) + 2) × Power × A/D) / 50 + 2) × STAB × Type1 × Type2 × random
+ * Calculates damage using the Generation I Pokemon damage formula:.
+ * Damage = ((((2 × Level × Critical / 5) + 2) × Power × A/D) / 50 + 2) × STAB × Type1 × Type2 × random.
  */
 public class DamageCalculator {
 
@@ -28,16 +28,19 @@ public class DamageCalculator {
      */
     public static int calculateDamage(Pokemon attacker, Pokemon defender, Move move) {
         if (move == null || move.getPower() == null || move.getPower() <= 0) {
-            return 0; // Status moves or null power deal no damage
+            return 0;
+            // Status moves or null power deal no damage
         }
 
         if ("status".equalsIgnoreCase(move.getDamageClass())) {
-            return 0; // Status moves deal no damage
+            return 0;
+            // Status moves deal no damage
         }
 
-        int power = move.getPower();
-        int level = DEFAULT_LEVEL;
-        int critical = 1; // No critical hits for simplicity
+        final int power = move.getPower();
+        final int level = DEFAULT_LEVEL;
+        final int critical = 1;
+        // No critical hits for simplicity
 
         // Get attack and defense stats based on damage class
         int attackStat;
@@ -46,30 +49,36 @@ public class DamageCalculator {
         if ("special".equalsIgnoreCase(move.getDamageClass())) {
             attackStat = attacker.getStats().getSpAttack();
             defenseStat = defender.getStats().getSpDefense();
-        } else {
+        }
+        else {
             // Physical or unknown defaults to physical
             attackStat = attacker.getStats().getAttack();
             defenseStat = defender.getStats().getDefense();
         }
 
         // Prevent division by zero
-        if (defenseStat <= 0) defenseStat = 1;
-        if (attackStat <= 0) attackStat = 1;
+        if (defenseStat <= 0) {
+            defenseStat = 1;
+        }
+
+        if (attackStat <= 0) {
+            attackStat = 1;
+        }
 
         // Calculate base damage using Gen I formula
-        double baseDamage = (((2.0 * level * critical / 5.0) + 2.0) * power * attackStat / defenseStat) / 50.0 + 2.0;
+        final double baseDamage = (((2.0 * level * critical / 5.0) + 2.0) * power * attackStat / defenseStat) / 50.0 + 2.0;
 
         // Apply STAB (Same Type Attack Bonus)
-        double stab = calculateSTAB(attacker, move);
+        final double stab = calculateSTAB(attacker, move);
 
         // Apply type effectiveness
-        double typeEffectiveness = calculateTypeEffectiveness(move, defender);
+        final double typeEffectiveness = calculateTypeEffectiveness(move, defender);
 
         // Apply random factor (0.85 to 1.0)
-        double randomFactor = 0.85 + (random.nextDouble() * 0.15);
+        final double randomFactor = 0.85 + (random.nextDouble() * 0.15);
 
         // Calculate final damage
-        double finalDamage = baseDamage * stab * typeEffectiveness * randomFactor;
+        final double finalDamage = baseDamage * stab * typeEffectiveness * randomFactor;
 
         // Minimum 1 damage if move has power
         return Math.max(1, (int) Math.floor(finalDamage));
@@ -84,7 +93,7 @@ public class DamageCalculator {
             return 1.0;
         }
 
-        String moveType = move.getType().toLowerCase();
+        final String moveType = move.getType().toLowerCase();
         for (String pokemonType : attacker.getTypes()) {
             if (pokemonType != null && pokemonType.toLowerCase().equals(moveType)) {
                 return 1.5;
@@ -102,7 +111,7 @@ public class DamageCalculator {
             return 1.0;
         }
 
-        String moveType = move.getType().toLowerCase();
+        final String moveType = move.getType().toLowerCase();
         double multiplier = 1.0;
 
         for (String defenderType : defender.getTypes()) {
@@ -118,7 +127,7 @@ public class DamageCalculator {
      * Get the effectiveness multiplier for an attack type vs a defender type.
      */
     private static double getTypeMultiplier(String attackType, String defenderType) {
-        Map<String, Double> attackEffectiveness = TYPE_CHART.get(attackType);
+        final Map<String, Double> attackEffectiveness = TYPE_CHART.get(attackType);
         if (attackEffectiveness != null && attackEffectiveness.containsKey(defenderType)) {
             return attackEffectiveness.get(defenderType);
         }
@@ -129,14 +138,17 @@ public class DamageCalculator {
      * Get effectiveness description for display.
      */
     public static String getEffectivenessDescription(Move move, Pokemon defender) {
-        double effectiveness = calculateTypeEffectiveness(move, defender);
+        final double effectiveness = calculateTypeEffectiveness(move, defender);
         if (effectiveness >= 2.0) {
             return "super effective";
-        } else if (effectiveness > 1.0) {
+        }
+        else if (effectiveness > 1.0) {
             return "effective";
-        } else if (effectiveness == 0) {
+        }
+        else if (effectiveness == 0) {
             return "no effect";
-        } else if (effectiveness < 1.0) {
+        }
+        else if (effectiveness < 1.0) {
             return "not very effective";
         }
         return "normal";
@@ -147,17 +159,17 @@ public class DamageCalculator {
      * 2.0 = super effective, 0.5 = not very effective, 0 = no effect
      */
     private static Map<String, Map<String, Double>> buildTypeChart() {
-        Map<String, Map<String, Double>> chart = new HashMap<>();
+        final Map<String, Map<String, Double>> chart = new HashMap<>();
 
         // Normal type
-        Map<String, Double> normal = new HashMap<>();
+        final Map<String, Double> normal = new HashMap<>();
         normal.put("rock", 0.5);
         normal.put("ghost", 0.0);
         normal.put("steel", 0.5);
         chart.put("normal", normal);
 
         // Fire type
-        Map<String, Double> fire = new HashMap<>();
+        final Map<String, Double> fire = new HashMap<>();
         fire.put("fire", 0.5);
         fire.put("water", 0.5);
         fire.put("grass", 2.0);
@@ -169,7 +181,7 @@ public class DamageCalculator {
         chart.put("fire", fire);
 
         // Water type
-        Map<String, Double> water = new HashMap<>();
+        final Map<String, Double> water = new HashMap<>();
         water.put("fire", 2.0);
         water.put("water", 0.5);
         water.put("grass", 0.5);
@@ -179,7 +191,7 @@ public class DamageCalculator {
         chart.put("water", water);
 
         // Electric type
-        Map<String, Double> electric = new HashMap<>();
+        final Map<String, Double> electric = new HashMap<>();
         electric.put("water", 2.0);
         electric.put("electric", 0.5);
         electric.put("grass", 0.5);
@@ -189,7 +201,7 @@ public class DamageCalculator {
         chart.put("electric", electric);
 
         // Grass type
-        Map<String, Double> grass = new HashMap<>();
+        final Map<String, Double> grass = new HashMap<>();
         grass.put("fire", 0.5);
         grass.put("water", 2.0);
         grass.put("grass", 0.5);
@@ -203,7 +215,7 @@ public class DamageCalculator {
         chart.put("grass", grass);
 
         // Ice type
-        Map<String, Double> ice = new HashMap<>();
+        final Map<String, Double> ice = new HashMap<>();
         ice.put("fire", 0.5);
         ice.put("water", 0.5);
         ice.put("grass", 2.0);
@@ -215,7 +227,7 @@ public class DamageCalculator {
         chart.put("ice", ice);
 
         // Fighting type
-        Map<String, Double> fighting = new HashMap<>();
+        final Map<String, Double> fighting = new HashMap<>();
         fighting.put("normal", 2.0);
         fighting.put("ice", 2.0);
         fighting.put("poison", 0.5);
@@ -230,7 +242,7 @@ public class DamageCalculator {
         chart.put("fighting", fighting);
 
         // Poison type
-        Map<String, Double> poison = new HashMap<>();
+        final Map<String, Double> poison = new HashMap<>();
         poison.put("grass", 2.0);
         poison.put("poison", 0.5);
         poison.put("ground", 0.5);
@@ -241,7 +253,7 @@ public class DamageCalculator {
         chart.put("poison", poison);
 
         // Ground type
-        Map<String, Double> ground = new HashMap<>();
+        final Map<String, Double> ground = new HashMap<>();
         ground.put("fire", 2.0);
         ground.put("electric", 2.0);
         ground.put("grass", 0.5);
@@ -253,7 +265,7 @@ public class DamageCalculator {
         chart.put("ground", ground);
 
         // Flying type
-        Map<String, Double> flying = new HashMap<>();
+        final Map<String, Double> flying = new HashMap<>();
         flying.put("electric", 0.5);
         flying.put("grass", 2.0);
         flying.put("fighting", 2.0);
@@ -263,7 +275,7 @@ public class DamageCalculator {
         chart.put("flying", flying);
 
         // Psychic type
-        Map<String, Double> psychic = new HashMap<>();
+        final Map<String, Double> psychic = new HashMap<>();
         psychic.put("fighting", 2.0);
         psychic.put("poison", 2.0);
         psychic.put("psychic", 0.5);
@@ -272,7 +284,7 @@ public class DamageCalculator {
         chart.put("psychic", psychic);
 
         // Bug type
-        Map<String, Double> bug = new HashMap<>();
+        final Map<String, Double> bug = new HashMap<>();
         bug.put("fire", 0.5);
         bug.put("grass", 2.0);
         bug.put("fighting", 0.5);
@@ -286,7 +298,7 @@ public class DamageCalculator {
         chart.put("bug", bug);
 
         // Rock type
-        Map<String, Double> rock = new HashMap<>();
+        final Map<String, Double> rock = new HashMap<>();
         rock.put("fire", 2.0);
         rock.put("ice", 2.0);
         rock.put("fighting", 0.5);
@@ -297,7 +309,7 @@ public class DamageCalculator {
         chart.put("rock", rock);
 
         // Ghost type
-        Map<String, Double> ghost = new HashMap<>();
+        final Map<String, Double> ghost = new HashMap<>();
         ghost.put("normal", 0.0);
         ghost.put("psychic", 2.0);
         ghost.put("ghost", 2.0);
@@ -305,14 +317,14 @@ public class DamageCalculator {
         chart.put("ghost", ghost);
 
         // Dragon type
-        Map<String, Double> dragon = new HashMap<>();
+        final Map<String, Double> dragon = new HashMap<>();
         dragon.put("dragon", 2.0);
         dragon.put("steel", 0.5);
         dragon.put("fairy", 0.0);
         chart.put("dragon", dragon);
 
         // Dark type
-        Map<String, Double> dark = new HashMap<>();
+        final Map<String, Double> dark = new HashMap<>();
         dark.put("fighting", 0.5);
         dark.put("psychic", 2.0);
         dark.put("ghost", 2.0);
@@ -321,7 +333,7 @@ public class DamageCalculator {
         chart.put("dark", dark);
 
         // Steel type
-        Map<String, Double> steel = new HashMap<>();
+        final Map<String, Double> steel = new HashMap<>();
         steel.put("fire", 0.5);
         steel.put("water", 0.5);
         steel.put("electric", 0.5);
@@ -332,7 +344,7 @@ public class DamageCalculator {
         chart.put("steel", steel);
 
         // Fairy type
-        Map<String, Double> fairy = new HashMap<>();
+        final Map<String, Double> fairy = new HashMap<>();
         fairy.put("fire", 0.5);
         fairy.put("fighting", 2.0);
         fairy.put("poison", 0.5);

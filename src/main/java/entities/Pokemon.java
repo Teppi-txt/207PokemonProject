@@ -9,18 +9,21 @@ import pokeapi.JSONUtility;
 import java.util.ArrayList;
 
 /**
- * Pokemon entity for the project
+ * Pokemon entity for the project.
  */
 
 public class Pokemon implements Serializable {
     private static final long serialVersionUID = 1L;
-    private String name;    // private so no other classes can modify/access
+    private String name;
+    // private so no other classes can modify/access
     private int id;
     private ArrayList<String> types;
     private Stats stats;
-    private ArrayList<String> moves; // IDK if pokemon should have a list of MOVE objects (high redundancy)
+    private ArrayList<String> moves;
+    // IDK if pokemon should have a list of MOVE objects (high redundancy)
     // or a list of Strings of move_names which can be looked up
-    private boolean shiny = false;  //default of each pokemon is not shiny
+    private boolean shiny = false;
+    // default of each pokemon is not shiny
 
     public Pokemon(String name, int id, ArrayList<String> types, Stats stats, ArrayList<String> moves) {
         this.name = name;
@@ -30,15 +33,16 @@ public class Pokemon implements Serializable {
         this.moves = moves;
     }
 
-    public Pokemon() {}
+    public Pokemon() {
+    }
 
     public static Pokemon fromJSON(JSONObject jsonObject) {
-        String name = jsonObject.getString("name");
-        Integer id = jsonObject.getInt("id");
-        ArrayList<String> types = JSONUtility.jsonArrayToString(jsonObject.getJSONArray("types"));
-        ArrayList<String> moves = JSONUtility.jsonArrayToString(jsonObject.getJSONArray("moves"));
-        Stats stats = Stats.fromJSON(jsonObject.getJSONObject("stats"));
-        Pokemon p = new Pokemon(name, id, types, stats, moves);
+        final String name = jsonObject.getString("name");
+        final Integer id = jsonObject.getInt("id");
+        final ArrayList<String> types = JSONUtility.jsonArrayToString(jsonObject.getJSONArray("types"));
+        final ArrayList<String> moves = JSONUtility.jsonArrayToString(jsonObject.getJSONArray("moves"));
+        final Stats stats = Stats.fromJSON(jsonObject.getJSONObject("stats"));
+        final Pokemon p = new Pokemon(name, id, types, stats, moves);
         if (jsonObject.has("shiny")) {
             p.setShiny(jsonObject.getBoolean("shiny"));
         }
@@ -125,7 +129,9 @@ public class Pokemon implements Serializable {
         json.append("\"types\":[");
         for (int i = 0; i < types.size(); i++) {
             json.append("\"").append(types.get(i)).append("\"");
-            if (i < types.size() - 1) json.append(",");
+            if (i < types.size() - 1) {
+                json.append(",");
+            }
         }
         json.append("],");
 

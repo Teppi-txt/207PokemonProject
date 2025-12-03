@@ -3,7 +3,7 @@ package entities.battle;
 import java.io.Serializable;
 
 /**
- * Entity representing a static Item in the game
+ * Entity representing a static Item in the game.
  */
 
 public class Item implements Serializable {
