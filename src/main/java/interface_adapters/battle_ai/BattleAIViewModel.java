@@ -8,10 +8,12 @@ import java.util.List;
  * Represents the current state of the battle in a view-friendly format.
  * Supports observer pattern for reactive UI updates.
  */
+
 public class BattleAIViewModel {
 
     // Battle state
-    private String battleStatus; // "PENDING", "IN_PROGRESS", "COMPLETED"
+    private String battleStatus;
+    // "PENDING", "IN_PROGRESS", "COMPLETED"
     private String currentTurnDescription;
     private int turnNumber;
 
@@ -130,77 +132,136 @@ public class BattleAIViewModel {
         return aiSwitchedToName;
     }
 
-    // Setters with notification
+    /**
+     * Sets battle status.
+     * @param battleStatus new status
+     */
     public void setBattleStatus(String battleStatus) {
         this.battleStatus = battleStatus;
         notifyListeners();
     }
 
+    /**
+     * Sets turn description.
+     * @param currentTurnDescription text
+     */
     public void setCurrentTurnDescription(String currentTurnDescription) {
         this.currentTurnDescription = currentTurnDescription;
         notifyListeners();
     }
 
+    /**
+     * Sets turn number.
+     * @param turnNumber turn
+     */
     public void setTurnNumber(int turnNumber) {
         this.turnNumber = turnNumber;
         notifyListeners();
     }
 
+    /**
+     * Sets player 1 name.
+     * @param player1Name name
+     */
     public void setPlayer1Name(String player1Name) {
         this.player1Name = player1Name;
         notifyListeners();
     }
 
+    /**
+     * Sets player 1 team.
+     * @param player1Team team
+     */
     public void setPlayer1Team(List<PokemonViewModel> player1Team) {
         this.player1Team = player1Team;
         notifyListeners();
     }
 
+    /**
+     * Sets player 1 active.
+     * @param player1Active active Pokémon
+     */
     public void setPlayer1Active(PokemonViewModel player1Active) {
         this.player1Active = player1Active;
         notifyListeners();
     }
 
+    /**
+     * Sets player 2 name.
+     * @param player2Name name
+     */
     public void setPlayer2Name(String player2Name) {
         this.player2Name = player2Name;
         notifyListeners();
     }
 
+    /**
+     * Sets player 2 team.
+     * @param player2Team team
+     */
     public void setPlayer2Team(List<PokemonViewModel> player2Team) {
         this.player2Team = player2Team;
         notifyListeners();
     }
 
+    /**
+     * Sets player 2 active.
+     * @param player2Active active Pokémon
+     */
     public void setPlayer2Active(PokemonViewModel player2Active) {
         this.player2Active = player2Active;
         notifyListeners();
     }
 
+    /**
+     * Sets error message.
+     * @param errorMessage msg
+     */
     public void setErrorMessage(String errorMessage) {
         this.errorMessage = errorMessage;
         notifyListeners();
     }
 
+    /**
+     * Sets winner name.
+     * @param winnerName name
+     */
     public void setWinnerName(String winnerName) {
         this.winnerName = winnerName;
         notifyListeners();
     }
 
+    /**
+     * Sets currency awarded.
+     * @param currencyAwarded amount
+     */
     public void setCurrencyAwarded(int currencyAwarded) {
         this.currencyAwarded = currencyAwarded;
         notifyListeners();
     }
 
+    /**
+     * Sets battle ended flag.
+     * @param battleEnded flag
+     */
     public void setBattleEnded(boolean battleEnded) {
         this.battleEnded = battleEnded;
         notifyListeners();
     }
 
+    /**
+     * Sets player switch name.
+     * @param playerSwitchedToName name
+     */
     public void setPlayerSwitchedToName(String playerSwitchedToName) {
         this.playerSwitchedToName = playerSwitchedToName;
         notifyListeners();
     }
 
+    /**
+     * Sets AI switch name.
+     * @param aiSwitchedToName name
+     */
     public void setAiSwitchedToName(String aiSwitchedToName) {
         this.aiSwitchedToName = aiSwitchedToName;
         notifyListeners();

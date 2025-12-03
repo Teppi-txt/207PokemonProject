@@ -1,5 +1,8 @@
 package interface_adapters.battle_ai;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import entities.battle.AIPlayer;
 import entities.battle.Battle;
 import entities.battle.Move;
@@ -7,13 +10,13 @@ import entities.Pokemon;
 import entities.user.User;
 import use_case.battle_ai.BattleAIUserDataAccessInterface;
 
-import java.util.ArrayList;
-import java.util.List;
+
 
 /**
  * Data Access Object for Battle AI use cases.
  * Manages current user, battle state, and team data in memory.
  */
+
 public class BattleAIDataAccessObject implements BattleAIUserDataAccessInterface {
 
     private final List<Pokemon> allPokemon;

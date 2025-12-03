@@ -1,9 +1,14 @@
 package interface_adapters.pick_moveset;
 
-import entities.Pokemon;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import entities.Pokemon;
+
+/**
+ * State for pick moveset.
+ */
 
 public class PickMovesetState {
 
@@ -19,13 +24,17 @@ public class PickMovesetState {
         this.availableMoves = availableMoves;
     }
 
-    public String getMessage() { return message; }
+    public String getMessage() {
+        return message;
+    }
 
     public void setMessage(String message) {
         this.message = message;
     }
 
-    public String getError() { return error; }
+    public String getError() {
+        return error;
+    }
 
     public void setError(String error) {
         this.error = error;

@@ -3,6 +3,9 @@ package interface_adapters.battle_player;
 import entities.battle.Battle;
 import entities.battle.Turn;
 
+/**
+ * State for a battle.
+ */
 
 public class BattlePlayerState {
 
@@ -11,7 +14,8 @@ public class BattlePlayerState {
     private String turnResult;
     private boolean battleEnded;
     private String battleStatus;
-    private String errorMessage; // if it is null there is no error
+    private String errorMessage;
+    // if it is null there is no error
 
     public Turn getTurn() {
         return turn;

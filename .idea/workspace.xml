@@ -5,8 +5,31 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="34a417fa-c292-411a-b2e4-331aa70ff139" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/checkstyle.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/use_case/battle_player/BattlePlayerInteractor.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/use_case/battle_player/BattlePlayerInteractor.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/interface_adapters/battle_ai/BattleAIController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/interface_adapters/battle_ai/BattleAIController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/interface_adapters/battle_ai/BattleAIDataAccessObject.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/interface_adapters/battle_ai/BattleAIDataAccessObject.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/interface_adapters/battle_ai/BattleAIPresenter.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/interface_adapters/battle_ai/BattleAIPresenter.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/interface_adapters/battle_ai/BattleAIViewModel.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/interface_adapters/battle_ai/BattleAIViewModel.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/interface_adapters/battle_player/BattlePlayerController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/interface_adapters/battle_player/BattlePlayerController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/interface_adapters/battle_player/BattlePlayerPresenter.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/interface_adapters/battle_player/BattlePlayerPresenter.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/interface_adapters/battle_player/BattlePlayerState.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/interface_adapters/battle_player/BattlePlayerState.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/interface_adapters/battle_player/BattlePlayerViewModel.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/interface_adapters/battle_player/BattlePlayerViewModel.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/interface_adapters/build_deck/BuildDeckController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/interface_adapters/build_deck/BuildDeckController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/interface_adapters/build_deck/BuildDeckPresenter.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/interface_adapters/build_deck/BuildDeckPresenter.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/interface_adapters/build_deck/BuildDeckState.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/interface_adapters/build_deck/BuildDeckState.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/interface_adapters/collection/ViewCollectionController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/interface_adapters/collection/ViewCollectionController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/interface_adapters/collection/ViewCollectionPresenter.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/interface_adapters/collection/ViewCollectionPresenter.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/interface_adapters/collection/ViewCollectionState.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/interface_adapters/collection/ViewCollectionState.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/interface_adapters/collection/ViewCollectionViewModel.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/interface_adapters/collection/ViewCollectionViewModel.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/interface_adapters/open_pack/OpenPackController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/interface_adapters/open_pack/OpenPackController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/interface_adapters/open_pack/OpenPackPresenter.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/interface_adapters/open_pack/OpenPackPresenter.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/interface_adapters/open_pack/OpenPackState.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/interface_adapters/open_pack/OpenPackState.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/interface_adapters/open_pack/OpenPackViewModel.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/interface_adapters/open_pack/OpenPackViewModel.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/interface_adapters/pick_moveset/PickMovesetController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/interface_adapters/pick_moveset/PickMovesetController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/interface_adapters/pick_moveset/PickMovesetPresenter.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/interface_adapters/pick_moveset/PickMovesetPresenter.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/interface_adapters/pick_moveset/PickMovesetState.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/interface_adapters/pick_moveset/PickMovesetState.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/interface_adapters/pick_moveset/PickMovesetViewModel.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/interface_adapters/pick_moveset/PickMovesetViewModel.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -21,22 +44,22 @@
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
-  "lastFilter": {
-    "state": "OPEN",
-    "assignee": "Dimural"
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;Dimural&quot;
   }
-}]]></component>
+}</component>
   <component name="GithubPullRequestsUISettings"><![CDATA[{
   "selectedUrlAndAccountId": {
     "url": "https://github.com/Teppi-txt/207PokemonProject.git",
-    "accountId": "5b3f7747-8198-4f08-b8c5-c3b9faa6f0b1"
+    "accountId": "57b1964e-1ab8-4a9e-992c-ad2a24a47f2e"
   }
 }]]></component>
-  <component name="ProjectColorInfo"><![CDATA[{
-  "customColor": "",
-  "associatedIndex": 4
-}]]></component>
+  <component name="ProjectColorInfo">{
+  &quot;customColor&quot;: &quot;&quot;,
+  &quot;associatedIndex&quot;: 4
+}</component>
   <component name="ProjectId" id="36GmVtFdVXkb8PLg6T4FM10lTZv" />
   <component name="ProjectLevelVcsManager">
     <ConfirmationsSetting value="2" id="Add" />
@@ -47,18 +70,25 @@
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
+    "Application.Main.executor": "Run",
     "JUnit.BattlePlayerInteractorTest.executor": "Coverage",
     "JUnit.PickMovesetInteractorTest.executor": "Run",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "main",
-    "kotlin-language-version-configured": "true"
+    "git-widget-placeholder": "checkstyle",
+    "kotlin-language-version-configured": "true",
+    "settings.editor.selected.configurable": "org.infernus.idea.checkstyle.CheckStyleConfigurable"
   }
 }]]></component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$" />
+    </key>
+  </component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-jdk-9823dce3aa75-bf35d07a577b-intellij.indexing.shared.core-IU-252.25557.131" />
+        <option value="bundled-jdk-9823dce3aa75-bf35d07a577b-intellij.indexing.shared.core-IU-252.28238.7" />
       </set>
     </attachedChunks>
   </component>

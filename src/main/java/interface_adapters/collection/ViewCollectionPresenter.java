@@ -5,7 +5,7 @@ import use_case.collection.ViewCollectionOutputBoundary;
 import use_case.collection.ViewCollectionOutputData;
 
 /**
- * Class responsible for presenting ViewCollectionOutputData
+ * Class responsible for presenting ViewCollectionOutputData.
  */
 
 public class ViewCollectionPresenter implements ViewCollectionOutputBoundary {

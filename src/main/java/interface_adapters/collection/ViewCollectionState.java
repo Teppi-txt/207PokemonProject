@@ -2,11 +2,10 @@ package interface_adapters.collection;
 
 import entities.Pokemon;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Class representing a state of the Collection View
+ * Class representing a state of the Collection View.
  */
 
 public class ViewCollectionState {

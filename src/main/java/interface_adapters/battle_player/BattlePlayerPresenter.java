@@ -4,7 +4,7 @@ import use_case.battle_player.BattlePlayerOutputBoundary;
 import use_case.battle_player.BattlePlayerOutputData;
 
 /**
- * the presenter for the Battle Player use case
+ * The presenter for the Battle Player use case.
  */
 
 public class BattlePlayerPresenter implements BattlePlayerOutputBoundary {
@@ -16,7 +16,7 @@ public class BattlePlayerPresenter implements BattlePlayerOutputBoundary {
 
     @Override
     public void prepareSuccessView(BattlePlayerOutputData outputData) {
-        BattlePlayerState battlePlayerState = new BattlePlayerState();
+        final BattlePlayerState battlePlayerState = new BattlePlayerState();
         
         battlePlayerState.setTurn(outputData.getTurn());
         battlePlayerState.setBattle(outputData.getBattle());
@@ -30,7 +30,7 @@ public class BattlePlayerPresenter implements BattlePlayerOutputBoundary {
 
     @Override
     public void prepareFailView(String errorMessage) {
-        BattlePlayerState battlePlayerState = new BattlePlayerState();
+        final BattlePlayerState battlePlayerState = new BattlePlayerState();
         battlePlayerState.setErrorMessage(errorMessage);
         viewModel.setState(battlePlayerState);
     }

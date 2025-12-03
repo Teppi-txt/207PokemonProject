@@ -1,14 +1,11 @@
 package interface_adapters.build_deck;
 
-import entities.battle.Deck;
-/**
- * The State for the Build Deck Use Case.
- */
-
 import java.util.List;
 
+import entities.battle.Deck;
+
 /**
- * A state of the Build Deck view
+ * A state of the Build Deck view.
  */
 
 public class BuildDeckState {
@@ -17,13 +14,27 @@ public class BuildDeckState {
     private String errorMessage;
 
     public Deck getDeck() {
+
         return deck;
     }
-    public void setDeck(Deck deck) { this.deck = deck; }
 
-    public List<Deck> getAllDecks() { return allDecks; }
-    public void setAllDecks(List<Deck> allDecks) { this.allDecks = allDecks; }
+    public void setDeck(Deck deck) {
+        this.deck = deck;
+    }
 
-    public String getErrorMessage() { return errorMessage; }
-    public void setErrorMessage(String errorMessage) { this.errorMessage = errorMessage; }
+    public List<Deck> getAllDecks() {
+        return allDecks;
+    }
+
+    public void setAllDecks(List<Deck> allDecks) {
+        this.allDecks = allDecks;
+    }
+
+    public String getErrorMessage() {
+        return errorMessage;
+    }
+
+    public void setErrorMessage(String errorMessage) {
+        this.errorMessage = errorMessage;
+    }
 }
