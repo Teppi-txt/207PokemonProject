@@ -5,6 +5,10 @@ import entities.Pokemon;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Class representing a state of the Collection View
+ */
+
 public class ViewCollectionState {
     private List<Pokemon> pokemonOnPage;
     private Pokemon selectedPokemon;

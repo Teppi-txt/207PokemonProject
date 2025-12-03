@@ -7,6 +7,10 @@ import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.util.List;
 
+/**
+ * Static class containing helper methods and constants for the Collection View
+ */
+
 public class CollectionViewHelpers {
     public static final Dimension COLLECTION_VIEW_WINDOW_SIZE = new Dimension(1000, 700);
     public static final Font TITLE_FONT = new Font("Arial", Font.BOLD, 48);

@@ -10,6 +10,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Class representing a JPanel displaying a specific Pokemon instance
+ */
+
 public class PokemonInfoPanel extends JPanel {
     public PokemonInfoPanel() {
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));

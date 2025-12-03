@@ -7,6 +7,10 @@ import entities.Deck;
 
 import java.util.List;
 
+/**
+ * A state of the Build Deck view
+ */
+
 public class BuildDeckState {
     private Deck deck;
     private List<Deck> allDecks;

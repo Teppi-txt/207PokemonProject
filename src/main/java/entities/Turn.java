@@ -2,6 +2,10 @@ package entities;
 
 import java.io.Serializable;
 
+/**
+ * Entity representing a specific turn of a pokemon battle.
+ */
+
 public abstract class Turn implements Serializable {
     private static final long serialVersionUID = 1L;
     protected int id;

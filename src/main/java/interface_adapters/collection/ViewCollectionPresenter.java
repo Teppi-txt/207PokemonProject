@@ -4,6 +4,10 @@ import interface_adapters.ViewModel;
 import use_case.collection.ViewCollectionOutputBoundary;
 import use_case.collection.ViewCollectionOutputData;
 
+/**
+ * Class responsible for presenting ViewCollectionOutputData
+ */
+
 public class ViewCollectionPresenter implements ViewCollectionOutputBoundary {
     private final ViewCollectionViewModel viewCollectionViewModel;
     private final ViewModel homeViewModel = null;

@@ -6,6 +6,10 @@ import org.json.JSONObject;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Entity representing the stats of a Pokemon
+ */
+
 public class Stats implements Serializable {
     private static final long serialVersionUID = 1L;
     private int hp;

@@ -17,6 +17,10 @@ import java.beans.PropertyChangeListener;
 import java.util.*;
 import java.util.List;
 
+/**
+ * The view for the moveset selection use case
+ */
+
 public class MovesetSelectionView extends JFrame implements PropertyChangeListener {
 
     private final Deck deck;

@@ -6,6 +6,10 @@ import entities.Stats;
 
 import java.util.ArrayList;
 
+/**
+ * Builder class for the Pokemon entity.
+ */
+
 public class PokemonBuilder {
 
     private final Pokemon pokemon;

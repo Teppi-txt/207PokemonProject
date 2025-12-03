@@ -2,6 +2,10 @@ package entities;
 
 import java.io.Serializable;
 
+/**
+ * Entity representing a battle in the pokemon game.
+ */
+
 public class Battle implements Serializable {
     private static final long serialVersionUID = 1L;
     private int id;

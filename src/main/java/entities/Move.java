@@ -3,6 +3,10 @@ package entities;
 import java.io.Serializable;
 import org.json.JSONObject;
 
+/**
+ * Entity representing a static Move in a pokemon game
+ */
+
 public class Move implements Serializable {
     private static final long serialVersionUID = 1L;
     private String name;
@@ -19,7 +23,7 @@ public class Move implements Serializable {
 
 
     public static Move fromJSON(JSONObject jsonObject) {
-        Move returnMove = new Move()
+        return new Move()
             .setName(jsonObject.getString("name"))
             .setType(jsonObject.getString("type"))
             .setDamageClass(jsonObject.getString("damageClass"))
@@ -27,7 +31,6 @@ public class Move implements Serializable {
             .setAccuracy(parseIntValue(jsonObject, "accuracy"))
             .setPriority(parseIntValue(jsonObject, "priority"))
             .setEffect(jsonObject.getString("effect"));
-        return returnMove;
     }
 
     private static Integer parseIntValue(JSONObject jsonObject, String key) {
