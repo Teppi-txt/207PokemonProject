@@ -6,10 +6,13 @@ package entities.battle;
  * Example: "limber" prevents paralysis.
  */
 public class Ability {
-    private int id;             // Unique identifier for the ability
+    private int id;
+    // Unique identifier for the ability
     private String name;
-    private String effect;      // Full description of what the ability does
-    private boolean isMainSeries; // Whether this ability is part of main series games
+    private String effect;
+    // Full description of what the ability does
+    private boolean isMainSeries;
+    // Whether this ability is part of main series games
 
     public Ability(int id, String name, String effect, String shortEffect, String generation, boolean isMainSeries) {
         this.id = id;
@@ -18,25 +21,70 @@ public class Ability {
         this.isMainSeries = isMainSeries;
     }
 
-    public int getId() { return id; }
-    public Ability setId(int id) { this.id = id; return this; }
+    public int getId() {
+        return id;
+    }
 
-    public String getName() { return name; }
-    public Ability setName(String name) { this.name = name; return this; }
+    /**
+     * Sets the ability ID.
+     * @param id the new ID
+     * @return this Ability instance for chaining
+     */
+    public Ability setId(int id) {
+        this.id = id; return this;
+    }
 
-    public String getEffect() { return effect; }
-    public Ability setEffect(String effect) { this.effect = effect; return this; }
+    public String getName() {
+        return name;
+    }
 
-    public boolean isMainSeries() { return isMainSeries; }
-    public Ability setMainSeries(boolean mainSeries) { isMainSeries = mainSeries; return this; }
+    /**
+     * Sets the ability name.
+     * @param name the new name
+     * @return this Ability instance for chaining
+     */
+    public Ability setName(String name) {
+        this.name = name;
+        return this;
+    }
+
+    public String getEffect() {
+        return effect;
+    }
+
+    /**
+     * Sets the effect description for this ability.
+     * @param effect the new effect text
+     * @return this Ability instance for chaining
+     */
+    public Ability setEffect(String effect) {
+        this.effect = effect;
+        return this;
+    }
+
+    public boolean isMainSeries() {
+        return isMainSeries;
+    }
+
+    public Ability setMainSeries(boolean mainSeries) {
+        isMainSeries = mainSeries;
+        return this;
+    }
 
     public String toJSONString() {
-        return "{" +
-                "\"id\":" + id + "," +
-                "\"name\":\"" + name + "\"," +
-                "\"effect\":\"" + effect + "\"," +
-                "\"isMainSeries\":" + isMainSeries +
-                "}";
+        return "{"
+                + "\"id\":"
+                + id
+                + ","
+                + "\"name\":\""
+                + name
+                + "\","
+                + "\"effect\":\""
+                + effect
+                + "\","
+                + "\"isMainSeries\":"
+                + isMainSeries
+                + "}";
     }
 
     @Override

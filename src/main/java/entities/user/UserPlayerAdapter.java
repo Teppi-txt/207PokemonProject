@@ -1,15 +1,15 @@
 package entities.user;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+
 import entities.Player;
 import entities.Pokemon;
 import entities.battle.Battle;
 import entities.battle.Deck;
 import entities.battle.Item;
 import entities.battle.Move;
-
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Adapter that adapts a User to the Player interface.
