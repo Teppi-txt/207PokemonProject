@@ -1,7 +1,7 @@
 package interface_adapters.battle_player;
 
-import entities.Battle;
-import entities.Turn;
+import entities.battle.Battle;
+import entities.battle.Turn;
 
 
 public class BattlePlayerState {

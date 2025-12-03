@@ -1,8 +1,7 @@
 package interface_adapters;
 
-import entities.Move;
 import entities.Pokemon;
-import entities.Stats;
+import entities.battle.Stats;
 
 import java.util.ArrayList;
 

@@ -1,6 +1,6 @@
 package interface_adapters.pick_moveset;
 
-import entities.Move;
+import entities.battle.Move;
 import entities.Pokemon;
 import use_case.pick_moveset.PickMovesetOutputBoundary;
 import use_case.pick_moveset.PickMovesetOutputData;

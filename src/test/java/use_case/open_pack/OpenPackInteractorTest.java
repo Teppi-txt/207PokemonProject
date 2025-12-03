@@ -1,11 +1,12 @@
 package use_case.open_pack;
 
 import entities.Pokemon;
-import entities.User;
+import entities.user.User;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import entities.open_pack.Pack;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
@@ -31,7 +32,7 @@ class OpenPackInteractorTest {
         }
     }
 
-    private static class FakePack extends entities.Pack {
+    private static class FakePack extends Pack {
         private final List<Pokemon> cards;
         public FakePack(List<Pokemon> cards) {
             super(0, "unit test", new ArrayList<>());

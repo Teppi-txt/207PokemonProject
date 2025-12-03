@@ -1,6 +1,6 @@
 package use_case.pick_moveset;
 
-import entities.Move;
+import entities.battle.Move;
 import entities.Pokemon;
 
 import java.util.List;

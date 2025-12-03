@@ -1,6 +1,6 @@
 package interface_adapters.battle_ai;
 
-import entities.Battle;
+import entities.battle.Battle;
 import entities.Pokemon;
 import use_case.battle_ai.BattleAIOutputBoundary;
 import use_case.battle_ai.BattleAIOutputData;

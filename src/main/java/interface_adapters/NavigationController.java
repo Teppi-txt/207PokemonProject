@@ -1,6 +1,6 @@
 package interface_adapters;
 
-import view.MainMenuView;
+import app.MainMenuView;
 
 /**
  * Controller for coordinating navigation between views.

@@ -1,7 +1,7 @@
 package use_case.battle_ai;
 
 import entities.Pokemon;
-import entities.User;
+import entities.user.User;
 
 import java.util.List;
 

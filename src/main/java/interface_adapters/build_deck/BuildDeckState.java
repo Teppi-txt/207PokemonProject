@@ -1,6 +1,6 @@
 package interface_adapters.build_deck;
 
-import entities.Deck;
+import entities.battle.Deck;
 /**
  * The State for the Build Deck Use Case.
  */

@@ -3,7 +3,7 @@ package ai.serializers;
 import ai.config.DifficultyConfig;
 import ai.graph.BattleDecisionState;
 import entities.Pokemon;
-import entities.Turn;
+import entities.battle.Turn;
 
 import java.util.List;
 import java.util.stream.Collectors;

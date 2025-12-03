@@ -1,10 +1,10 @@
 package use_case.battle_player;
 
-import entities.Battle;
+import entities.battle.Battle;
 import entities.Pokemon;
-import entities.Stats;
-import entities.Turn;
-import entities.User;
+import entities.battle.Stats;
+import entities.battle.Turn;
+import entities.user.User;
 import junit.framework.TestCase;
 
 import java.util.ArrayList;
